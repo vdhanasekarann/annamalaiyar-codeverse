@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+@source "./index.html";
+@source "./src/**/*.{js,jsx,ts,tsx}";
+
+/* ===== GLOBAL RESET ===== */
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #0b1220;
+  color: #e6edf3;
+  overflow-x: hidden;
+}
+
+/* ===== DASHBOARD BACKGROUND ===== */
+.os-bg {
+  min-height: 100vh;
+  background-image: url("/bg/universe.webp");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #020617; }
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+img {
+  max-width: 100%;
+  height: auto;
+}

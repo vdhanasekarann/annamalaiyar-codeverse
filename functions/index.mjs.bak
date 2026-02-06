@@ -1,0 +1,62 @@
+// functions/index.mjs
+import * as functions from "firebase-functions";
+import admin from "firebase-admin";
+import OpenAI from "openai";
+
+admin.initializeApp();
+const db = admin.firestore();
+
+// Read the OpenAI key from functions config
+const OPENAI_KEY = functions.config()?.openai?.key || process.env.OPENAI_KEY;
+if (!OPENAI_KEY) {
+  console.warn("OpenAI key missing. Set via `firebase functions:config:set openai.key=\"KEY\"`");
+}
+
+const openai = new OpenAI({
+  apiKey: OPENAI_KEY,
+});
+
+/* --------- notifyEnquiry: optional email/slack/etc hook --------- */
+export const notifyEnquiry = functions.https.onCall(async (data, context) => {
+  await db.collection("enquiries").add({
+    ...data,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    source: "website-form",
+  });
+
+  // optional: send an email / slack / webhook here
+
+  return { ok: true };
+});
+
+/* --------- chatWithAssistant: website AI chatbot --------- */
+export const chatWithAssistant = functions.https.onCall(async (data, context) => {
+  try {
+    const history = Array.isArray(data.history) ? data.history : [];
+    const trimmed = history.slice(-12);
+
+    const messages = [
+      {
+        role: "system",
+        content:
+          "You are Kannizcon IT Enabling Services website assistant. " +
+          "You help visitors understand services (web, mobile, cloud, AI, DevOps), " +
+          "rough pricing ranges, and next steps. Be concise and friendly. " +
+          "If user asks for exact cost, say you can estimate after a short call.",
+      },
+      ...trimmed,
+    ];
+
+    // Use the OpenAI Chat Completions API
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini", // or "gpt-4.1-mini" if available in your account
+      messages,
+    });
+
+    const reply = completion.choices?.[0]?.message?.content || "How can I help you today?";
+    return { reply };
+  } catch (err) {
+    console.error("chatWithAssistant error:", err);
+    return { reply: "Sorry — I'm having trouble responding right now." };
+  }
+});

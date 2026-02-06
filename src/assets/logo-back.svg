@@ -1,0 +1,52 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <radialGradient id="bg" cx="50%" cy="50%" r="90%">
+    <stop offset="0%" stop-color="#00121F"/>
+    <stop offset="100%" stop-color="#00070F"/>
+  </radialGradient>
+  <linearGradient id="neon" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#00F6D3"/>
+    <stop offset="50%" stop-color="#00B8FF"/>
+    <stop offset="100%" stop-color="#1E6BFF"/>
+  </linearGradient>
+</defs>
+
+<rect width="100%" height="100%" fill="url(#bg)"/>
+
+<!-- Neural Cortex Network -->
+<g stroke="url(#neon)" stroke-width="6" stroke-linecap="round" opacity="0.95">
+  <!-- Core Nodes -->
+  <circle cx="320" cy="290" r="10" fill="url(#neon)"/>
+  <circle cx="700" cy="290" r="10" fill="url(#neon)"/>
+  <circle cx="510" cy="210" r="14" fill="url(#neon)"/>
+  <circle cx="430" cy="470" r="10" fill="url(#neon)"/>
+  <circle cx="620" cy="470" r="10" fill="url(#neon)"/>
+  <circle cx="510" cy="620" r="12" fill="url(#neon)"/>
+
+  <!-- Circuit Lines -->
+  <line x1="510" y1="210" x2="320" y2="290"/>
+  <line x1="510" y1="210" x2="700" y2="290"/>
+  <line x1="320" y1="290" x2="430" y2="470"/>
+  <line x1="700" y1="290" x2="620" y2="470"/>
+  <line x1="430" y1="470" x2="620" y2="470"/>
+  <line x1="430" y1="470" x2="510" y2="620"/>
+  <line x1="620" y1="470" x2="510" y2="620"/>
+</g>
+
+<!-- Neural K Mark -->
+<path d="M470 260v400h-60V260h60zm40 200l115-200h80l-113 187 128 213h-85l-125-210v210h-60V460z"
+      fill="url(#neon)" opacity="1"/>
+
+<!-- Title -->
+<text x="50%" y="880" text-anchor="middle"
+      font-family="Poppins,Inter,Space Grotesk" font-size="82"
+      fill="url(#neon)" letter-spacing="18">
+  KANNIZCON
+</text>
+
+<text x="50%" y="940" text-anchor="middle"
+      font-family="Poppins,Inter" font-size="30"
+      fill="#6CF5FF" letter-spacing="10" opacity="0.85">
+  IT ENABLING SERVICES
+</text>
+</svg>

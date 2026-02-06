@@ -1,0 +1,23 @@
+<svg id="concept-logo" viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="core" x1="0" x2="1">
+<stop offset="0" stop-color="#7be3ff"/>
+<stop offset="1" stop-color="#7b6bff"/>
+</linearGradient>
+<radialGradient id="glow" cx="50%" cy="50%">
+<stop offset="0" stop-color="#8cf0ff" stop-opacity="0.6" />
+<stop offset="1" stop-color="#7b6bff" stop-opacity="0" />
+</radialGradient>
+</defs>
+<circle cx="150" cy="150" r="110" fill="url(#glow)" opacity="0.35" />
+<ellipse cx="150" cy="150" rx="105" ry="45" stroke="url(#core)" stroke-width="3" fill="none" opacity="0.55" />
+<ellipse cx="150" cy="150" rx="45" ry="105" stroke="url(#core)" stroke-width="3" fill="none" opacity="0.55" />
+<path d="M150 65 C175 110 165 150 150 175 C135 150 125 110 150 65 Z" fill="none" stroke="url(#core)" stroke-width="4" />
+<polygon points="150,110 185,150 150,190 115,150" fill="none" stroke="#ffffff" stroke-width="3" opacity="0.85" />
+<circle cx="150" cy="110" r="5" fill="#fff" />
+<circle cx="185" cy="150" r="5" fill="#fff" />
+<circle cx="150" cy="190" r="5" fill="#fff" />
+<circle cx="115" cy="150" r="5" fill="#fff" />
+<text x="250" y="145" font-size="38" font-weight="700" fill="url(#core)" font-family="Inter, sans-serif">Annamalaiyar</text>
+<text x="250" y="185" font-size="34" font-weight="600" fill="#cfe7ff" font-family="Inter, sans-serif">CodeVerse</text>
+</svg>
