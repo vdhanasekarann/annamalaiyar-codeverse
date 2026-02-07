@@ -1,7 +1,7 @@
 // api/requireUser.js
 import jwt from "jsonwebtoken";
 import { db } from "./_db.js";
-import { PLAN_LIMITS } from "../config/limits.js";
+import { PLAN_LIMITS } from "../../config/limits.js";
 import crypto from "crypto";
 
 export async function requireUser(req, res, next) {

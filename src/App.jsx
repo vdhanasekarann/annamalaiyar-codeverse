@@ -8,6 +8,7 @@ import Premium from "./pages/Premium";
 import AdminRevenue from "./pages/admin/AdminRevenue";
 import AdminUsers from "./pages/admin/Users";
 import AdminRoute from "./components/AdminRoute";
+import MagicLogin from "./pages/MagicLogin";
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
       <Routes>
         {/* PUBLIC */}
         <Route path="/login" element={<Login />} />
+        <Route path="/magic-login" element={<MagicLogin />} />
 
         {/* APP */}
         <Route element={<Layout />}>

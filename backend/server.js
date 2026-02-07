@@ -591,6 +591,8 @@ await generateInvoice({
   plan
 });
 
+await sendInvoiceEmail(email, payment_id);
+
 return res.json({ ok: true });
 
   });
