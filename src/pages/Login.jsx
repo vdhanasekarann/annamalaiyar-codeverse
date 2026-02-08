@@ -1,31 +1,30 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE } from "../config/api";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const navigate = useNavigate();
 
-  // Magic Link
   const sendMagicLink = async () => {
     if (!email) return alert("Email required");
 
-const res = await fetch("/api/auth/magic-link", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  credentials: "include",
-  body: JSON.stringify({ email }),
-});
+    const res = await fetch(`${API_BASE}/api/auth/magic-link`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email }),
+    });
 
-const data = await res.json();
+    const data = await res.json();
 
-if (data.devLink) {
-  window.location.href = data.devLink; // 🔥 auto-login
-} else {
-  alert("Magic link sent");
-}
+    if (data.devLink) {
+      window.location.href = data.devLink;
+    } else {
+      alert("Magic link sent");
+    }
   };
 
-  /* GOOGLE OAUTH */
   useEffect(() => {
     if (!window.google) return;
     if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) return;
@@ -33,7 +32,7 @@ if (data.devLink) {
     window.google.accounts.id.initialize({
       client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
       callback: async (res) => {
-        const r = await fetch("/api/auth/google", {
+        const r = await fetch(`${API_BASE}/api/auth/google`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
@@ -54,14 +53,13 @@ if (data.devLink) {
     }
   }, [navigate]);
 
-  /* EMAIL LOGIN */
   const handleLogin = async (e) => {
     e.preventDefault();
 
     const cleanEmail = email.trim();
     if (!cleanEmail) return alert("Email required");
 
-    const res = await fetch("${API_BASE}/api/auth/login", {
+    const res = await fetch(`${API_BASE}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -105,10 +103,6 @@ if (data.devLink) {
             Continue
           </button>
         </form>
-
-        <div className="text-center text-xs opacity-60">
-          Passwordless • Secure • No spam
-        </div>
       </div>
     </div>
   );
