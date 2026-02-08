@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_BASE } from "../config/api";
+<<<<<<< HEAD
 import { apiFetch } from "../lib/apiFetch";
+=======
+>>>>>>> d64744fba5aa128cbc1906cdd5b3d8585a46e7c7
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -10,7 +13,11 @@ export default function Login() {
   const sendMagicLink = async () => {
     if (!email) return alert("Email required");
 
+<<<<<<< HEAD
     const res = await apiFetch("/api/auth/magic-link", {
+=======
+    const res = await fetch(`${API_BASE}/api/auth/magic-link`, {
+>>>>>>> d64744fba5aa128cbc1906cdd5b3d8585a46e7c7
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -33,7 +40,11 @@ export default function Login() {
     window.google.accounts.id.initialize({
       client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
       callback: async (res) => {
+<<<<<<< HEAD
         const r = await apiFetch("/api/auth/google", {
+=======
+        const r = await fetch(`${API_BASE}/api/auth/google`, {
+>>>>>>> d64744fba5aa128cbc1906cdd5b3d8585a46e7c7
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
@@ -60,7 +71,11 @@ export default function Login() {
     const cleanEmail = email.trim();
     if (!cleanEmail) return alert("Email required");
 
+<<<<<<< HEAD
     const res = await apiFetch("/api/auth/login", {
+=======
+    const res = await fetch(`${API_BASE}/api/auth/login`, {
+>>>>>>> d64744fba5aa128cbc1906cdd5b3d8585a46e7c7
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
