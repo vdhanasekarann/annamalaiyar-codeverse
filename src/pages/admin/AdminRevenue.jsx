@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { API_BASE } from "../../config/api";
+import { apiFetch } from "../../lib/apiFetch";
 
 export default function AdminRevenue() {
   const [plans, setPlans] = useState([]);
@@ -7,9 +8,9 @@ export default function AdminRevenue() {
 
   useEffect(() => {
     Promise.all([
-      apiFetch(`${API_BASE}/api/admin/revenue`, { credentials: "include" })
+      apiFetch("/api/admin/revenue", { credentials: "include" })
         .then(r => r.json()),
-      apiFetch(`${API_BASE}/api/admin/payments`, { credentials: "include" })
+      apiFetch("/api/admin/payments", { credentials: "include" })
         .then(r => r.json()),
     ]).then(([rev, pay]) => {
       setPlans(rev.plans);
@@ -21,7 +22,7 @@ export default function AdminRevenue() {
   const ok = confirm("Issue refund for this payment?");
   if (!ok) return;
 
-  const res = await apiFetch(`${API_BASE}/api/admin/refund`, {
+  const res = await apiFetch("/api/admin/refund", {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },

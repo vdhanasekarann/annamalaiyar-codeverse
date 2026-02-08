@@ -34,6 +34,7 @@ async function logAudit(actor, action, target) {
 }
 
 const app = express();
+app.set("trust proxy", 1);
 app.use(cookieParser());
 
 app.use(

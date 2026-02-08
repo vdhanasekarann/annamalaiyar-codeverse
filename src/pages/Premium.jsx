@@ -28,7 +28,7 @@ function Plan({ title, price, planKey, highlight }) {
   const upgrade = async () => {
     await requireAuth();
 
-    const res = await apiFetch("/create-order", {
+    const res = await apiFetch("/api/create-order", {
       method: "POST",
       body: JSON.stringify({ plan: planKey })
     });

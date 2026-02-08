@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { requireAuth } from "../../utils/auth";
 import { API_BASE } from "../../config/api";
+import { apiFetch } from "../../lib/apiFetch";
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
@@ -10,14 +11,14 @@ export default function AdminUsers() {
   }, []);
 
   async function load() {
-    const res = await apiFetch(`${API_BASE}/api/admin/users`, {
+    const res = await apiFetch("/api/admin/users", {
       credentials: "include",
     });
     setUsers(await res.json());
   }
 
   async function action(email, action, value) {
-    await apiFetch(`${API_BASE}/api/admin/users/action`, {
+    await apiFetch("/api/admin/users/action", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
