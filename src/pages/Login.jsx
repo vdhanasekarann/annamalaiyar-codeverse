@@ -40,8 +40,11 @@ export default function Login() {
           body: JSON.stringify({ credential: res.credential }),
         });
 
-        if (r.ok) navigate("/dashboard");
-        else alert("Google login failed");
+        if (r.ok) {
+      await apiFetch("/api/auth/me");
+      navigate("/dashboard");
+        }
+      else alert("Google login failed");
       },
     });
 

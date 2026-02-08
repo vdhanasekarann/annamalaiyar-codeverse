@@ -43,7 +43,7 @@ app.use(
     credentials: true,
   })
 );
-
+app.enable("trust proxy");
 app.use(express.json());
 app.use(helmet());
 
@@ -179,6 +179,7 @@ app.post("/api/auth/login", async (req, res) => {
     httpOnly: true,
     sameSite: isProd ? "none" : "lax",
     secure: isProd,
+    domain: ".aicodeverse.com",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
@@ -237,6 +238,7 @@ app.post("/api/auth/google", async (req, res) => {
       httpOnly: true,
       sameSite: isProd ? "none" : "lax",
       secure: isProd,
+      domain: ".aicodeverse.com",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -389,6 +391,7 @@ app.get("/api/auth/magic-verify", async (req, res) => {
     httpOnly: true,
     sameSite: isProd ? "none" : "lax",
     secure: isProd,
+    domain: ".aicodeverse.com",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
@@ -582,6 +585,7 @@ res.cookie("auth", newToken, {
   httpOnly: true,
   sameSite: "none",
   secure: true,
+  domain: ".aicodeverse.com",
   maxAge: 7 * 24 * 60 * 60 * 1000,
 });
 
