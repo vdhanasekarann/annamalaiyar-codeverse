@@ -1,13 +1,14 @@
+import { API_BASE } from "../config/api";
 import { getDeviceId } from "../utils/device";
 
 export async function apiFetch(url, options = {}) {
-  let path = url.startsWith("/api") ? url : `/api${url.startsWith("/") ? url : `/${url}`}`;
+  const path = url.startsWith("/") ? url : `/${url}`;
 
-  const csrf = await fetch("/api/csrf", {
+  const csrf = await fetch(`${API_BASE}/api/csrf`, {
     credentials: "include",
-  }).then(r => r.json());
+  }).then((r) => r.json());
 
-  return fetch(path, {
+  return fetch(`${API_BASE}${path}`, {
     ...options,
     credentials: "include",
     headers: {

@@ -8,7 +8,7 @@ export default function DeviceList() {
   const [loading, setLoading] = useState(true);
 
   async function load() {
-    const res = await fetch(`${API_BASE}/api/account/devices`, {
+    const res = await apiFetch(`${API_BASE}/api/account/devices`, {
       credentials: "include",
       headers: { "x-device-id": getDeviceId() },
     });

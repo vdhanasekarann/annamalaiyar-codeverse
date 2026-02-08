@@ -8,7 +8,7 @@ export default function DeviceRow({ device, onRevoked }) {
     );
     if (!ok) return;
 
-    const res = await fetch(`${API_BASE}/api/account/devices/revoke`, {
+    const res = await apiFetch(`${API_BASE}/api/account/devices/revoke`, {
   method: "POST",
   credentials: "include",
   headers: {

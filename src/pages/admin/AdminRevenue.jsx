@@ -7,9 +7,9 @@ export default function AdminRevenue() {
 
   useEffect(() => {
     Promise.all([
-      fetch(`${API_BASE}/api/admin/revenue`, { credentials: "include" })
+      apiFetch(`${API_BASE}/api/admin/revenue`, { credentials: "include" })
         .then(r => r.json()),
-      fetch(`${API_BASE}/api/admin/payments`, { credentials: "include" })
+      apiFetch(`${API_BASE}/api/admin/payments`, { credentials: "include" })
         .then(r => r.json()),
     ]).then(([rev, pay]) => {
       setPlans(rev.plans);
@@ -21,7 +21,7 @@ export default function AdminRevenue() {
   const ok = confirm("Issue refund for this payment?");
   if (!ok) return;
 
-  const res = await fetch(`${API_BASE}/api/admin/refund`, {
+  const res = await apiFetch(`${API_BASE}/api/admin/refund`, {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },

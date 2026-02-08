@@ -10,14 +10,14 @@ export default function AdminUsers() {
   }, []);
 
   async function load() {
-    const res = await fetch(`${API_BASE}/api/admin/users`, {
+    const res = await apiFetch(`${API_BASE}/api/admin/users`, {
       credentials: "include",
     });
     setUsers(await res.json());
   }
 
   async function action(email, action, value) {
-    await fetch(`${API_BASE}/api/admin/users/action`, {
+    await apiFetch(`${API_BASE}/api/admin/users/action`, {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },

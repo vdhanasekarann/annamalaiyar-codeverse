@@ -38,7 +38,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: ["http://localhost:5173", "http://localhost:5174", "https://app.aicodeverse.com"], 
     credentials: true,
   })
 );
@@ -391,7 +391,7 @@ app.get("/api/auth/magic-verify", async (req, res) => {
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
-  res.redirect("/dashboard");
+  res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
 });
 
 /* ---------- ADMIN: REVENUE (AUTO CALCULATED) ---------- */
