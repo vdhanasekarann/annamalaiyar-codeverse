@@ -12,7 +12,9 @@ export default function Layout() {
       {/* Sidebar */}
       <div className="flex-shrink-0">
       {/* Sidebar */}
-      <SideBar />
+      <div className="hidden md:block">
+   <SideBar />
+    </div>
       </div>
 
       {/* Mobile */}

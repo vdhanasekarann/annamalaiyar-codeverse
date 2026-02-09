@@ -273,7 +273,8 @@ app.post("/api/auth/magic-link", async (req, res) => {
       [uuid(), email, hash]
     );
 
-    const link = `http://localhost:5173/magic-login?token=${token}`;
+    // const link = `http://localhost:5173/magic-login?token=${token}`; //
+    const link = `${process.env.FRONTEND_URL}/magic-login?token=${token}`;
 
     // 1) Try Resend
     try {
@@ -281,9 +282,33 @@ app.post("/api/auth/magic-link", async (req, res) => {
         from: "CodeVerse <hello@aicodeverse.com>",
         to: email,
         subject: "Your secure login link – CodeVerse AI OS",
-        html: `<p>Click to sign in:</p>
-        <p><a href="${link}">Secure Login</a></p>
-        <p>Expires in 15 minutes.</p>`,
+        html: `<div style="font-family:Arial;max-width:600px;margin:auto;border:1px solid #e5e7eb;border-radius:12px;padding:20px">
+  <div style="text-align:center">
+    <img src="https://app.aicodeverse.com/logo.png" style="width:120px;margin-bottom:20px" />
+    <h2>Secure Login – CodeVerse AI OS</h2>
+  </div>
+
+  <p>Hello,</p>
+
+  <p>You requested a secure login to <b>CodeVerse AI OS</b>.</p>
+
+  <div style="text-align:center;margin:25px 0">
+    <a href="${link}"
+       style="background:#4f46e5;color:white;padding:12px 20px;border-radius:8px;text-decoration:none">
+      Login to Dashboard
+    </a>
+  </div>
+
+  <p>This link will expire in <b>15 minutes</b>.</p>
+
+  <p style="opacity:0.7">If you did not request this, please ignore.</p>
+
+  <hr />
+
+  <p style="font-size:12px;opacity:0.6">
+    CodeVerse AI OS – Secure Authentication System
+  </p>
+</div>`,
     });
 
       console.log("Resend send response:", resp);
