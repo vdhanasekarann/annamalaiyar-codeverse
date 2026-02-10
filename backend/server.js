@@ -34,17 +34,25 @@ async function logAudit(actor, action, target) {
 }
 
 const app = express();
-app.set("trust proxy", 1);
+app.set("trust proxy", "loopback");
 app.use(cookieParser());
 
 app.use(cors({
   origin: ["http://localhost:5173", "http://localhost:5174", "https://app.aicodeverse.com"],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token"]
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "X-CSRF-Token",
+    "x-device-id"
+  ]
 }));
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Credentials", "true");
+  next();
+});
 
-app.enable("trust proxy");
 app.use(express.json());
 app.use(helmet());
 
@@ -66,6 +74,8 @@ app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 50,
+    standardHeaders: true,
+    legacyHeaders: false,
   })
 );
 

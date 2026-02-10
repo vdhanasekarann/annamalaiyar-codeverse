@@ -61,9 +61,9 @@ export default function AdminRevenue() {
       {/* PAYMENTS */}
       <div className="bg-zinc-900 rounded-xl p-6">
         <h2 className="text-xl font-semibold mb-4">Payments</h2>
-
-        <table className="w-full text-sm">
-          <thead>
+        <div className="overflow-x-auto">
+        <table className="w-full text-sm min-w-[600px]">
+          <thead className="text-left">
             <tr className="border-b border-zinc-700">
               <th>ID</th>
               <th>Email</th>
@@ -105,11 +105,11 @@ export default function AdminRevenue() {
             ))}
           </tbody>
         </table>
+        </div>
 <h2 className="text-xl font-bold mt-10 mb-4">💳 Payments</h2>
-
 <div className="bg-zinc-900 rounded-xl p-6 overflow-x-auto">
   <table className="w-full text-sm">
-    <thead>
+    <thead className="text-left">
       <tr className="border-b border-zinc-700 text-left">
         <th>Payment ID</th>
         <th>Email</th>
@@ -142,7 +142,6 @@ export default function AdminRevenue() {
     </tbody>
   </table>
 </div>
-
       </div>
     </div>
   );
