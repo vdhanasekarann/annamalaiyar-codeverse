@@ -31,8 +31,9 @@ export default function AdminUsers() {
     <div className="p-6 text-white">
       <h1 className="text-2xl font-bold mb-4">👥 Users</h1>
 
-      <table className="w-full text-sm">
-        <thead>
+      <div className="overflow-x-auto">
+      <table className="w-full text-sm min-w-[650px]">
+            <thead>
           <tr className="border-b border-zinc-700">
             <th>Email</th>
             <th>Plan</th>
@@ -70,6 +71,7 @@ export default function AdminUsers() {
           ))}
         </tbody>
       </table>
+        </div>
     </div>
   );
 }

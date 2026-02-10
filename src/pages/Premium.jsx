@@ -75,7 +75,7 @@ function Plan({ title, price, planKey, highlight }) {
   };
 
   return (
-    <div className={`rounded-xl p-6 bg-zinc-1000/80 border flex flex-col justify-between ${
+    <div className={`rounded-xl p-6 bg-zinc-900/80 border flex flex-col justify-between ${
       highlight ? "ring-2 ring-indigo-600" : "border-white/10"
     }`}>
       <h3 className="font-semibold">{title}</h3>

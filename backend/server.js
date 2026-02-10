@@ -646,9 +646,15 @@ app.post("/api/admin/refund", requireAdmin, async (req, res) => {
   }
 
   try {
-    const refund = await razorpay.payments.refund(paymentId, {
-      amount: amount ? amount * 100 : undefined, // partial or full
-    });
+    let refund;
+
+    if (amount) {
+      refund = await razorpay.payments.refund(paymentId, {
+        amount: amount * 100
+      });
+    } else {
+      refund = await razorpay.payments.refund(paymentId);
+    }
 
     await logAudit(req.user.email, "REFUND", paymentId);
 
@@ -664,9 +670,11 @@ app.post("/api/admin/refund", requireAdmin, async (req, res) => {
 
     res.json({ ok: true, refund });
   } catch (err) {
-    console.error("Refund error:", err);
-    res.status(500).json({ error: "Refund failed" });
-  }
+  console.error("Refund error:", err?.error || err);
+  res.status(500).json({
+    error: err?.error?.description || "Refund failed"
+  });
+}
 });
 
 app.get("/api/admin/audit-logs", requireAdmin, async (_, res) => {

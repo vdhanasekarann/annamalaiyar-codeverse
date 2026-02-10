@@ -13,8 +13,8 @@ export default function Layout() {
       <div className="flex-shrink-0">
       {/* Sidebar */}
       <div className="hidden md:block">
-  <SideBar />
-</div>
+      <SideBar />
+      </div>
       </div>
 
       {/* Mobile */}
@@ -27,7 +27,7 @@ export default function Layout() {
         <TopBar onOpenMobileMenu={() => setMobileOpen(true)} />
 
         <main className="flex-1 overflow-y-auto">
-          <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="max-w-7xl mx-auto px-1 py-1">
             <Outlet />
           </div>
         </main>

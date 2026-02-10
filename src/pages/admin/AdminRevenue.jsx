@@ -60,7 +60,7 @@ export default function AdminRevenue() {
 
       {/* PAYMENTS */}
       <div className="bg-zinc-900 rounded-xl p-6">
-        <h2 className="text-xl font-semibold mb-4">Payments</h2>
+        <h2 className="text-xl font-semibold mb-4">💳 Payments</h2>
         <div className="overflow-x-auto">
         <table className="w-full text-sm min-w-[600px]">
           <thead className="text-left">
@@ -106,42 +106,6 @@ export default function AdminRevenue() {
           </tbody>
         </table>
         </div>
-<h2 className="text-xl font-bold mt-10 mb-4">💳 Payments</h2>
-<div className="bg-zinc-900 rounded-xl p-6 overflow-x-auto">
-  <table className="w-full text-sm">
-    <thead className="text-left">
-      <tr className="border-b border-zinc-700 text-left">
-        <th>Payment ID</th>
-        <th>Email</th>
-        <th>Amount</th>
-        <th>Status</th>
-        <th>Refund</th>
-      </tr>
-    </thead>
-    <tbody>
-      {payments.map(p => (
-        <tr key={p.payment_id} className="border-b border-zinc-800">
-          <td className="py-2">{p.payment_id}</td>
-          <td>{p.email}</td>
-          <td>₹{p.amount}</td>
-          <td>{p.status}</td>
-          <td>
-            {p.status === "paid" ? (
-              <button
-            onClick={() => refundPayment(p.payment_id)}
-            className="px-3 py-1 bg-red-600 rounded text-xs"
-          >
-            Refund
-          </button>
-            ) : (
-              <span className="opacity-50">—</span>
-            )}
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</div>
       </div>
     </div>
   );

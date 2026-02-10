@@ -27,7 +27,7 @@ export default function GPTsPage() {
     <div className="min-h-screen bg-slate-20">
       <div className="max-w-1xl mx-auto px-1 py-1">
         <h1 className="text-sm font-bold mb-1">
-          Annamalaiyar CodeVerse GPT Tools
+          CodeVerse GPT Tools
         </h1>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -56,7 +56,7 @@ export default function GPTsPage() {
 
                 <a
                   href="/premium"
-                  className="flex-1 text-center rounded-lg bg-black border text-white px-1 py-1 text-sm"
+                  className="flex-1 text-center rounded-lg bg-black border text-white px-1 py-3 text-sm"
                 >
                   Unlock Premium
                 </a>
