@@ -19,7 +19,7 @@ export default function Layout() {
 
       {/* Mobile */}
       <MobileDrawer open={mobileOpen} onClose={() => setMobileOpen(false)}>
-   <SideBar mobile onNavigate={() => setMobileOpen(false)} />
+    <SideBar mobile onNavigate={() => setMobileOpen(false)} />
     </MobileDrawer>
 
       {/* Main */}

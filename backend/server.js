@@ -37,15 +37,13 @@ const app = express();
 app.set("trust proxy", 1);
 app.use(cookieParser());
 
-app.use(
-  cors({
-    origin: ["http://localhost:5173", "http://localhost:5174", "https://app.aicodeverse.com"], 
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token"]
-  })
-);
-app.options("*", cors());
+app.use(cors({
+  origin: ["http://localhost:5173", "http://localhost:5174", "https://app.aicodeverse.com"],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token"]
+}));
+
 app.enable("trust proxy");
 app.use(express.json());
 app.use(helmet());
