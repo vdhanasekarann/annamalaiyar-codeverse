@@ -8,40 +8,49 @@ import AdminRevenue from "./pages/admin/AdminRevenue";
 import AdminUsers from "./pages/admin/Users";
 import AdminRoute from "./components/AdminRoute";
 import MagicLogin from "./pages/MagicLogin";
+import AuthGate from "./components/AuthGate";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* PUBLIC */}
+
+        {/* PUBLIC ROUTES */}
         <Route path="/login" element={<Login />} />
         <Route path="/magic-login" element={<MagicLogin />} />
 
-        {/* APP */}
-        <Route element={<Layout />}>
+        {/* PROTECTED APP ROUTES */}
+        <Route
+          element={
+            <AuthGate>
+              <Layout />
+            </AuthGate>
+          }
+        >
           <Route path="/" element={<Dashboard />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/gpts" element={<GPTs />} />
           <Route path="/premium" element={<Premium />} />
-          <Route
-  path="/admin/users"
-  element={
-    <AdminRoute>
-      <AdminUsers />
-    </AdminRoute>
-  }
-/>
 
-<Route
-  path="/admin/revenue"
-  element={
-    <AdminRoute>
-      <AdminRevenue />
-    </AdminRoute>
-  }
-/>
-          <Route path="/admin/revenue" element={<AdminRevenue />} />
+          <Route
+            path="/admin/users"
+            element={
+              <AdminRoute>
+                <AdminUsers />
+              </AdminRoute>
+            }
+          />
+
+          <Route
+            path="/admin/revenue"
+            element={
+              <AdminRoute>
+                <AdminRevenue />
+              </AdminRoute>
+            }
+          />
         </Route>
+
       </Routes>
     </BrowserRouter>
   );

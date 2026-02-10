@@ -25,7 +25,7 @@ export default function TopBar({ onOpenMobileMenu }) {
   };
 
   return (
-    <header className="flex items-center justify-between p-4 border-b border-white/10">
+    <header className="flex items-center justify-between p-4 border-b border-white/10 w-full overflow-hidden">
       <div className="flex items-center gap-3">
         <button
           className="md:hidden p-2 rounded hover:bg-white/10"

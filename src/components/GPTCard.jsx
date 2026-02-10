@@ -24,7 +24,7 @@ const click = async () => {
     <div
   onClick={click}
   className={`relative rounded-xl p-4 cursor-pointer
-    bg-zinc-1000/80 border border-white/10
+    bg-zinc-900/80 border border-white/10
     transition hover:border-indigo-500 hover:shadow-purple
     ${locked ? "opacity-60 cursor-not-allowed" : ""}
   `}

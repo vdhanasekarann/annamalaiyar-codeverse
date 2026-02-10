@@ -94,7 +94,7 @@ export default function AdminRevenue() {
                 <td>
                   {p.status === "paid" && (
                     <button
-                      onClick={() => refund(p.payment_id)}
+                      onClick={() => refundPayment(p.payment_id)}
                       className="px-3 py-1 bg-red-600 rounded text-xs"
                     >
                       Refund

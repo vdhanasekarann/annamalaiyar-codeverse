@@ -13,14 +13,14 @@ export default function Layout() {
       <div className="flex-shrink-0">
       {/* Sidebar */}
       <div className="hidden md:block">
-   <SideBar />
-    </div>
+  <SideBar />
+</div>
       </div>
 
       {/* Mobile */}
       <MobileDrawer open={mobileOpen} onClose={() => setMobileOpen(false)}>
-  <SideBar mobile onNavigate={() => setMobileOpen(false)} />
-</MobileDrawer>
+   <SideBar mobile onNavigate={() => setMobileOpen(false)} />
+    </MobileDrawer>
 
       {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden">
