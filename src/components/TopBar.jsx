@@ -56,7 +56,7 @@ export default function TopBar({ onOpenMobileMenu }) {
             </Link>
           )}
 
-          <div className="hidden md:flex items-center gap-4 text-sm">
+          <div className="flex items-center gap-4 text-sm">
   <img
     src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
       user.email

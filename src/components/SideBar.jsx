@@ -44,12 +44,34 @@ export default function SideBar({ mobile, onNavigate }) {
   };
 
   return (
-    <aside className="w-44 h-screen flex flex-col bg-black/60 backdrop-blur border-r border-white/10">
-      <div className="p-4 font-semibold text-white border-b border-white/10">
-        CodeVerse AI OS
-      </div>
+  <aside className="w-60 md:w-44 h-screen flex flex-col bg-black/60 backdrop-blur border-r border-white/10">
 
-      <nav className="flex-1 px-3 py-4 space-y-2">
+    {/* BRAND */}
+    <div className="p-4 font-semibold text-white border-b border-white/10">
+      CodeVerse AI OS
+    </div>
+
+    {/* USER PROFILE (NEW) */}
+    {mobile && (
+      <div className="p-4 border-b border-white/10 flex items-center gap-3">
+        <img
+          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+            user?.email || "User"
+          )}&background=4f46e5&color=fff`}
+          className="w-10 h-10 rounded-full"
+        />
+        <div className="text-sm">
+          <div className="text-indigo-400 truncate">
+            {user?.email}
+          </div>
+          <div className="opacity-60 text-xs">
+            {role?.toUpperCase()}
+          </div>
+        </div>
+      </div>
+    )}
+
+    <nav className="flex-1 px-3 py-4 space-y-2">
         <button onClick={() => go("/dashboard")} className={linkClass(location.pathname === "/dashboard")}>
           🧠 Dashboard
         </button>
