@@ -67,7 +67,7 @@ if (!user) {
 
   return (
     <div
-      className="min-h-screen text-white"
+      className="bg-[#0f0f0f] min-h-screen text-white"
       style={{
         backgroundImage: "url('/bg-galaxy.jpg')",
         backgroundSize: "cover",

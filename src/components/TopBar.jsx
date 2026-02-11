@@ -25,9 +25,9 @@ export default function TopBar({ onOpenMobileMenu }) {
   };
 
   return (
-  <header className="flex items-center justify-between px-4 h-14 border-b border-white/10 bg-black">
+  <header className="flex items-center justify-between px-4 h-14 border-b border-white/10 bg-[#0f0f0f]">
     
-    {/* LEFT SECTION */}
+    {/* LEFT */}
     <div className="flex items-center gap-2">
       <button
         className="md:hidden p-2 rounded hover:bg-white/10"
@@ -36,35 +36,44 @@ export default function TopBar({ onOpenMobileMenu }) {
         ☰
       </button>
 
-      <Link to="/" className="font-bold text-base md:text-lg whitespace-nowrap">
+      <Link to="/" className="font-semibold text-base whitespace-nowrap">
         CodeVerse AI OS
       </Link>
     </div>
 
-    {/* RIGHT SECTION - ONLY DESKTOP */}
+    {/* RIGHT – SHOWN ON ALL DEVICES */}
     {user && (
-      <div className="hidden md:flex items-center gap-4 text-sm">
-        
-        <span className="px-2 py-1 rounded bg-zinc-800">
+      <div className="flex items-center gap-2 md:gap-4 text-sm">
+
+        {/* PLAN BADGE */}
+        <span className="px-2 py-1 rounded bg-zinc-800 text-xs md:text-sm">
           {user.plan?.toUpperCase()}
         </span>
 
-        <span className="opacity-80">
+        {/* ROLE – HIDDEN ON SMALL */}
+        <span className="hidden md:block opacity-80">
           {user.role === "admin" ? "Admin" : "User"}
         </span>
 
+        {/* UPGRADE BUTTON – ALWAYS VISIBLE */}
         {user.plan === "free" && (
           <Link
             to="/premium"
-            className="px-3 py-1 rounded bg-indigo-600 hover:bg-indigo-700"
+            className="px-3 py-1 rounded bg-indigo-600 hover:bg-indigo-700 text-xs md:text-sm"
           >
             Upgrade
           </Link>
         )}
 
-        <button onClick={logout} className="text-red-400 hover:text-red-300">
-          Logout
+        {/* LOGOUT – ICON ONLY ON MOBILE */}
+        <button
+          onClick={logout}
+          className="text-red-400 hover:text-red-300 text-xs md:text-sm"
+        >
+          <span className="md:hidden">🚪</span>
+          <span className="hidden md:inline">Logout</span>
         </button>
+
       </div>
     )}
   </header>

@@ -18,7 +18,7 @@ export default function AdminRevenue() {
     });
   }, []);
 
-  const refundPayment = async (paymentId) => {
+  const refundPayment = async (paymentId, amount) => {
   const ok = confirm("Issue refund for this payment?");
   if (!ok) return;
 
@@ -26,7 +26,7 @@ export default function AdminRevenue() {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ paymentId, amount: p.amount })
+    body: JSON.stringify({ paymentId, amount })
   });
 
   if (res.ok) {
@@ -94,7 +94,7 @@ export default function AdminRevenue() {
                 <td>
                   {p.status === "paid" && (
                     <button
-                      onClick={() => refundPayment(p.payment_id)}
+                      onClick={() => refundPayment(p.payment_id, p.amount)}
                       className="px-3 py-1 bg-red-600 rounded text-xs"
                     >
                       Refund
