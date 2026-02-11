@@ -6,7 +6,9 @@ import { apiFetch } from "../lib/apiFetch";
 export default function SideBar({ mobile, onNavigate }) {
   const navigate = useNavigate();
   const location = useLocation();
+
   const [role, setRole] = useState(null);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     let alive = true;
@@ -16,16 +18,21 @@ export default function SideBar({ mobile, onNavigate }) {
         if (!res.ok) return null;
         return res.json();
       })
-      .then(user => {
+      .then(data => {
         if (!alive) return;
-        setRole(user?.role || "user");
+
+        setUser(data);
+        setRole(data?.role || "user");
       })
       .catch(() => {
         if (!alive) return;
         setRole("user");
+        setUser(null);
       });
 
-    return () => { alive = false };
+    return () => {
+      alive = false;
+    };
   }, []);
 
   if (location.pathname === "/login") return null;
@@ -52,8 +59,8 @@ export default function SideBar({ mobile, onNavigate }) {
     </div>
 
     {/* USER PROFILE (NEW) */}
-    {mobile && (
-      <div className="p-4 border-b border-white/10 flex items-center gap-3">
+    {mobile && user && (
+  <div className="p-4 border-b border-white/10 flex items-center gap-3">
         <img
           src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
             user?.email || "User"
