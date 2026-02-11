@@ -51,24 +51,32 @@ export default function SideBar({ mobile, onNavigate }) {
   };
 
   return (
-  <aside className="w-60 md:w-44 h-screen flex flex-col bg-black/60 backdrop-blur border-r border-white/10">
-
+  <aside
+    className="
+      w-[260px] md:w-[220px]
+      h-screen flex flex-col
+      bg-black/60 backdrop-blur
+      border-r border-white/10
+      overflow-hidden
+    "
+  >
     {/* BRAND */}
-    <div className="p-4 font-semibold text-white border-b border-white/10">
+    <div className="p-4 font-semibold text-white border-b border-white/10 whitespace-nowrap">
       CodeVerse AI OS
     </div>
 
-    {/* USER PROFILE (NEW) */}
-    {mobile && user && (
-  <div className="p-4 border-b border-white/10 flex items-center gap-3">
+    {/* USER PROFILE */}
+    {user && (
+      <div className="p-3 border-b border-white/10 flex items-center gap-3 overflow-hidden">
         <img
           src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
             user?.email || "User"
           )}&background=4f46e5&color=fff`}
-          className="w-10 h-10 rounded-full"
+          className="w-10 h-10 rounded-full flex-shrink-0"
         />
-        <div className="text-sm">
-          <div className="text-indigo-400 truncate">
+
+        <div className="min-w-0">
+          <div className="text-indigo-400 text-sm truncate max-w-[170px]">
             {user?.email}
           </div>
           <div className="opacity-60 text-xs">

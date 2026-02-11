@@ -17,6 +17,10 @@ const click = async () => {
     }),
   });
 
+  // REFRESH USAGE AFTER POST
+const updated = await apiFetch("/api/usage?email=" + user.email);
+setUsage(await updated.json());
+  
   window.open(gpt.link, "_blank");
 };
 

@@ -26,7 +26,7 @@ export default function AdminRevenue() {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ paymentId }),
+    body: JSON.stringify({ paymentId, amount: p.amount })
   });
 
   if (res.ok) {

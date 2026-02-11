@@ -23,6 +23,17 @@ export default function GPTsPage() {
     }
   };
 
+const { usage, refresh } = useUsage(user.email);
+
+async function openGpt(id) {
+  await apiFetch("/api/usage", {
+    method: "POST",
+    body: JSON.stringify({ gpt: id })
+  });
+
+  await refresh();   // REAL TIME UPDATE
+}
+
   return (
     <div className="min-h-screen bg-slate-20">
       <div className="max-w-1xl mx-auto px-1 py-1">

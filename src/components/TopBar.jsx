@@ -25,53 +25,48 @@ export default function TopBar({ onOpenMobileMenu }) {
   };
 
   return (
-    <header className="flex items-center justify-between p-4 border-b border-white/10 w-full overflow-hidden">
-      <div className="flex items-center gap-3">
-        <button
-          className="md:hidden p-2 rounded hover:bg-white/10"
-          onClick={onOpenMobileMenu}
-        >
-          ☰
+  <header className="flex items-center justify-between px-4 h-14 border-b border-white/10 bg-black">
+    
+    {/* LEFT SECTION */}
+    <div className="flex items-center gap-2">
+      <button
+        className="md:hidden p-2 rounded hover:bg-white/10"
+        onClick={onOpenMobileMenu}
+      >
+        ☰
+      </button>
+
+      <Link to="/" className="font-bold text-base md:text-lg whitespace-nowrap">
+        CodeVerse AI OS
+      </Link>
+    </div>
+
+    {/* RIGHT SECTION - ONLY DESKTOP */}
+    {user && (
+      <div className="hidden md:flex items-center gap-4 text-sm">
+        
+        <span className="px-2 py-1 rounded bg-zinc-800">
+          {user.plan?.toUpperCase()}
+        </span>
+
+        <span className="opacity-80">
+          {user.role === "admin" ? "Admin" : "User"}
+        </span>
+
+        {user.plan === "free" && (
+          <Link
+            to="/premium"
+            className="px-3 py-1 rounded bg-indigo-600 hover:bg-indigo-700"
+          >
+            Upgrade
+          </Link>
+        )}
+
+        <button onClick={logout} className="text-red-400 hover:text-red-300">
+          Logout
         </button>
-
-        <Link to="/" className="font-bold text-lg">
-          CodeVerse AI OS
-        </Link>
       </div>
-
-      {user && (
-        <div className="flex items-center gap-4 text-sm">
-          <span className="px-2 py-1 rounded bg-zinc-800">
-            {user.plan?.toUpperCase()}
-          </span>
-
-          <span>{user.role === "admin" ? "Admin" : "User"}</span>
-
-          {user.plan === "free" && (
-            <Link
-              to="/premium"
-              className="px-3 py-1 rounded bg-indigo-600 hover:bg-indigo-700"
-            >
-              Upgrade
-            </Link>
-          )}
-
-          <div className="flex items-center gap-4 text-sm">
-  <img
-    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-      user.email
-    )}&background=4f46e5&color=fff`}
-    alt="avatar"
-    className="w-8 h-8 rounded-full border border-white/20"
-  />
-  <span className="text-indigo-400">{user.email}</span>
-</div>
-
-          <button onClick={logout} className="text-red-400">
-            Logout
-          </button>
-        </div>
-      )}
-    </header>
-  );
+    )}
+  </header>
+);
 }
