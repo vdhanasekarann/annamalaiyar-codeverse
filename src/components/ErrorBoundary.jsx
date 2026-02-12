@@ -1,6 +1,6 @@
-import { Component } from "react";
+import React from "react";
 
-export default class ErrorBoundary extends Component {
+export default class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
     this.state = { hasError: false };
@@ -11,14 +11,22 @@ export default class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, info) {
-    console.error("App Crash:", error, info);
+    console.error("App crashed:", error, info);
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <div className="p-10 text-white bg-black">
-          <h1>Something went wrong.</h1>
+        <div className="min-h-screen flex items-center justify-center bg-black text-white">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4">Something went wrong</h1>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-indigo-600 rounded"
+            >
+              Reload
+            </button>
+          </div>
         </div>
       );
     }
