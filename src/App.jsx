@@ -9,6 +9,10 @@ import AdminUsers from "./pages/admin/Users";
 import AdminRoute from "./components/AdminRoute";
 import MagicLogin from "./pages/MagicLogin";
 import AuthGate from "./components/AuthGate";
+import PromptAssistant from "./pages/PromptAssistant";
+import React, { Suspense } from "react";
+
+const GPTsPage = React.lazy(() => import("./pages/GPTs"));
 
 export default function App() {
   return (
@@ -29,8 +33,15 @@ export default function App() {
         >
           <Route path="/" element={<Dashboard />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/gpts" element={<GPTs />} />
-          <Route path="/premium" element={<Premium />} />
+          <Route
+            path="/gpts"
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <GPTsPage />
+              </Suspense>
+            }
+          />
+         <Route path="/premium" element={<Premium />} />
 
           <Route
             path="/admin/users"
@@ -50,6 +61,8 @@ export default function App() {
             }
           />
         </Route>
+
+        <Route path="/prompt-assistant" element={<PromptAssistant />} />
 
       </Routes>
     </BrowserRouter>

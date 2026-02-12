@@ -3,16 +3,20 @@ import { apiFetch } from "../lib/apiFetch";
 
 export default function PremiumPage() {
   return (
-    <div className="os-bg min-h-screen text-white">
-      <div className="max-w-5xl mx-auto px-2 py-16">
-        <h1 className="text-3xl font-bold mb-2">
-          Unlock all 50+ AI GPT Apps
-        </h1>
-        <p className="text-zinc-300 mb-8">
-          Higher limits • Premium styles • Faster access
-        </p>
+    <div className="relative min-h-screen text-white overflow-hidden">
+  <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-black to-black opacity-80" />
 
-        <div className="grid sm:grid-cols-4 gap-2">
+  <div className="relative max-w-6xl mx-auto px-6 py-20 text-center">
+
+    <h1 className="text-4xl md:text-5xl font-bold mb-4">
+      Upgrade to CodeVerse PRO
+    </h1>
+
+    <p className="text-zinc-300 mb-12">
+      Unlimited GPT access • Faster responses • Priority features
+    </p>
+
+    <div className="grid gap-8 md:grid-cols-4">
           <Plan title="Starter" price="₹199 / month" planKey="starter" />
           <Plan title="Pro" price="₹399 / month" planKey="pro" highlight />
           <Plan title="Yearly" price="₹1999 / year" planKey="yearly" />
@@ -80,8 +84,8 @@ function Plan({ title, price, planKey, highlight }) {
     bg-gradient-to-br from-zinc-900 to-black
     border border-white/10
     flex flex-col justify-between
-    ${highlight ? "ring-2 ring-indigo-500 scale-105" : ""}
-  `}
+    ${highlight ? "scale-110 ring-2 ring-indigo-500 shadow-xl" : ""}
+    `}
 >
   {highlight && (
     <span className="absolute top-3 right-3 text-xs bg-indigo-600 px-2 py-1 rounded">

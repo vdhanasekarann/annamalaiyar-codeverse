@@ -59,10 +59,25 @@ export default function TopBar({ onOpenMobileMenu }) {
           {user.plan?.toUpperCase()}
         </span>
 
+        <Link
+  to="/prompt-assistant"
+  className="hidden md:block px-3 py-1 rounded bg-indigo-600 hover:bg-indigo-700 text-xs"
+>
+  🤖 Ask AI
+</Link>
+
         {/* ROLE – HIDDEN ON SMALL */}
         <span className="hidden md:block opacity-80">
           {user.role === "admin" ? "Admin" : "User"}
         </span>
+<select onChange={(e) => i18n.changeLanguage(e.target.value)}>
+  <option value="en">EN</option>
+  <option value="ta">தமிழ்</option>
+  <option value="hi">हिंदी</option>
+ <option value="ml">മലയാളം</option>
+  <option value="kn">ಕನ್ನಡ</option>
+   <option value="te">తెలుగు</option>
+</select>
 
         {/* UPGRADE BUTTON – ALWAYS VISIBLE */}
         {user.plan === "free" && (

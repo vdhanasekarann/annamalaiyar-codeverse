@@ -11,7 +11,7 @@ import { useUsage } from "../hooks/useUsage";
 
 export default function DashboardPage() {
   const [user, setUser] = useState(null);
-  const [setUsage] = useState({});
+  const [localUsage, setUsage] = useState({});
   const [loading, setLoading] = useState(true);
   const { usage, refresh } = useUsage(user?.email);
 
@@ -19,38 +19,40 @@ export default function DashboardPage() {
   let mounted = true;
 
   async function load() {
-    try {
-      const meRes = await apiFetch("/api/auth/me");
+  try {
+    const meRes = await apiFetch("/api/auth/me");
 
-      const res = await apiFetch("/api/account/devices");
-      const devices = await res.json();
+    if (!meRes.ok) throw new Error("unauth");
 
-      if (!meRes.ok) throw new Error("unauth");
+    const me = await meRes.json();
+    if (!mounted) return;
 
-      const me = await meRes.json();
-      if (!mounted) return;
+    setUser(me);
 
-      setUser(me);
+    // 🔥 Fetch devices AFTER confirming auth
+    const res = await apiFetch("/api/account/devices");
+    const devices = res.ok ? await res.json() : [];
 
-      const uRes = await fetch(
-        `${API_BASE}/api/usage?email=${me.email}`,
-        {
-          credentials: "include",
-          headers: { "x-device-id": getDeviceId() },
-        }
-      );
+    const deviceId = getDeviceId();
 
-      const usageData = uRes.ok ? await uRes.json() : {};
-      if (!mounted) return;
+    const exists = devices.some(d => d.device_id === deviceId);
 
-      setUsage(usageData);
-    } catch {
-      setUser(null);
-    } finally {
-      if (mounted) setLoading(false);
+    if (!exists) {
+      await apiFetch("/api/account/devices/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deviceId }),
+        credentials: "include",
+      });
     }
-  }
 
+  } catch (err) {
+    console.error("Dashboard load error:", err);
+    setUser(null);
+  } finally {
+    if (mounted) setLoading(false);
+  }
+}
   load();
   return () => { mounted = false; };
 }, []);
@@ -67,9 +69,22 @@ if (!user) {
     user.plan === "free" &&
     GPTS.some(g => (usage[g.id] || 0) >= parseLimit(g.freeLimit));
 
+  function WelcomeBanner({ user }) {
   return (
-    <div
-      className="bg-[#0f0f0f] min-h-screen text-white"
+    <div className="rounded-2xl p-8 mb-10 bg-gradient-to-br from-orange-400 via-indigo-500 to-black">
+      <h1 className="text-3xl font-bold mb-2">
+        Welcome back, {user.email.split("@")[0]}
+      </h1>
+      <p className="opacity-90">
+        Build the future with CodeVerse AI
+      </p>
+    </div>
+  );
+}
+
+  return (
+        <div
+      className="min-h-screen bg-[#0f0f0f] text-white p-6"
       style={{
         backgroundImage: "url('/bg-galaxy.jpg')",
         backgroundSize: "cover",
@@ -77,12 +92,27 @@ if (!user) {
         backgroundAttachment: "fixed",
       }}
     >
-      <UpgradeBanner show={hasAnyLimitHit} />
-      <AppGrid
-  plan={user.plan}
-  usage={usage}
-  onUsed={refresh}
-/>
-   </div>
-  );
+       <WelcomeBanner user={user} />
+
+    <UpgradeBanner show={hasAnyLimitHit} />
+
+    <h2 className="text-lg font-semibold mb-6">Continue Using</h2>
+
+    <AppGrid
+      plan={user.plan}
+      usage={usage}
+      onUsed={refresh}
+      limit={4}
+    />
+
+    <h2 className="text-lg font-semibold mt-12 mb-6">All GPT Apps</h2>
+
+    <AppGrid
+      plan={user.plan}
+      usage={usage}
+      onUsed={refresh}
+    />
+
+  </div>
+);
 }

@@ -187,12 +187,13 @@ app.post("/api/auth/login", async (req, res) => {
   const isProd = process.env.NODE_ENV === "production";
 
   res.cookie("auth", token, {
-    httpOnly: true,
-    sameSite: isProd ? "none" : "lax",
-    secure: isProd,
-    domain: ".aicodeverse.com",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
+  httpOnly: true,
+  sameSite: "none",
+  secure: true,
+  domain: ".aicodeverse.com",
+  path: "/",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
 
   res.json({ ok: true });
 });
@@ -670,7 +671,11 @@ app.post("/api/admin/refund", requireAdmin, async (req, res) => {
 
     res.json({ ok: true, refund });
   } catch (err) {
-  console.error("Refund error:", err?.error || err);
+  console.log("Refund request:", paymentId, amount);
+console.log("Payment record:", await db.query(
+  "SELECT * FROM payments WHERE payment_id=$1",
+  [paymentId]
+));
   res.status(500).json({
     error: err?.error?.description || "Refund failed"
   });
@@ -710,6 +715,27 @@ app.get("/api/invoice/:id", requireUser, async (req, res) => {
 
   res.setHeader("Content-Type", "application/pdf");
   res.sendFile(pdfPath);
+});
+
+app.post("/api/reviews", requireUser, async (req, res) => {
+  const { gpt, rating, review } = req.body;
+
+  await db.query(
+    `INSERT INTO gpt_reviews (id,gpt,email,rating,review)
+     VALUES ($1,$2,$3,$4,$5)`,
+    [uuid(), gpt, req.user.email, rating, review]
+  );
+
+  res.json({ ok: true });
+});
+
+app.get("/api/reviews/:gpt", async (req, res) => {
+  const r = await db.query(
+    "SELECT rating, review, email FROM gpt_reviews WHERE gpt=$1",
+    [req.params.gpt]
+  );
+
+  res.json(r.rows);
 });
 
 app.listen(3000, () =>

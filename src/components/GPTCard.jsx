@@ -1,7 +1,9 @@
 import { parseLimit } from "../config/limits";
 import { apiFetch } from "../lib/apiFetch";
+import React from "react";
 
-export default function GPTCard({ gpt, used, plan, onUsed }) {
+
+function GPTCard({ gpt, used, plan, onUsed }) {
   const limit = plan === "free" ? parseLimit(gpt.freeLimit) : Infinity;
   const locked = plan === "free" && used >= limit;
 
@@ -34,13 +36,14 @@ export default function GPTCard({ gpt, used, plan, onUsed }) {
     `}
   >
     {/* IMAGE CONTAINER */}
-    <div className="aspect-square bg-zinc-800 flex items-center justify-center p-6">
-      <img
-        src={gpt.logo}
-        alt={gpt.title}
-        className="max-h-28 object-contain"
-      />
-    </div>
+    <div className="h-40 bg-zinc-800 flex items-center justify-center">
+  <img
+    src={gpt.logo}
+    alt={gpt.title}
+    loading="lazy"
+    className="max-h-24 object-contain"
+  />
+</div>
 
     {/* CONTENT */}
     <div className="p-4 flex flex-col h-[130px]">
@@ -63,3 +66,5 @@ export default function GPTCard({ gpt, used, plan, onUsed }) {
   </div>
 );
 }
+
+export default React.memo(GPTCard);
