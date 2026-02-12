@@ -1,6 +1,7 @@
 // src/components/SideBar.jsx
+import React from "react";
 import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { apiFetch } from "../lib/apiFetch";
 
 export default function SideBar({ mobile, onNavigate }) {

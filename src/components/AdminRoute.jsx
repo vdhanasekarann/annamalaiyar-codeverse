@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { API_BASE } from "../config/api";
 
 export default function AdminRoute({ children }) {
