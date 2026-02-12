@@ -15,37 +15,51 @@ export default function GPTCard({ gpt, used, plan, onUsed }) {
       body: JSON.stringify({ gpt: gpt.id }),
     });
 
-    await onUsed();
+    // ✅ SAFE CALL
+    if (onUsed) {
+      await onUsed();
+    }
 
     window.open(gpt.link, "_blank");
   };
 
   return (
-    <div
-      onClick={click}
-      className={`relative rounded-xl p-4 cursor-pointer
-        bg-zinc-900/80 border border-white/10
-        transition hover:border-indigo-500
-        ${locked ? "opacity-60 cursor-not-allowed" : ""}
-      `}
-    >
-      <img src={gpt.logo} className="h-10 mb-2" />
+  <div
+    onClick={click}
+    className={`group relative rounded-2xl overflow-hidden
+      bg-gradient-to-b from-zinc-900 to-zinc-950
+      border border-white/10 hover:border-indigo-500
+      transition-all duration-300 hover:shadow-lg
+      ${locked ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}
+    `}
+  >
+    {/* IMAGE CONTAINER */}
+    <div className="aspect-square bg-zinc-800 flex items-center justify-center p-6">
+      <img
+        src={gpt.logo}
+        alt={gpt.title}
+        className="max-h-28 object-contain"
+      />
+    </div>
 
-      <h3 className="text-sm font-semibold truncate">
+    {/* CONTENT */}
+    <div className="p-4 flex flex-col h-[130px]">
+      <h3 className="text-sm font-semibold text-white line-clamp-2">
         {gpt.title}
       </h3>
 
-      <p className="text-xs text-zinc-400 line-clamp-2">
+      <p className="text-xs text-zinc-400 mt-1 line-clamp-2 flex-1">
         {gpt.description}
       </p>
 
-      <div className="mt-2 text-xs">
+      <div className="text-xs mt-2 text-zinc-300">
         {locked
-          ? "Limit reached"
+          ? "🔒 Limit reached"
           : plan === "free"
           ? `${used} / ${limit} used today`
           : "Unlimited"}
       </div>
     </div>
-  );
+  </div>
+);
 }

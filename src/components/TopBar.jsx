@@ -40,6 +40,15 @@ export default function TopBar({ onOpenMobileMenu }) {
         CodeVerse AI OS
       </Link>
     </div>
+{/* CENTER – HIDDEN ON MOBILE */}
+    <div className="hidden md:flex flex-1 justify-center px-6">
+  <input
+    type="text"
+    placeholder="Search GPTs..."
+    className="w-full max-w-md bg-zinc-800 border border-white/10
+               rounded-full px-4 py-1 text-sm focus:outline-none"
+  />
+</div>
 
     {/* RIGHT – SHOWN ON ALL DEVICES */}
     {user && (

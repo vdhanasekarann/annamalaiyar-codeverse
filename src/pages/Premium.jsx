@@ -75,17 +75,31 @@ function Plan({ title, price, planKey, highlight }) {
   };
 
   return (
-    <div className={`rounded-xl p-6 bg-zinc-900/80 border flex flex-col justify-between ${
-      highlight ? "ring-2 ring-indigo-600" : "border-white/10"
-    }`}>
-      <h3 className="font-semibold">{title}</h3>
-      <p className="text-2xl mt-2">{price}</p>
-      <button
-        onClick={upgrade}
-        className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 py-2 rounded"
-      >
-        Upgrade
-      </button>
-    </div>
+    <div
+  className={`relative rounded-2xl p-6
+    bg-gradient-to-br from-zinc-900 to-black
+    border border-white/10
+    flex flex-col justify-between
+    ${highlight ? "ring-2 ring-indigo-500 scale-105" : ""}
+  `}
+>
+  {highlight && (
+    <span className="absolute top-3 right-3 text-xs bg-indigo-600 px-2 py-1 rounded">
+      Popular
+    </span>
+  )}
+
+  <div>
+    <h3 className="text-lg font-semibold">{title}</h3>
+    <p className="text-3xl font-bold mt-3">{price}</p>
+  </div>
+
+  <button
+    onClick={upgrade}
+    className="mt-6 w-full bg-indigo-600 hover:bg-indigo-700 py-2 rounded-lg"
+  >
+    Upgrade
+  </button>
+</div>
   );
 }

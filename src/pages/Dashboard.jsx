@@ -7,11 +7,13 @@ import { GPTS } from "../data/gpts";
 import { API_BASE } from "../config/api";
 import { getDeviceId } from "../utils/device";
 import { apiFetch } from "../lib/apiFetch";
+import { useUsage } from "../hooks/useUsage";
 
 export default function DashboardPage() {
   const [user, setUser] = useState(null);
-  const [usage, setUsage] = useState({});
+  const [setUsage] = useState({});
   const [loading, setLoading] = useState(true);
+  const { usage, refresh } = useUsage(user?.email);
 
   useEffect(() => {
   let mounted = true;
@@ -76,7 +78,11 @@ if (!user) {
       }}
     >
       <UpgradeBanner show={hasAnyLimitHit} />
-      <AppGrid plan={user.plan} usage={usage} />
-    </div>
+      <AppGrid
+  plan={user.plan}
+  usage={usage}
+  onUsed={refresh}
+/>
+   </div>
   );
 }
