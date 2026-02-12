@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export default function TermsPage() {
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-white px-6 py-12">

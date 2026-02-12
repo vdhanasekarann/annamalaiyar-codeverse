@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { requireAuth } from "../../utils/auth";
 import { API_BASE } from "../../config/api";
 import { apiFetch } from "../../lib/apiFetch";
+import { Link } from "react-router-dom";
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);

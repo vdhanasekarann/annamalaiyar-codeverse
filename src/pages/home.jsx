@@ -3,6 +3,7 @@ import "../website.css";
 import Logo from "../assets/Logo.svg"; // or your logo.png if you prefer
 import EnquiryForm from "../components/EnquiryForm";
 import { useEffect } from "react";
+import { Link } from "react-router-dom";
 
 export default function Home() {
   const [active, setActive] = useState("web");
