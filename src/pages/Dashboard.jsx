@@ -14,6 +14,8 @@ export default function DashboardPage() {
   const [localUsage, setUsage] = useState({});
   const [loading, setLoading] = useState(true);
   const { usage, refresh } = useUsage(user?.email);
+  const [devices, setDevices] = useState([]);
+
 
   useEffect(() => {
   let mounted = true;
@@ -31,7 +33,17 @@ export default function DashboardPage() {
 
     // 🔥 Fetch devices AFTER confirming auth
     const res = await apiFetch("/api/account/devices");
-    const devices = res.ok ? await res.json() : [];
+    const devicesData = res.ok ? await res.json() : [];
+    setDevices(devicesData);
+
+        const revokeDevice = async (id) => {
+      await apiFetch(`/api/account/devices/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      setDevices(prev => prev.filter(d => d.id !== id));
+    };
 
     const deviceId = getDeviceId();
 
@@ -107,26 +119,37 @@ if (!user) {
 
        <WelcomeBanner user={user} />
        <h2 className="text-lg font-semibold mt-12 mb-4">
-Active Devices
+  Active Devices
 </h2>
 
 <div className="grid gap-4">
-  {devices.map(d => (
-    <div key={d.id} className="bg-zinc-900 rounded-xl p-4 flex justify-between">
-      <div>
-        <div className="font-semibold">{d.device_name}</div>
-        <div className="text-xs opacity-60">
-          Last active: {d.last_seen}
-        </div>
-      </div>
-      <button
-        onClick={() => revokeDevice(d.id)}
-        className="text-red-400"
+  {devices && devices.length > 0 ? (
+    devices.map(d => (
+      <div
+        key={d.id}
+        className="bg-zinc-900 rounded-xl p-4 flex justify-between"
       >
-        Revoke
-      </button>
+        <div>
+          <div className="font-semibold">
+            {d.device_name || "Unknown Device"}
+          </div>
+          <div className="text-xs opacity-60">
+            Last active: {d.last_seen || "Recently"}
+          </div>
+        </div>
+        <button
+          onClick={() => revokeDevice(d.id)}
+          className="text-red-400"
+        >
+          Revoke
+        </button>
+      </div>
+    ))
+  ) : (
+    <div className="text-sm opacity-60">
+      No active devices found.
     </div>
-  ))}
+  )}
 </div>
 
     <UpgradeBanner show={hasAnyLimitHit} />
