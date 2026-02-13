@@ -106,6 +106,28 @@ if (!user) {
 </div>
 
        <WelcomeBanner user={user} />
+       <h2 className="text-lg font-semibold mt-12 mb-4">
+Active Devices
+</h2>
+
+<div className="grid gap-4">
+  {devices.map(d => (
+    <div key={d.id} className="bg-zinc-900 rounded-xl p-4 flex justify-between">
+      <div>
+        <div className="font-semibold">{d.device_name}</div>
+        <div className="text-xs opacity-60">
+          Last active: {d.last_seen}
+        </div>
+      </div>
+      <button
+        onClick={() => revokeDevice(d.id)}
+        className="text-red-400"
+      >
+        Revoke
+      </button>
+    </div>
+  ))}
+</div>
 
     <UpgradeBanner show={hasAnyLimitHit} />
 
