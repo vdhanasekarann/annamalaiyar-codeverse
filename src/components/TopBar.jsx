@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { API_BASE } from "../config/api";
 import { apiFetch } from "../lib/apiFetch";
+import i18n from "../i18n";
 
 export default function TopBar({ onOpenMobileMenu }) {
   const navigate = useNavigate();

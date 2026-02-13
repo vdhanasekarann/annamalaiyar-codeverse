@@ -35,12 +35,12 @@ function GPTCard({ gpt, used, plan, onUsed }) {
     `}
   >
     {/* IMAGE CONTAINER */}
-    <div className="h-40 bg-zinc-800 flex items-center justify-center">
+    <div className="h-44 bg-zinc-800 overflow-hidden">
   <img
     src={gpt.logo}
     alt={gpt.title}
     loading="lazy"
-    className="max-h-24 object-contain"
+    className="w-full h-full object-cover"
   />
 </div>
 
@@ -53,6 +53,12 @@ function GPTCard({ gpt, used, plan, onUsed }) {
       <p className="text-xs text-zinc-400 mt-1 line-clamp-2 flex-1">
         {gpt.description}
       </p>
+      <Link
+  to={`/gpt/${gpt.id}`}
+  className="text-xs text-indigo-400 mt-2"
+>
+  View Reviews
+</Link>
 
       <div className="text-xs mt-2 text-zinc-300">
         {locked

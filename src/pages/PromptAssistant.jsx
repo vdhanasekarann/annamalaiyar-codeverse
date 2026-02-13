@@ -43,8 +43,18 @@ Make the output high-quality, well-structured and optimized.
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-white p-6">
       <div className="max-w-2xl mx-auto bg-zinc-900 rounded-xl p-6 shadow-xl">
+        <Link
+  to="/dashboard"
+  className="text-sm text-indigo-400 hover:underline mb-4 inline-block"
+>
+  ← Back to Dashboard
+</Link>
 
         <h1 className="text-2xl font-bold mb-6">🤖 Ask AI Prompt Assistant</h1>
+        <p className="text-sm opacity-60 mb-6">
+          Create perfectly structured prompts in 5 easy steps.
+          Choose tone, language, style and generate production-ready AI prompts.
+          </p>
 
         {step === 1 && (
           <>

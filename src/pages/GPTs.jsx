@@ -15,6 +15,7 @@ export default function GPTsPage() {
   }, []);
 
   const { usage, refresh } = useUsage(user?.email);
+  const categories = [...new Set(GPTS.map(g => g.category))];
 
   if (!user) return <div>Loading...</div>;
 

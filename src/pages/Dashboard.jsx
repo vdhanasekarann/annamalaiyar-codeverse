@@ -92,6 +92,19 @@ if (!user) {
         backgroundAttachment: "fixed",
       }}
     >
+      <div className="relative group">
+  <button className="px-3 py-1 bg-zinc-800 rounded text-xs">
+    AI Tools ▾
+  </button>
+
+  <div className="absolute hidden group-hover:block bg-zinc-900 mt-2 rounded shadow-lg text-sm">
+    <a href="https://chat.openai.com" target="_blank" className="block px-4 py-2 hover:bg-indigo-600">ChatGPT</a>
+    <a href="https://claude.ai" target="_blank" className="block px-4 py-2 hover:bg-indigo-600">Claude</a>
+    <a href="https://gemini.google.com" target="_blank" className="block px-4 py-2 hover:bg-indigo-600">Gemini</a>
+    <a href="https://copilot.microsoft.com" target="_blank" className="block px-4 py-2 hover:bg-indigo-600">Copilot</a>
+  </div>
+</div>
+
        <WelcomeBanner user={user} />
 
     <UpgradeBanner show={hasAnyLimitHit} />
@@ -102,7 +115,7 @@ if (!user) {
       plan={user.plan}
       usage={usage}
       onUsed={refresh}
-      limit={4}
+      limit={4} 
     />
 
     <h2 className="text-lg font-semibold mt-12 mb-6">All GPT Apps</h2>
