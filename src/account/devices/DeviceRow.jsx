@@ -1,5 +1,6 @@
 import { API_BASE } from "../../config/api";
 import { getDeviceId } from "../../utils/device";
+import { Navigate, Link } from "react-router-dom";
 
 export default function DeviceRow({ device, onRevoked }) {
   const revoke = async () => {

@@ -1,5 +1,6 @@
 // src/components/EnquiryForm.jsx
 import { useState } from "react";
+import { Navigate, Link } from "react-router-dom";
 
 export default function EnquiryForm() {
   const [loading, setLoading] = useState(false);

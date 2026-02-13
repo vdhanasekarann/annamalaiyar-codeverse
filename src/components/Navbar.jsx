@@ -1,5 +1,6 @@
 // src/components/Navbar.jsx
 import React from "react";
+import { Navigate, Link } from "react-router-dom";
 
 export default function Navbar() {
   return (

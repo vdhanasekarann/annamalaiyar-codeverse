@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { API_BASE } from "../../config/api";
 import { getDeviceId } from "../../utils/device";
 import DeviceRow from "./DeviceRow";
+import { Navigate, Link } from "react-router-dom";
 
 export default function DeviceList() {
   const [devices, setDevices] = useState([]);
