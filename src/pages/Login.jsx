@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { API_BASE } from "../config/api";
 import { apiFetch } from "../lib/apiFetch";
 
 export default function Login() {
@@ -18,17 +17,12 @@ export default function Login() {
     });
 
     const data = await res.json();
-
-    if (data.devLink) {
-      window.location.href = data.devLink;
-    } else {
-      alert("Magic link sent");
-    }
+    if (data.devLink) window.location.href = data.devLink;
+    else alert("Magic link sent to your email");
   };
 
   useEffect(() => {
-    if (!window.google) return;
-    if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) return;
+    if (!window.google || !import.meta.env.VITE_GOOGLE_CLIENT_ID) return;
 
     window.google.accounts.id.initialize({
       client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
@@ -40,73 +34,66 @@ export default function Login() {
           body: JSON.stringify({ credential: res.credential }),
         });
 
-        if (r.ok) {
-      await apiFetch("/api/auth/me");
-      navigate("/dashboard");
-        }
-      else alert("Google login failed");
+        if (r.ok) navigate("/dashboard");
+        else alert("Google login failed");
       },
     });
 
-    const btn = document.getElementById("googleBtn");
-    if (btn) {
-      window.google.accounts.id.renderButton(btn, {
-        theme: "outline",
-        size: "large",
-      });
-    }
+    window.google.accounts.id.renderButton(
+      document.getElementById("googleBtn"),
+      { theme: "outline", size: "large", width: 320 }
+    );
   }, [navigate]);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-
-    const cleanEmail = email.trim();
-    if (!cleanEmail) return alert("Email required");
-
-    const res = await apiFetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ email: cleanEmail }),
-    });
-
-    if (!res.ok) return alert("Login failed");
-    navigate("/dashboard");
-  };
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black text-white">
-      <div className="bg-zinc-900 p-6 rounded-xl w-full max-w-sm space-y-4">
-        <h1 className="text-xl font-bold text-center">CodeVerse AI OS</h1>
+    <div className="min-h-screen flex">
 
-        <div id="googleBtn" className="flex justify-center" />
+      {/* LEFT PANEL */}
+      <div className="hidden md:flex w-1/2 relative">
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-400 via-indigo-500 to-black opacity-90" />
+        <div className="relative z-10 text-white p-16 flex flex-col justify-center">
+          <h1 className="text-4xl font-bold mb-4">AI CodeVerse</h1>
+          <p className="text-xl mb-6">Bring your ideas to life</p>
+          <p className="opacity-80">
+            Joined 100,000+ creators, Business peoples, Home makers,
+            Techies, Kids, travelers, Activist — Use Daily free credits
+          </p>
+        </div>
+      </div>
 
-        <div className="text-center opacity-50">OR</div>
+      {/* RIGHT PANEL */}
+      <div className="flex w-full md:w-1/2 items-center justify-center bg-white text-black">
+        <div className="w-full max-w-md p-10">
 
-        <form onSubmit={handleLogin} className="space-y-3">
+          <h2 className="text-2xl font-semibold mb-2">Welcome Back</h2>
+          <p className="text-sm opacity-60 mb-6">
+            Sign in to continue your AI journey
+          </p>
+
+          <div id="googleBtn" className="mb-4 flex justify-center" />
+
+          <div className="text-center text-sm opacity-50 mb-4">OR</div>
+
           <input
             type="email"
             placeholder="Enter your email"
+            className="w-full border p-3 rounded mb-3"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-2 rounded bg-zinc-800 border border-zinc-700"
           />
 
           <button
-            type="button"
             onClick={sendMagicLink}
-            className="w-full bg-zinc-700 hover:bg-zinc-600 p-2 rounded"
+            className="w-full bg-black text-white p-3 rounded mb-3"
           >
             Send Magic Link
           </button>
 
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 hover:bg-indigo-700 p-2 rounded font-semibold"
-          >
-            Continue
-          </button>
-        </form>
+          <p className="text-xs opacity-50 text-center mt-6">
+            Secure login • No password required
+          </p>
+
+        </div>
       </div>
     </div>
   );
