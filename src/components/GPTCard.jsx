@@ -1,7 +1,7 @@
 import { parseLimit } from "../config/limits";
 import { apiFetch } from "../lib/apiFetch";
 import React from "react";
-import { Navigate, Link } from "react-router-dom";
+import { Navigate, useNavigate, Link } from "react-router-dom";
 
 function GPTCard({ gpt, used, plan, onUsed }) {
   const limit = plan === "free" ? parseLimit(gpt.freeLimit) : Infinity;

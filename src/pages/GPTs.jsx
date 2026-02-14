@@ -3,7 +3,7 @@ import GPTCard from "../components/GPTCard";
 import { useUsage } from "../hooks/useUsage";
 import { useEffect, useState } from "react";
 import { apiFetch } from "../lib/apiFetch";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function GPTsPage() {
   const [user, setUser] = useState(null);
