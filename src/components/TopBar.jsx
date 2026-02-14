@@ -49,6 +49,7 @@ export default function TopBar({ onOpenMobileMenu }) {
   <input
    value={query}
    onChange={e=>setQuery(e.target.value)}
+    onKeyDown={e=> e.key==="Enter" && navigate(`/gpts?q=${query}`)}
     type="text"
     placeholder="Search GPTs..."
     className="w-full max-w-md bg-zinc-800 border border-white/10

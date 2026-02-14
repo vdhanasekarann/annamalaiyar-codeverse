@@ -110,6 +110,25 @@ app.get("/api/account/devices", requireUser, async (req, res) => {
   res.json(r.rows);
 });
 
+app.post("/api/account/devices/register", requireUser, async (req, res) => {
+  const { deviceId } = req.body;
+
+  if (!deviceId)
+    return res.status(400).json({ error: "deviceId required" });
+
+  await db.query(
+    `
+    INSERT INTO user_devices (email, device_id, user_agent, last_seen)
+    VALUES ($1,$2,$3,NOW())
+    ON CONFLICT (email, device_id)
+    DO UPDATE SET last_seen = NOW()
+    `,
+    [req.user.email, deviceId, req.headers["user-agent"]]
+  );
+
+  res.json({ ok: true });
+});
+
 app.post("/api/create-order", requireUser, async (req, res) => {
   try {
     console.log("create-order called, req.user:", req.user);

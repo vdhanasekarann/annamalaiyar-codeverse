@@ -16,14 +16,16 @@ export default function DashboardPage() {
   const { usage, refresh } = useUsage(user?.email);
   const [devices, setDevices] = useState([]);
 
-  const revokeDevice = async (id) => {
-      await apiFetch(`/api/account/devices/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+  const revokeDevice = async (deviceId) => {
+  await apiFetch("/api/account/devices/revoke", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ deviceId }),
+    credentials: "include"
+  });
 
-      setDevices(prev => prev.filter(d => d.id !== id));
-    };
+  setDevices(prev => prev.filter(d => d.device_id !== deviceId));
+};
 
     navigate(`/gpts?q=${query}`)
 
@@ -105,16 +107,27 @@ if (!user) {
         backgroundAttachment: "fixed",
       }}
     >
-      <div className="absolute z-50 hidden group-hover:block bg-zinc-900 mt-2 rounded shadow-lg text-sm">
+      <div className="relative inline-block z-[100]">
   <button className="px-4 py-2 bg-zinc-800 rounded-lg text-sm hover:bg-zinc-700 shadow">
     AI Tools ▾
   </button>
 
-  <div className="absolute hidden group-hover:block bg-zinc-900 mt-2 rounded shadow-lg text-sm">
-    <a href="https://chat.openai.com" target="_blank" className="block px-4 py-2 hover:bg-indigo-600">ChatGPT</a>
-    <a href="https://claude.ai" target="_blank" className="block px-4 py-2 hover:bg-indigo-600">Claude</a>
-    <a href="https://gemini.google.com" target="_blank" className="block px-4 py-2 hover:bg-indigo-600">Gemini</a>
-    <a href="https://copilot.microsoft.com" target="_blank" className="block px-4 py-2 hover:bg-indigo-600">Copilot</a>
+  <div className="absolute left-0 mt-2 w-48 rounded-lg bg-zinc-900 border border-white/10 shadow-xl">
+    {[
+      ["ChatGPT","https://chat.openai.com"],
+      ["Claude","https://claude.ai"],
+      ["Gemini","https://gemini.google.com"],
+      ["Copilot","https://copilot.microsoft.com"]
+    ].map(([name,url])=>(
+      <a
+        key={name}
+        href={url}
+        target="_blank"
+        className="block px-4 py-2 hover:bg-indigo-600"
+      >
+        {name}
+      </a>
+    ))}
   </div>
 </div>
 
@@ -139,7 +152,7 @@ if (!user) {
           </div>
         </div>
         <button
-          onClick={() => revokeDevice(d.id)}
+          onClick={() => revokeDevice(d.device_id)}
           className="text-red-400"
         >
           Revoke
@@ -171,6 +184,12 @@ if (!user) {
       usage={usage}
       onUsed={refresh}
     />
+<div className="mt-10 p-6 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-700">
+ <h3 className="font-bold text-lg mb-2">AI Insight</h3>
+ <p className="text-sm opacity-90">
+  You are most active in Education category apps. Try more Lifestyle GPTs to balance your usage.
+ </p>
+</div>
 
   </div>
 );

@@ -7,6 +7,11 @@ import { Link } from "react-router-dom";
 
 export default function GPTsPage() {
   const [user, setUser] = useState(null);
+  const [active,setActive]=useState("All");
+
+const filtered = active==="All"
+ ? GPTS
+ : GPTS.filter(g=>g.category===active);
 
   useEffect(() => {
     apiFetch("/api/auth/me")
@@ -22,8 +27,20 @@ export default function GPTsPage() {
   if (!user) return <div>Loading...</div>;
 
   return (
-    <div className="p-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {GPTS.map((gpt) => (
+    <div className="flex gap-2 mb-6 flex-wrap">
+ {["All",...categories].map(c=>(
+  <button
+   key={c}
+   onClick={()=>setActive(c)}
+   className={`px-3 py-1 rounded-full border
+     ${active===c?"bg-indigo-600":"bg-zinc-800"}`}
+  >
+   {c}
+  </button>
+ ))}
+  
+      <div className="p-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {filtered.map((gpt) => (
         <GPTCard
           key={gpt.id}
           gpt={gpt}
@@ -33,5 +50,5 @@ export default function GPTsPage() {
         />
       ))}
     </div>
-  );
+    </div>);
 }

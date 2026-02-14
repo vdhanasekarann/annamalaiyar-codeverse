@@ -6,6 +6,8 @@ import { Navigate, Link } from "react-router-dom";
 function GPTCard({ gpt, used, plan, onUsed }) {
   const limit = plan === "free" ? parseLimit(gpt.freeLimit) : Infinity;
   const locked = plan === "free" && used >= limit;
+  const navigate = useNavigate();
+  const [reviews,setReviews]=React.useState([]);
 
   const click = async () => {
     if (locked) return;
@@ -22,7 +24,7 @@ function GPTCard({ gpt, used, plan, onUsed }) {
       await onUsed();
     }
 
-    window.open(gpt.link, "_blank");
+    navigate(`/gpt/${gpt.id}`);
   };
 
   return (

@@ -37,6 +37,10 @@ export default function DeviceRow({ device, onRevoked }) {
         </div>
       </div>
 
+      <span className="text-xs bg-indigo-600 px-2 py-1 rounded ml-2">
+ {detectOS()}
+</span>
+
       <button
         onClick={revoke}
         className="text-red-400 hover:text-red-300 text-sm"
