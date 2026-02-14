@@ -16,6 +16,16 @@ export default function DashboardPage() {
   const { usage, refresh } = useUsage(user?.email);
   const [devices, setDevices] = useState([]);
 
+  const revokeDevice = async (id) => {
+      await apiFetch(`/api/account/devices/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      setDevices(prev => prev.filter(d => d.id !== id));
+    };
+
+    navigate(`/gpts?q=${query}`)
 
   useEffect(() => {
   let mounted = true;
@@ -36,18 +46,9 @@ export default function DashboardPage() {
     const devicesData = res.ok ? await res.json() : [];
     setDevices(devicesData);
 
-        const revokeDevice = async (id) => {
-      await apiFetch(`/api/account/devices/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-
-      setDevices(prev => prev.filter(d => d.id !== id));
-    };
-
     const deviceId = getDeviceId();
 
-    const exists = devices.some(d => d.device_id === deviceId);
+    const exists = devicesData.some(d => d.device_id === deviceId);
 
     if (!exists) {
       await apiFetch("/api/account/devices/register", {
@@ -104,8 +105,8 @@ if (!user) {
         backgroundAttachment: "fixed",
       }}
     >
-      <div className="relative group">
-  <button className="px-3 py-1 bg-zinc-800 rounded text-xs">
+      <div className="absolute z-50 hidden group-hover:block bg-zinc-900 mt-2 rounded shadow-lg text-sm">
+  <button className="px-4 py-2 bg-zinc-800 rounded-lg text-sm hover:bg-zinc-700 shadow">
     AI Tools ▾
   </button>
 

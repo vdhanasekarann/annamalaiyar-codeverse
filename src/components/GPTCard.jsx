@@ -28,13 +28,13 @@ function GPTCard({ gpt, used, plan, onUsed }) {
   return (
   <div
     onClick={click}
-    className={`group relative rounded-2xl overflow-hidden
-      bg-gradient-to-b from-zinc-900 to-zinc-950
-      border border-white/10 hover:border-indigo-500
-      transition-all duration-300 hover:shadow-lg
-      ${locked ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}
-    `}
-  >
+    className="relative rounded-2xl p-6
+ backdrop-blur-xl
+ bg-white/5
+ border border-white/10
+ hover:border-indigo-500
+ hover:scale-105
+ transition-all duration-300">
     {/* IMAGE CONTAINER */}
     <div className="h-44 bg-zinc-800 overflow-hidden">
   <img
@@ -54,6 +54,16 @@ function GPTCard({ gpt, used, plan, onUsed }) {
       <p className="text-xs text-zinc-400 mt-1 line-clamp-2 flex-1">
         {gpt.description}
       </p>
+
+      <div className="mt-6 space-y-3">
+ {reviews.map((r,i)=>(
+   <div key={i} className="bg-zinc-900 p-3 rounded">
+     ⭐ {r.rating}/5
+     <p className="text-sm opacity-80">{r.review}</p>
+   </div>
+ ))}
+</div>
+
       <Link
   to={`/gpt/${gpt.id}`}
   className="text-xs text-indigo-400 mt-2"

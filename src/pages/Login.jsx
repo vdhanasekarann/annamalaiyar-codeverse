@@ -49,14 +49,15 @@ export default function Login() {
     <div className="min-h-screen flex">
 
       {/* LEFT PANEL */}
-      <div className="hidden md:flex w-1/2 relative">
+      <div className="flex md:w-1/2 w-full h-48 md:h-auto relative">
         <div className="absolute inset-0 bg-gradient-to-br from-orange-400 via-indigo-500 to-black opacity-90" />
         <div className="relative z-10 text-white p-16 flex flex-col justify-center">
-          <h1 className="text-4xl font-bold mb-4">AI CodeVerse</h1>
-          <p className="text-xl mb-6">Bring your ideas to life</p>
+          <h1 className="text-4xl font-bold mb-4">AI CodeVerse OS</h1>
+          <p className="text-xl mb-6">Create. Build. Launch.
+            The AI platform trusted by creators, founders, learners & innovators.</p>
           <p className="opacity-80">
-            Joined 100,000+ creators, Business peoples, Home makers,
-            Techies, Kids, travelers, Activist — Use Daily free credits
+            Join 100,000+ minds already building the future.
+            Start free. Upgrade anytime.
           </p>
         </div>
       </div>

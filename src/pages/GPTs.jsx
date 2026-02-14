@@ -14,6 +14,8 @@ export default function GPTsPage() {
       .then(setUser);
   }, []);
 
+  navigate(`/gpts?q=${query}`)
+
   const { usage, refresh } = useUsage(user?.email);
   const categories = [...new Set(GPTS.map(g => g.category))];
 

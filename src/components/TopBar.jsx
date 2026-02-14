@@ -1,14 +1,15 @@
-
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { API_BASE } from "../config/api";
 import { apiFetch } from "../lib/apiFetch";
 import i18n from "../i18n";
+import { LayoutDashboard, Sparkles, Crown, Users } from "lucide-react";
 
 export default function TopBar({ onOpenMobileMenu }) {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [query,setQuery]=useState("")
 
   useEffect(() => {
       apiFetch("/api/auth/me")
@@ -46,6 +47,8 @@ export default function TopBar({ onOpenMobileMenu }) {
 {/* CENTER – HIDDEN ON MOBILE */}
     <div className="hidden md:flex flex-1 justify-center px-6">
   <input
+   value={query}
+   onChange={e=>setQuery(e.target.value)}
     type="text"
     placeholder="Search GPTs..."
     className="w-full max-w-md bg-zinc-800 border border-white/10
