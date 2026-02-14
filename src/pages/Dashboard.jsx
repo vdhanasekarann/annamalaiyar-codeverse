@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Navigate, Link } from "react-router-dom";
+import { Navigate, useNavigate, Link } from "react-router-dom";
 import AppGrid from "../components/AppGrid";
 import UpgradeBanner from "../components/UpgradeBanner";
 import { parseLimit } from "../config/limits";
