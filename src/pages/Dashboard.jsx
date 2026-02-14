@@ -15,6 +15,11 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const { usage, refresh } = useUsage(user?.email);
   const [devices, setDevices] = useState([]);
+  const navigate = useNavigate();
+
+function handleSearch(q){
+  navigate(`/gpts?q=${q}`);
+}
 
   const revokeDevice = async (deviceId) => {
   await apiFetch("/api/account/devices/revoke", {
@@ -27,9 +32,7 @@ export default function DashboardPage() {
   setDevices(prev => prev.filter(d => d.device_id !== deviceId));
 };
 
-    navigate(`/gpts?q=${query}`)
-
-  useEffect(() => {
+useEffect(() => {
   let mounted = true;
 
   async function load() {

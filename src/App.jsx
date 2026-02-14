@@ -11,7 +11,7 @@ import MagicLogin from "./pages/MagicLogin";
 import AuthGate from "./components/AuthGate";
 import PromptAssistant from "./pages/PromptAssistant";
 import React, { Suspense } from "react";
-import GPTDetails from "./pages/GPTDetails";
+import { GPTDetails } from "./pages/GPTDetails";
 
 const GPTsPage = React.lazy(() => import("./pages/GPTs"));
 

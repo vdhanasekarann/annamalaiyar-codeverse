@@ -7,7 +7,18 @@ function GPTCard({ gpt, used, plan, onUsed }) {
   const limit = plan === "free" ? parseLimit(gpt.freeLimit) : Infinity;
   const locked = plan === "free" && used >= limit;
   const navigate = useNavigate();
-  const [reviews,setReviews]=React.useState([]);
+
+const [reviews,setReviews] = React.useState([]);
+
+  React.useEffect(()=>{
+    apiFetch(`/api/reviews/${gpt.id}`)
+      .then(r=>r.json())
+      .then(setReviews);
+  },[gpt.id]);
+
+function handleSearch(q){
+  navigate(`/gpts?q=${q}`);
+}
 
   const click = async () => {
     if (locked) return;
@@ -23,20 +34,19 @@ function GPTCard({ gpt, used, plan, onUsed }) {
     if (onUsed) {
       await onUsed();
     }
-
-    navigate(`/gpt/${gpt.id}`);
+   
   };
 
   return (
   <div
     onClick={click}
     className="relative rounded-2xl p-6
- backdrop-blur-xl
- bg-white/5
- border border-white/10
- hover:border-indigo-500
- hover:scale-105
- transition-all duration-300">
+      backdrop-blur-xl
+      bg-white/5
+      border border-white/10
+      hover:border-indigo-500
+      hover:scale-105
+      transition-all duration-300">
     {/* IMAGE CONTAINER */}
     <div className="h-44 bg-zinc-800 overflow-hidden">
   <img
