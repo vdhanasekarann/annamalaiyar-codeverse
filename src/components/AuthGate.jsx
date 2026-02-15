@@ -15,13 +15,14 @@ export default function AuthGate({ children }) {
       })
       .then(() => setChecked(true))
       .catch(() => {
+        setChecked(true);
         if (location.pathname !== "/login") {
           navigate("/login");
         }
       });
   }, []);
 
-  if (!checked) return <div className="p-10 text-white">Checking login...</div>;
+  if (!checked) return <LoaderScreen />;
 
   return children;
 }

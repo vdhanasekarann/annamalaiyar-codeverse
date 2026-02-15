@@ -53,10 +53,10 @@ export default function Login() {
         <div className="absolute inset-0 bg-gradient-to-br from-orange-400 via-indigo-500 to-black opacity-90" />
         <div className="relative z-10 text-white p-16 flex flex-col justify-center">
           <h1 className="text-4xl font-bold mb-4">AI CodeVerse OS</h1>
-          <p className="text-xl mb-6">Create. Build. Launch.
+          <p className="text-xl mb-6">Create. Build. Launch.<br/>
             The AI platform trusted by creators, founders, learners & innovators.</p>
           <p className="opacity-80">
-            Join 100,000+ minds already building the future.
+            Join 100,000+ minds already building the future.<br/>
             Start free. Upgrade anytime.
           </p>
         </div>

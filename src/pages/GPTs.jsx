@@ -3,11 +3,17 @@ import GPTCard from "../components/GPTCard";
 import { useUsage } from "../hooks/useUsage";
 import { useEffect, useState } from "react";
 import { apiFetch } from "../lib/apiFetch";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, Navigate } from "react-router-dom";
 
 export default function GPTsPage() {
   const [user, setUser] = useState(null);
   const [active,setActive]=useState("All");
+  const navigate = useNavigate();
+  const [query,setQuery]=useState("");
+
+  function handleSearch(q){
+  navigate(`/gpts?q=${q}`);
+}
 
 const filtered = active==="All"
  ? GPTS
@@ -18,8 +24,6 @@ const filtered = active==="All"
       .then(r => r.json())
       .then(setUser);
   }, []);
-
-  navigate(`/gpts?q=${query}`)
 
   const { usage, refresh } = useUsage(user?.email);
   const categories = [...new Set(GPTS.map(g => g.category))];

@@ -45,7 +45,7 @@ export default function TopBar({ onOpenMobileMenu }) {
       </Link>
     </div>
 {/* CENTER – HIDDEN ON MOBILE */}
-    <div className="hidden md:flex flex-1 justify-center px-6">
+    <div className="hidden md:flex flex-1 justify-center px-2">
   <input
    value={query}
    onChange={e=>setQuery(e.target.value)}

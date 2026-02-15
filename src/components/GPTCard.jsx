@@ -34,7 +34,7 @@ function handleSearch(q){
     if (onUsed) {
       await onUsed();
     }
-   
+   window.open(gpt.link,"_blank");
   };
 
   return (
@@ -44,11 +44,11 @@ function handleSearch(q){
       backdrop-blur-xl
       bg-white/5
       border border-white/10
-      hover:border-indigo-500
+      hover:border-yellow-500
       hover:scale-105
       transition-all duration-300">
     {/* IMAGE CONTAINER */}
-    <div className="h-44 bg-zinc-800 overflow-hidden">
+    <div className="h-36 md:h-44 bg-zinc-800 overflow-hidden">
   <img
     src={gpt.logo}
     alt={gpt.title}
@@ -63,25 +63,25 @@ function handleSearch(q){
         {gpt.title}
       </h3>
 
-      <p className="text-xs text-zinc-400 mt-1 line-clamp-2 flex-1">
+      <p className="text-xs text-zinc-400 mt-1 line-clamp-2 md:line-clamp-3">
         {gpt.description}
       </p>
 
       <div className="mt-6 space-y-3">
- {reviews.map((r,i)=>(
-   <div key={i} className="bg-zinc-900 p-3 rounded">
-     ⭐ {r.rating}/5
-     <p className="text-sm opacity-80">{r.review}</p>
-   </div>
- ))}
-</div>
+      {reviews.map((r,i)=>(
+        <div key={gpt.id} className="bg-zinc-900 p-3 rounded">
+          ⭐ {r.rating}/5
+          <p className="text-sm opacity-80">{r.review}</p>
+        </div>
+      ))}
+      </div>
 
       <Link
-  to={`/gpt/${gpt.id}`}
-  className="text-xs text-indigo-400 mt-2"
->
-  View Reviews
-</Link>
+        to={`/gpt/${gpt.id}`}
+        className="text-xs text-indigo-400 mt-2"
+      >
+        View Reviews
+      </Link>
 
       <div className="text-xs mt-2 text-zinc-300">
         {locked
