@@ -235,7 +235,7 @@ export const GPTS = [
     title: "3D Diagram Generator & Visual Explainer AI",
     logo: "/logos/3D-Diagram-Generator.jpg",
     description: "Create clear 3D diagrams instantly 🧊 Generate educational 3D diagrams and visual explanations for science, engineering, anatomy, architecture, math, workflows, and systems. Ideal for learning, teaching, and presentations—without complex software.",
-    category: "Reaserch & Analysis",
+    category: "Research & Analysis",
     freeLimit: "3",
     unit: "diagrams/day",
     link: "https://chatgpt.com/g/g-695a9a0e44c8819186b1d594785a11b5-3d-diagram-generator-visual-explainer-ai"
