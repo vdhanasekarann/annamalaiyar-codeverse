@@ -1,6 +1,6 @@
 import { requireAuth } from "../utils/auth";
 import { apiFetch } from "../lib/apiFetch";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 
 export default function PremiumPage() {
   return (

@@ -8,6 +8,7 @@ import { API_BASE } from "../config/api";
 import { getDeviceId } from "../utils/device";
 import { apiFetch } from "../lib/apiFetch";
 import { useUsage } from "../hooks/useUsage";
+import { useTranslation } from "react-i18next";
 
 export default function DashboardPage() {
   const [user, setUser] = useState(null);
@@ -16,8 +17,9 @@ export default function DashboardPage() {
   const { usage, refresh } = useUsage(user?.email);
   const [devices, setDevices] = useState([]);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
-function handleSearch(q){
+  function handleSearch(q){
   navigate(`/gpts?q=${q}`);
 }
 
@@ -110,6 +112,7 @@ if (!user) {
         backgroundAttachment: "fixed",
       }}
     >
+      <h1>{t("welcome")}</h1>
       <div className="relative inline-block z-[100]">
   <button onClick={()=>setOpen(!open)} className="px-4 py-2 bg-zinc-800 rounded-lg text-sm hover:bg-zinc-700 shadow">
     AI Tools ▾

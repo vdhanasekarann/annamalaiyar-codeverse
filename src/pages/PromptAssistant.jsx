@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 
 const tones = ["Professional", "Friendly", "Persuasive", "Creative", "Technical"];
 const languages = ["English", "Tamil", "Hindi", "Malayalam", "Kannada", "Telugu"];

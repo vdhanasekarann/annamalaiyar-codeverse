@@ -12,6 +12,7 @@ import AuthGate from "./components/AuthGate";
 import PromptAssistant from "./pages/PromptAssistant";
 import React, { Suspense } from "react";
 import GPTDetails from "./pages/GPTDetails";
+import Terms from "./pages/Terms";
 
 const GPTsPage = React.lazy(() => import("./pages/GPTs"));
 
@@ -44,6 +45,7 @@ export default function App() {
           />
           <Route path="/gpt/:id" element={<GPTDetails />} />
          <Route path="/premium" element={<Premium />} />
+          <Route path="/terms" element={<Terms />} />
 
           <Route
             path="/admin/users"

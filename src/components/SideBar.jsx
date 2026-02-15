@@ -1,7 +1,7 @@
 // src/components/SideBar.jsx
 import React from "react";
 import { useEffect, useState } from "react";
-import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useNavigate, Link, useLocation, Navigate } from "react-router-dom";
 import { apiFetch } from "../lib/apiFetch";
 
 export default function SideBar({ mobile, onNavigate }) {
@@ -91,6 +91,7 @@ export default function SideBar({ mobile, onNavigate }) {
       {[
         { path: "/dashboard", label: "Home", icon: "🏠" },
         { path: "/gpts", label: "GPT Apps", icon: "🤖" },
+        { path: "/terms", label: "Terms", icon: "📄" },
         { path: "/premium", label: "Premium", icon: "💎" },
       ].map((item) => (
         <button

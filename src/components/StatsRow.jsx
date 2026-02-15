@@ -4,12 +4,10 @@ export default function StatsRow({usage}){
 
  return(
   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-
    <Card title="Today Usage" value={total}/>
    <Card title="Apps Used" value={Object.keys(usage).length}/>
    <Card title="Plan" value="Free"/>
    <Card title="Status" value="Active"/>
-
   </div>
  )
 }
