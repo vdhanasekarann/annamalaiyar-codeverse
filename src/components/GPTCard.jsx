@@ -34,12 +34,12 @@ function handleSearch(q){
     body: JSON.stringify({ gpt: gpt.id }),
   });
 
-  // ⭐ SAVE RECENT
+  // SAVE RECENT
   const prev = JSON.parse(localStorage.getItem("recentGPTs") || "[]");
 
   localStorage.setItem(
     "recentGPTs",
-    JSON.stringify([gpt.id, ...prev.filter(id=>id!==gpt.id)].slice(0,4))
+    JSON.stringify([gpt.id, ...prev.filter(id => id !== gpt.id)].slice(0,4))
   );
 
   if (onUsed) await onUsed();

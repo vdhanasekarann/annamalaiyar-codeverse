@@ -25,6 +25,9 @@ export default function DashboardPage() {
   navigate(`/gpts?q=${q}`);
 }
 
+const recentIds = JSON.parse(localStorage.getItem("recentGPTs") || "[]");
+const recentGPTs = GPTS.filter(g => recentIds.includes(g.id));
+
 useEffect(()=>{
   const ids = JSON.parse(localStorage.getItem("recentGPTs") || "[]");
   setRecent(GPTS.filter(g=>ids.includes(g.id)));
@@ -195,23 +198,19 @@ if (!user) {
 
     <UpgradeBanner show={hasAnyLimitHit} />
 
-    {recent.length > 0 && (
+    {recentGPTs.length > 0 && (
   <>
-    <h2 className="text-lg font-semibold mb-6">Recently Visited</h2>
+    <h2 className="text-lg font-semibold mb-6">Recently Used</h2>
 
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {recent.map(g=>(
-        <GPTCard
-          key={g.id}
-          gpt={g}
-          used={usage[g.id] || 0}
-          plan={user.plan}
-          onUsed={refresh}
-        />
-      ))}
-    </div>
+    <AppGrid
+      gpts={recentGPTs}
+      plan={user.plan}
+      usage={usage}
+      onUsed={refresh}
+    />
   </>
 )}
+
 
     <h2 className="text-lg font-semibold mt-12 mb-6">All GPT Apps</h2>
 
