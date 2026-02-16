@@ -1,14 +1,37 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, Outlet, Navigate, useNavigate } from "react-router-dom";
 import SideBar from "./SideBar";
 import TopBar from "./TopBar";
-import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import MobileDrawer from "./MobileDrawer";
 
 export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user } = useAuth();
+  const [bg, setBg] = useState(null);
 
   if (location.pathname === "/login") return null;
+
+  useEffect(() => {
+    function loadBg() {
+      try {
+        if (!user) return setBg(null);
+        const key = `bg_${user.email}`;
+        const val = localStorage.getItem(key);
+        setBg(val || null);
+      } catch (e) {
+        setBg(null);
+      }
+    }
+    loadBg();
+    const onChange = () => loadBg();
+    window.addEventListener("bgChange", onChange);
+    window.addEventListener("storage", onChange);
+    return () => {
+      window.removeEventListener("bgChange", onChange);
+      window.removeEventListener("storage", onChange);
+    };
+  }, [user]);
 
   return (
     <div className="flex h-screen overflow-hidden bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-[#050816] to-[#0b0b0b]">
@@ -31,7 +54,7 @@ export default function Layout() {
             <div
               className="glass p-6 rounded-3xl min-h-screen"
               style={{
-                backgroundImage: "url('/bg-galaxy.jpg')",
+                backgroundImage: bg ? `url('${bg}')` : "url('/bg-galaxy.jpg')",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}

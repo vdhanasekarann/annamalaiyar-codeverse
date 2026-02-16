@@ -66,3 +66,50 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* Card entrance animation used by AppGrid */
+.card-entrance {
+  opacity: 0;
+  transform: translateY(18px) scale(0.98);
+  animation: cardIn 420ms cubic-bezier(.16,.84,.36,1) forwards;
+}
+
+@keyframes cardIn {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* GPTCard glossy gold accent helper */
+.gptcard-gloss {
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.gptcard-gloss:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.25));
+  mix-blend-mode: overlay;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-entrance { animation: none; transform: none; opacity: 1; }
+}
+
+/* Gold glossy card theme */
+.gptcard-gold {
+  border-radius: 20px;
+  border: 1px solid rgba(255,215,0,0.08);
+  background: linear-gradient(180deg, #08060a 0%, #0f0d12 60%);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.6), 0 1px 0 rgba(255,215,0,0.02) inset;
+  transition: transform 280ms cubic-bezier(.16,.84,.36,1), box-shadow 280ms;
+  transform-style: preserve-3d;
+}
+.gptcard-gold:hover { transform: translateY(-8px) rotateX(6deg) rotateY(-6deg) scale(1.02); box-shadow: 0 30px 60px rgba(0,0,0,0.65); }
+.gptcard-gold .gpt-title { background: linear-gradient(90deg,#ffd86b,#ffc700); -webkit-background-clip: text; color: transparent; }
+.gptcard-gold .gpt-badge { position: absolute; top: 12px; right: 12px; background: linear-gradient(90deg,#b68a00,#ffd86b); color:#111; padding:4px 8px; border-radius:12px; font-weight:600; font-size:12px; }
+

@@ -55,14 +55,12 @@ function GPTCard({ gpt, used, plan, onUsed }) {
         if (e.target.tagName === "A") return;
         click();
       }}
-      className="relative rounded-3xl p-6 transform-gpu will-change-transform perspective-1000 hover:scale-105 transition-all duration-300"
+      className="relative gptcard-gold gptcard-gloss p-6 transform-gpu will-change-transform perspective-1000"
       style={{
-        boxShadow: "0 20px 40px rgba(2,6,23,0.6)",
-        background: "linear-gradient(180deg, rgba(255,255,255,0.03), rgba(15,11,30,0.25))",
-        border: "1px solid rgba(255,255,255,0.06)",
-        backdropFilter: "blur(12px)",
+        minHeight: 280,
       }}
     >
+      <div className="gpt-badge">{gpt.category || 'GPT'}</div>
       <div className="pointer-events-none absolute inset-0 rounded-3xl overflow-hidden">
         <div className="absolute -top-10 -left-20 w-60 h-40 bg-gradient-to-br from-pink-500/30 via-indigo-400/20 to-transparent opacity-40 blur-2xl transform rotate-12"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-white/2 to-transparent mix-blend-screen opacity-6"></div>
@@ -76,9 +74,9 @@ function GPTCard({ gpt, used, plan, onUsed }) {
 
       {/* CONTENT */}
       <div className="p-4 flex flex-col min-h-[140px]">
-        <h3 className="text-sm font-semibold text-white line-clamp-2 drop-shadow-md">{t(gpt.title) || gpt.title}</h3>
+        <h3 className="text-sm font-semibold gpt-title line-clamp-2 drop-shadow-md">{t(gpt.title) || gpt.title}</h3>
 
-        <p className="text-sm text-zinc-300 mt-2 line-clamp-3">{t(gpt.description) || gpt.description}</p>
+        <p className="text-sm text-zinc-200/80 mt-2 line-clamp-4">{t(gpt.description) || gpt.description}</p>
 
         <div className="mt-6 space-y-3">
           {reviews.map((r, i) => (
@@ -89,7 +87,7 @@ function GPTCard({ gpt, used, plan, onUsed }) {
           ))}
         </div>
 
-        <Link to={`/gpt/${gpt.id}`} className="text-xs text-indigo-400 mt-2">
+        <Link to={`/gpt/${gpt.id}`} className="text-xs text-yellow-500 mt-2">
           {t("viewReviews") || "View Reviews"}
         </Link>
 

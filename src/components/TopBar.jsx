@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { API_BASE } from "../config/api";
 import { apiFetch } from "../lib/apiFetch";
@@ -12,12 +12,21 @@ export default function TopBar({ onOpenMobileMenu }) {
   const { user } = useAuth();
   const { query, setQuery } = useSearch();
   const [mobileSearchOpen, setMobileSearchOpen] = React.useState(false);
+  const inputRef = useRef(null);
 
   const logout = async () => {
     await apiFetch("/api/auth/logout", { method: "POST" });
     navigate("/login");
   };
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  useEffect(() => {
+    if (mobileSearchOpen && inputRef.current) {
+      try {
+        inputRef.current.focus();
+      } catch (e) {}
+    }
+  }, [mobileSearchOpen]);
 
   return (
     <header className="glass flex items-center justify-between px-4 h-14 border-b border-white/10">
@@ -67,12 +76,12 @@ export default function TopBar({ onOpenMobileMenu }) {
       <div />
 
       {mobileSearchOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 px-4">
+        <div className="fixed inset-0 z-60 flex items-start justify-center pt-24 px-4">
           <div className="w-full max-w-md">
             <div className="bg-zinc-900/90 p-4 rounded-xl backdrop-blur border border-white/10">
               <div className="flex gap-2">
                 <input
-                  autoFocus
+                  ref={inputRef}
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={(e) => {

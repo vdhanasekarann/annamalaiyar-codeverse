@@ -15,7 +15,7 @@ export default function SideBar({ mobile, onNavigate }) {
   const { user } = useAuth();
   const { t } = useTranslation();
   const [avatar, setAvatar] = useState(null);
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(!!mobile);
   const blobRef = useRef(null);
   const blobPathRef = useRef(null);
   const hamburgerRef = useRef(null);
@@ -40,6 +40,10 @@ export default function SideBar({ mobile, onNavigate }) {
     const blob = blobRef.current;
     const blobPath = blobPathRef.current;
     const hamburger = hamburgerRef.current;
+    // Respect reduced motion and low-memory devices
+    const prefersReduced = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const lowMemory = typeof navigator !== 'undefined' && navigator.deviceMemory && navigator.deviceMemory < 1.5;
+    if (prefersReduced || lowMemory) return;
     if (!blob || !blobPath) return;
 
     let height = window.innerHeight;
@@ -129,8 +133,9 @@ export default function SideBar({ mobile, onNavigate }) {
     
   return (
     <aside
-      onMouseEnter={() => setExpanded(true)}
-      onMouseLeave={() => setExpanded(false)}
+      {...(!mobile
+        ? { onMouseEnter: () => setExpanded(true), onMouseLeave: () => setExpanded(false) }
+        : {})}
       className={`h-screen relative overflow-hidden text-white flex flex-col before:absolute before:inset-0 before:bg-gradient-to-br before:from-indigo-600/10 before:via-purple-600/5 before:to-transparent before:pointer-events-none backdrop-blur-2xl bg-white/3 border-r border-white/6 shadow-[0_8px_48px_rgba(99,102,241,0.15)] transition-all duration-300 ${
         expanded ? "w-[240px]" : "w-16"
       }`}
