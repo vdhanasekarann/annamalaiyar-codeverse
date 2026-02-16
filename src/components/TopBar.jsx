@@ -11,7 +11,7 @@ export default function TopBar({ onOpenMobileMenu }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { query, setQuery } = useSearch();
-  const [aiOpen, setAiOpen] = React.useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = React.useState(false);
 
   const logout = async () => {
     await apiFetch("/api/auth/logout", { method: "POST" });
@@ -51,10 +51,10 @@ export default function TopBar({ onOpenMobileMenu }) {
           />
         </div>
 
-        {/* Mobile search icon (opens gpts with query param) */}
+        {/* Mobile search icon (opens small overlay input) */}
         <div className="md:hidden flex items-center">
           <button
-            onClick={() => navigate(`/gpts?q=${query}`)}
+            onClick={() => setMobileSearchOpen(true)}
             className="p-2 rounded-full bg-zinc-800"
             aria-label="Search"
           >
@@ -63,31 +63,33 @@ export default function TopBar({ onOpenMobileMenu }) {
         </div>
       </div>
 
-      {/* AI TOOLS */}
-      <div className="relative">
-        <button
-          onClick={() => setAiOpen((s) => !s)}
-          className="hidden md:inline-block px-3 py-1 rounded bg-zinc-800 text-xs mr-3"
-        >
-          AI Tools ▾
-        </button>
-        {aiOpen && (
-          <div className="absolute right-0 mt-2 w-44 bg-black/70 backdrop-blur rounded-xl border border-white/10">
-            {[
-              ["ChatGPT","https://chat.openai.com"],
-              ["Claude","https://claude.ai"],
-              ["Gemini","https://gemini.google.com"],
-              ["Copilot","https://copilot.microsoft.com"],
-              ["CooklyHub","https://cooklyhub.com"],
-              ["CA-sentinel","https://ca.kannizconites.com"]
-            ].map(([name, url]) => (
-              <a key={name} href={url} target="_blank" className="block px-4 py-2 hover:bg-indigo-600">
-                {name}
-              </a>
-            ))}
+      {/* AI Tools removed from TopBar (moved/removed per UI changes) */}
+      <div />
+
+      {mobileSearchOpen && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 px-4">
+          <div className="w-full max-w-md">
+            <div className="bg-zinc-900/90 p-4 rounded-xl backdrop-blur border border-white/10">
+              <div className="flex gap-2">
+                <input
+                  autoFocus
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      setMobileSearchOpen(false);
+                      navigate(`/gpts?q=${query}`);
+                    }
+                  }}
+                  placeholder={t("searchPlaceholder") || "Search GPTs..."}
+                  className="w-full bg-transparent border border-white/10 rounded px-3 py-2"
+                />
+                <button onClick={() => setMobileSearchOpen(false)} className="px-3 py-2">Close</button>
+              </div>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* RIGHT */}
       {user && (

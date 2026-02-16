@@ -15,7 +15,8 @@ export default function GPTsPage() {
   const location = useLocation();
 
   const filtered = GPTS.filter((g) =>
-    g.title.toLowerCase().includes((query || "").toLowerCase())
+    g.title.toLowerCase().includes((query || "").toLowerCase()) &&
+    (active === "All" || g.category === active)
   );
 
   useEffect(() => {

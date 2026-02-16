@@ -114,46 +114,8 @@ useEffect(() => {
   }
 
   return (
-        <div
-      className="glass min-h-screen bg-[#0f0f0f] text-white p-6"
-      style={{
-        backgroundImage: "url('/bg-galaxy.jpg')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundAttachment: "fixed",
-      }}
-    >
-      <div className="absolute top-6 right-6 z-[60]">
-        <div className="relative">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpen((o) => !o);
-            }}
-            className="px-4 py-2 bg-zinc-800 rounded-lg text-sm hover:bg-zinc-700 shadow"
-          >
-            {t("aiTools") || "AI Tools ▾"}
-          </button>
-          {open && (
-            <div className="absolute right-0 mt-2 w-44 bg-black/70 backdrop-blur rounded-xl border border-white/10">
-              {[
-                ["ChatGPT", "https://chat.openai.com"],
-                ["Claude", "https://claude.ai"],
-                ["Gemini", "https://gemini.google.com"],
-                ["Copilot", "https://copilot.microsoft.com"],
-                ["CooklyHub", "https://cooklyhub.com"],
-                ["CA-sentinel", "https://ca.kannizconites.com"],
-              ].map(([name, url]) => (
-                <a key={name} href={url} target="_blank" className="block px-4 py-2 hover:bg-indigo-600">
-                  {name}
-                </a>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-       <WelcomeBanner user={user} />
+    <>
+      <WelcomeBanner user={user} />
        <h2 className="text-lg font-semibold mt-12 mb-4">{t("activeDevices") || "Active Devices"}</h2>
 
 <div className="grid gap-4">
@@ -209,6 +171,6 @@ useEffect(() => {
       </p>
     </div>
 
-  </div>
-);
+  </>
+  );
 }

@@ -55,18 +55,30 @@ function GPTCard({ gpt, used, plan, onUsed }) {
         if (e.target.tagName === "A") return;
         click();
       }}
-      className="relative rounded-2xl p-6 backdrop-blur-xl bg-gradient-to-br from-indigo-700/8 via-purple-600/6 to-black/4 border border-white/6 hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-300"
+      className="relative rounded-3xl p-6 transform-gpu will-change-transform perspective-1000 hover:scale-105 transition-all duration-300"
+      style={{
+        boxShadow: "0 20px 40px rgba(2,6,23,0.6)",
+        background: "linear-gradient(180deg, rgba(255,255,255,0.03), rgba(15,11,30,0.25))",
+        border: "1px solid rgba(255,255,255,0.06)",
+        backdropFilter: "blur(12px)",
+      }}
     >
+      <div className="pointer-events-none absolute inset-0 rounded-3xl overflow-hidden">
+        <div className="absolute -top-10 -left-20 w-60 h-40 bg-gradient-to-br from-pink-500/30 via-indigo-400/20 to-transparent opacity-40 blur-2xl transform rotate-12"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-white/2 to-transparent mix-blend-screen opacity-6"></div>
+      </div>
       {/* IMAGE CONTAINER */}
-      <div className="h-36 md:h-44 bg-gradient-to-br from-indigo-800/10 via-purple-700/10 to-transparent overflow-hidden flex items-center justify-center p-4">
-        <img src={gpt.logo} alt={gpt.title} loading="lazy" className="max-h-full max-w-full object-contain rounded-md" />
+      <div className="h-44 md:h-52 rounded-xl overflow-hidden flex items-center justify-center p-4 bg-gradient-to-br from-indigo-900/10 via-purple-800/10 to-transparent border border-white/3">
+        <div className="w-full h-full flex items-center justify-center">
+          <img src={gpt.logo} alt={gpt.title} loading="lazy" className="max-h-28 max-w-28 object-contain rounded-md bg-white/6 p-2" />
+        </div>
       </div>
 
       {/* CONTENT */}
-      <div className="p-4 flex flex-col min-h-[120px]">
-        <h3 className="text-sm font-semibold text-white line-clamp-2">{t(gpt.title) || gpt.title}</h3>
+      <div className="p-4 flex flex-col min-h-[140px]">
+        <h3 className="text-sm font-semibold text-white line-clamp-2 drop-shadow-md">{t(gpt.title) || gpt.title}</h3>
 
-        <p className="text-xs text-zinc-400 mt-1 line-clamp-2 md:line-clamp-3">{t(gpt.description) || gpt.description}</p>
+        <p className="text-sm text-zinc-300 mt-2 line-clamp-3">{t(gpt.description) || gpt.description}</p>
 
         <div className="mt-6 space-y-3">
           {reviews.map((r, i) => (
