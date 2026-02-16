@@ -9,6 +9,10 @@ function GPTCard({ gpt, used, plan, onUsed }) {
   const navigate = useNavigate();
 
 const [reviews,setReviews] = React.useState([]);
+const avg =
+reviews.length
+? (reviews.reduce((a,b)=>a+b.rating,0)/reviews.length).toFixed(1)
+: null;
 
   React.useEffect(()=>{
     apiFetch(`/api/reviews/${gpt.id}`)
@@ -30,6 +34,10 @@ function handleSearch(q){
       body: JSON.stringify({ gpt: gpt.id }),
     });
 
+    const recent = JSON.parse(localStorage.getItem("recent")||"[]");
+const updated=[gpt.id,...recent.filter(x=>x!==gpt.id)].slice(0,6);
+localStorage.setItem("recent",JSON.stringify(updated));
+
     // ✅ SAFE CALL
     if (onUsed) {
       await onUsed();
@@ -39,7 +47,10 @@ function handleSearch(q){
 
   return (
   <div
-    onClick={click}
+    onClick={(e)=>{
+ if(e.target.tagName==="A") return;
+ click();
+}}
     className="relative rounded-2xl p-6
       backdrop-blur-xl
       bg-white/5
@@ -58,7 +69,7 @@ function handleSearch(q){
 </div>
 
     {/* CONTENT */}
-    <div className="p-4 flex flex-col h-[130px]">
+    <div className="p-4 flex flex-col min-h-[120px]">
       <h3 className="text-sm font-semibold text-white line-clamp-2">
         {gpt.title}
       </h3>
@@ -66,10 +77,10 @@ function handleSearch(q){
       <p className="text-xs text-zinc-400 mt-1 line-clamp-2 md:line-clamp-3">
         {gpt.description}
       </p>
-
+      
       <div className="mt-6 space-y-3">
       {reviews.map((r,i)=>(
-        <div key={r.email + i} className="bg-zinc-900 p-3 rounded">
+        <div key={r.id || `${gpt.id}-${i}`} className="bg-zinc-900 p-3 rounded">
           ⭐ {r.rating}/5
           <p className="text-sm opacity-80">{r.review}</p>
         </div>

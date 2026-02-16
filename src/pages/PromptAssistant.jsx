@@ -41,7 +41,7 @@ Make the output high-quality, well-structured and optimized.
   };
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] text-white p-6">
+    <div className="glass min-h-screen bg-[#0f0f0f] text-white p-6">
       <div className="max-w-2xl mx-auto bg-zinc-900 rounded-xl p-6 shadow-xl">
         <Link
   to="/dashboard"

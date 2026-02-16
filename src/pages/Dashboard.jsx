@@ -11,7 +11,6 @@ import { useUsage } from "../hooks/useUsage";
 import { useTranslation } from "react-i18next";
 
 export default function DashboardPage() {
-  const [user, setUser] = useState(null);
   const [localUsage, setUsage] = useState({});
   const [loading, setLoading] = useState(true);
   const { usage, refresh } = useUsage(user?.email);
@@ -19,6 +18,7 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [open,setOpen] = useState(false);
+  const {user}=useAuth();
 
   function handleSearch(q){
   navigate(`/gpts?q=${q}`);
@@ -111,7 +111,7 @@ if (!user) {
 
   return (
         <div
-      className="min-h-screen bg-[#0f0f0f] text-white p-6"
+      className="glass min-h-screen bg-[#0f0f0f] text-white p-6"
       style={{
         backgroundImage: "url('/bg-galaxy.jpg')",
         backgroundSize: "cover",
@@ -119,18 +119,19 @@ if (!user) {
         backgroundAttachment: "fixed",
       }}
     >
-      <h1>{t("welcome")}</h1>
-      <div className="absolute top-4 right-6 z-[999]">
-  <button onClick={()=>setOpen(!open)} className="px-4 py-2 bg-zinc-800 rounded-lg text-sm hover:bg-zinc-700 shadow">
+      <div className="relative top-4 right-6 z-[999]">
+  <button onClick={()=>setOpen(o=>!o)} className="px-4 py-2 bg-zinc-800 rounded-lg text-sm hover:bg-zinc-700 shadow">
     AI Tools ▾
   </button>
 {open && (
-  <div className="absolute left-0 mt-2 w-48 rounded-lg bg-zinc-900 border border-white/10 shadow-xl">
+  <div className="absolute right-0 mt-2 w-44 bg-black/70 backdrop-blur rounded-xl border border-white/10">
     {[
       ["ChatGPT","https://chat.openai.com"],
       ["Claude","https://claude.ai"],
       ["Gemini","https://gemini.google.com"],
-      ["Copilot","https://copilot.microsoft.com"]
+      ["Copilot","https://copilot.microsoft.com"],
+      ["CooklyHub","https://cooklyhub.com"],
+      ["CA-sentinel","https://ca.kannizconites.com"]
     ].map(([name,url])=>(
       <a
         key={name}
@@ -147,7 +148,7 @@ if (!user) {
 
        <WelcomeBanner user={user} />
        <h2 className="text-lg font-semibold mt-12 mb-4">
-  Active Devices
+  {t("activeDevices")}
 </h2>
 
 <div className="grid gap-4">

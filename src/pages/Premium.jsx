@@ -81,7 +81,7 @@ function Plan({ title, price, planKey, highlight }) {
 
   return (
     <div
-  className={`relative rounded-2xl p-6
+  className={`glass relative rounded-2xl p-6
     bg-gradient-to-br from-zinc-900 to-black
     border border-white/10
     flex flex-col justify-between

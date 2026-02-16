@@ -9,7 +9,8 @@ import { LayoutDashboard, Sparkles, Crown, Users } from "lucide-react";
 export default function TopBar({ onOpenMobileMenu }) {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [query,setQuery]=useState("")
+  const {loading}=useAuth();
+  const {query,setQuery}=useSearch();
 
   useEffect(() => {
       apiFetch("/api/auth/me")
@@ -29,7 +30,7 @@ export default function TopBar({ onOpenMobileMenu }) {
   };
 
   return (
-  <header className="flex items-center justify-between px-4 h-14 border-b border-white/10 bg-[#0f0f0f]">
+  <header className="glass flex items-center justify-between px-4 h-14 border-b border-white/10 bg-[#0f0f0f]">
     
     {/* LEFT */}
     <div className="flex items-center gap-2">
