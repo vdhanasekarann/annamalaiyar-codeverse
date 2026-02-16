@@ -4,13 +4,14 @@ import { useUsage } from "../hooks/useUsage";
 import { useEffect, useState } from "react";
 import { apiFetch } from "../lib/apiFetch";
 import { Link, useNavigate, Navigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function GPTsPage() {
-  const [setUser] = useState(null);
+  const { user, setUser } = useAuth();
   const [active,setActive]=useState("All");
   const navigate = useNavigate();
   const [query,setQuery]=useState("");
-  const { user } = useAuth();
+  
 
   function handleSearch(q){
   navigate(`/gpts?q=${q}`);

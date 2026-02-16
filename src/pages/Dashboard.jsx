@@ -8,17 +8,19 @@ import { API_BASE } from "../config/api";
 import { getDeviceId } from "../utils/device";
 import { apiFetch } from "../lib/apiFetch";
 import { useUsage } from "../hooks/useUsage";
+import { useAuth } from "../context/AuthContext";
 import { useTranslation } from "react-i18next";
 
 export default function DashboardPage() {
   const [localUsage, setUsage] = useState({});
   const [loading, setLoading] = useState(true);
+  const { user, setUser } = useAuth();
   const { usage, refresh } = useUsage(user?.email);
   const [devices, setDevices] = useState([]);
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [open,setOpen] = useState(false);
-  const { user } = useAuth();
+  
   const [recent,setRecent] = useState([]);
 
   function handleSearch(q){

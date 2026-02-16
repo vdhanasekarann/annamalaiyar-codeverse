@@ -3,6 +3,9 @@ import React from "react";
 import { useEffect, useState } from "react";
 import { useNavigate, Link, useLocation, Navigate } from "react-router-dom";
 import { apiFetch } from "../lib/apiFetch";
+import { useAuth } from "../context/AuthContext";
+
+const linkClass = (isActive) => `px-3 py-2 rounded-xl transition ${isActive ? "bg-gradient-to-r from-indigo-500 to-purple-600 shadow" : "hover:bg-white/10"}`;
 
 
 export default function SideBar({ mobile, onNavigate }) {
