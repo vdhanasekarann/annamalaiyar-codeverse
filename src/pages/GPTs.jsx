@@ -15,12 +15,14 @@ export default function GPTsPage() {
   navigate(`/gpts?q=${q}`);
 }
 
-const filtered = active==="All"
- ? GPTS
- : GPTS.filter(g=>g.category===active);
+const filtered = GPTS.filter(g =>
+ g.title.toLowerCase().includes(query.toLowerCase())
+);
 
   useEffect(() => {
-    apiFetch("/api/auth/me")
+    const { user } = useAuth();
+    if (!user) return;
+    apiFetch("/api/user")
       .then(r => r.json())
       .then(setUser);
   }, []);

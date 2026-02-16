@@ -11,7 +11,7 @@ export default function AuthGate({ children }) {
 const [status, setStatus] = useState("checking");
 
 useEffect(() => {
-  apiFetch("/api/auth/me")
+  apiFetch("/api/auth/status")
     .then(r => r.ok ? r.json() : Promise.reject())
     .then(() => setStatus("ok"))
     .catch(() => setStatus("fail"));

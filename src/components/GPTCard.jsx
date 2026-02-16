@@ -42,7 +42,7 @@ localStorage.setItem("recent",JSON.stringify(updated));
     if (onUsed) {
       await onUsed();
     }
-   window.open(gpt.link,"_blank");
+   navigate(`/gpt/${gpt.id}`);
   };
 
   return (
@@ -57,6 +57,7 @@ localStorage.setItem("recent",JSON.stringify(updated));
       border border-white/10
       hover:border-indigo-500
       hover:scale-105
+      active:scale-95
       transition-all duration-300">
     {/* IMAGE CONTAINER */}
     <div className="h-36 md:h-44 bg-zinc-800 overflow-hidden">

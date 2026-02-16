@@ -46,7 +46,11 @@ useEffect(() => {
 
   async function load() {
   try {
-    const meRes = await apiFetch("/api/auth/me");
+    const { user } = useAuth();
+    const meRes = await apiFetch("/api/account/me", {
+      method: "GET",
+      credentials: "include"
+    });
 
     if (!meRes.ok) throw new Error("unauth");
 

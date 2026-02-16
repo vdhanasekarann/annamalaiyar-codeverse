@@ -13,10 +13,12 @@ export default function TopBar({ onOpenMobileMenu }) {
   const {query,setQuery}=useSearch();
 
   useEffect(() => {
-      apiFetch("/api/auth/me")
-      .then(r => (r.ok ? r.json() : null))
-      .then(setUser)
-      .catch(() => setUser(null));
+      const { user } = useAuth();
+      if (!user) return;
+      apiFetch("/api/user")
+        .then(r => (r.ok ? r.json() : null))
+        .then(setUser)
+        .catch(() => setUser(null));
   }, []);
 
   // ✅ FIX: await is now inside async function

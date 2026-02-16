@@ -6,6 +6,7 @@
 /* ===== GLOBAL RESET ===== */
 html, body, #root {
   height: 100%;
+  active:scale-95
 }
 
 body {

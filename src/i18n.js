@@ -3,7 +3,9 @@ import { initReactI18next } from "react-i18next";
 import { Navigate, Link } from "react-router-dom";
 
 const resources = {
-  en: { translation: { welcome: "Welcome" } },
+  en: { translation: { welcome:"Welcome",
+ devices:"Active Devices",
+ recent:"Recently Used" } },
   ta: { translation: { welcome: "வரவேற்கிறோம்" } },
   hi: { translation: { welcome: "स्वागत है" } },
   ml: { translation: { welcome: "സ്വാഗതം" } },
