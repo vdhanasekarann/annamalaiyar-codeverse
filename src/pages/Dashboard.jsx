@@ -18,11 +18,17 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [open,setOpen] = useState(false);
-  const {user}=useAuth();
+  const { user } = useAuth();
+  const [recent,setRecent] = useState([]);
 
   function handleSearch(q){
   navigate(`/gpts?q=${q}`);
 }
+
+useEffect(()=>{
+  const ids = JSON.parse(localStorage.getItem("recentGPTs") || "[]");
+  setRecent(GPTS.filter(g=>ids.includes(g.id)));
+},[]);
 
   const revokeDevice = async (deviceId) => {
   await apiFetch("/api/account/devices/revoke", {
@@ -36,9 +42,9 @@ export default function DashboardPage() {
 };
 
 useEffect(()=>{
-  const close = ()=>setOpen(false);
-  window.addEventListener("click",close);
-  return ()=>window.removeEventListener("click",close);
+ const close=()=>setOpen(false);
+ document.addEventListener("click",close);
+ return()=>document.removeEventListener("click",close);
 },[]);
 
 useEffect(() => {
@@ -46,8 +52,7 @@ useEffect(() => {
 
   async function load() {
   try {
-    const { user } = useAuth();
-    const meRes = await apiFetch("/api/account/me", {
+        const meRes = await apiFetch("/api/account/me", {
       method: "GET",
       credentials: "include"
     });
@@ -124,7 +129,10 @@ if (!user) {
       }}
     >
       <div className="relative top-4 right-6 z-[999]">
-  <button onClick={()=>setOpen(o=>!o)} className="px-4 py-2 bg-zinc-800 rounded-lg text-sm hover:bg-zinc-700 shadow">
+  <button onClick={e=>{
+ e.stopPropagation();
+ setOpen(o=>!o);
+}} className="px-4 py-2 bg-zinc-800 rounded-lg text-sm hover:bg-zinc-700 shadow">
     AI Tools ▾
   </button>
 {open && (
@@ -187,14 +195,23 @@ if (!user) {
 
     <UpgradeBanner show={hasAnyLimitHit} />
 
-    <h2 className="text-lg font-semibold mb-6">Continue Using</h2>
+    {recent.length > 0 && (
+  <>
+    <h2 className="text-lg font-semibold mb-6">Recently Visited</h2>
 
-    <AppGrid
-      plan={user.plan}
-      usage={usage}
-      onUsed={refresh}
-      limit={4} 
-    />
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {recent.map(g=>(
+        <GPTCard
+          key={g.id}
+          gpt={g}
+          used={usage[g.id] || 0}
+          plan={user.plan}
+          onUsed={refresh}
+        />
+      ))}
+    </div>
+  </>
+)}
 
     <h2 className="text-lg font-semibold mt-12 mb-6">All GPT Apps</h2>
 

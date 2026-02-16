@@ -25,25 +25,27 @@ function handleSearch(q){
 }
 
   const click = async () => {
-    if (locked) return;
+  if (locked) return;
 
-    await apiFetch("/api/usage", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ gpt: gpt.id }),
-    });
+  await apiFetch("/api/usage", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ gpt: gpt.id }),
+  });
 
-    const recent = JSON.parse(localStorage.getItem("recent")||"[]");
-const updated=[gpt.id,...recent.filter(x=>x!==gpt.id)].slice(0,6);
-localStorage.setItem("recent",JSON.stringify(updated));
+  // ⭐ SAVE RECENT
+  const prev = JSON.parse(localStorage.getItem("recentGPTs") || "[]");
 
-    // ✅ SAFE CALL
-    if (onUsed) {
-      await onUsed();
-    }
-   navigate(`/gpt/${gpt.id}`);
-  };
+  localStorage.setItem(
+    "recentGPTs",
+    JSON.stringify([gpt.id, ...prev.filter(id=>id!==gpt.id)].slice(0,4))
+  );
+
+  if (onUsed) await onUsed();
+
+  window.open(gpt.link, "_blank");
+};
 
   return (
   <div

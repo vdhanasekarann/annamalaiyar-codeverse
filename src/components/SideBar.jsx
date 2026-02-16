@@ -22,8 +22,8 @@ export default function SideBar({ mobile, onNavigate }) {
     { path:"/premium", label:"Premium", icon:"💎" }
   ];
 
-  {role === "admin" && (
-        <>
+  {user?.role === "admin" && (
+  <>
           <div className="border-t border-white/10 my-2" />
 
           <button

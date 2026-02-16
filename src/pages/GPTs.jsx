@@ -6,10 +6,11 @@ import { apiFetch } from "../lib/apiFetch";
 import { Link, useNavigate, Navigate } from "react-router-dom";
 
 export default function GPTsPage() {
-  const [user, setUser] = useState(null);
+  const [setUser] = useState(null);
   const [active,setActive]=useState("All");
   const navigate = useNavigate();
   const [query,setQuery]=useState("");
+  const { user } = useAuth();
 
   function handleSearch(q){
   navigate(`/gpts?q=${q}`);
@@ -20,7 +21,7 @@ const filtered = GPTS.filter(g =>
 );
 
   useEffect(() => {
-    const { user } = useAuth();
+    
     if (!user) return;
     apiFetch("/api/user")
       .then(r => r.json())
