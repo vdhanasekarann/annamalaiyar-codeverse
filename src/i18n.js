@@ -7,6 +7,12 @@ const resources = {
     translation: {
       welcome: "Welcome",
       devices: "Active Devices",
+      activeDevices: "Active Devices",
+      aiTools: "AI Tools ▾",
+      revenue: "Revenue",
+      users: "Users",
+      aiInsight: "AI Insight",
+      aiInsightText: "You are most active in Education category apps. Try more Lifestyle GPTs to balance your usage.",
       recent: "Recently Used",
       home: "Home",
       gptApps: "GPT Apps",

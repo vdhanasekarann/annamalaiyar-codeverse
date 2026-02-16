@@ -1,6 +1,8 @@
 // src/api/chatClient.js
+import { apiFetch } from "../lib/apiFetch";
+
 export async function sendMessage(history) {
-  const res = await fetch("/api/chat", {
+  const res = await apiFetch("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ history }),

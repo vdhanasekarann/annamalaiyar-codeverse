@@ -1,9 +1,7 @@
-import { API_BASE } from "../config/api";
+import { apiFetch } from "../lib/apiFetch";
 
 export async function requireAuth(role) {
-  const res = await fetch(`${API_BASE}/api/auth/me`, {
-    credentials: "include",
-  });
+  const res = await apiFetch("/api/auth/me", { credentials: "include" });
 
   if (!res.ok) {
     window.location.href = "/login";

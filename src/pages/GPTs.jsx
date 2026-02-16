@@ -19,10 +19,7 @@ export default function GPTsPage() {
   );
 
   useEffect(() => {
-    if (!user) return;
-    apiFetch("/api/user")
-      .then((r) => r.json())
-      .then(setUser);
+    // No server `/api/user` endpoint in this app; rely on AuthProvider's `user`
   }, [user, setUser]);
 
   // Sync query param to global search context so direct links work

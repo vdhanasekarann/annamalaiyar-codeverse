@@ -1,6 +1,7 @@
 // src/components/EnquiryForm.jsx
 import { useState } from "react";
 import { Navigate, Link } from "react-router-dom";
+import { apiFetch } from "../lib/apiFetch";
 
 export default function EnquiryForm() {
   const [loading, setLoading] = useState(false);
@@ -25,7 +26,7 @@ export default function EnquiryForm() {
     }
 
     try {
-      const resp = await fetch("/api/enquiry", {
+      const resp = await apiFetch("/api/enquiry", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

@@ -14,6 +14,7 @@ export default function SideBar({ mobile, onNavigate }) {
   const location = useLocation();
   const { user } = useAuth();
   const { t } = useTranslation();
+  const [avatar, setAvatar] = useState(null);
 
   const go = path => {
     navigate(path);
@@ -26,26 +27,10 @@ export default function SideBar({ mobile, onNavigate }) {
     { path: "/terms", label: t("terms") || "Terms", icon: "📄" },
     { path: "/premium", label: t("premium") || "Premium", icon: "💎" },
   ];
-
-  {user?.role === "admin" && (
-  <>
-          <div className="border-t border-white/10 my-2" />
-
-          <button
-            onClick={() => go("/admin/revenue")}
-            className={linkClass(location.pathname === "/admin/revenue")}
-          >
-            📊 Revenue
-          </button>
-
-          <button
-            onClick={() => go("/admin/users")}
-            className={linkClass(location.pathname === "/admin/users")}
-          >
-            👥 Users
-          </button>
-        </>
-      )}
+  if (user?.role === "admin") {
+    items.push({ path: "/admin/revenue", label: t("revenue") || "Revenue", icon: "📊" });
+    items.push({ path: "/admin/users", label: t("users") || "Users", icon: "👥" });
+  }
     
   return (
     <aside className="
@@ -67,15 +52,52 @@ export default function SideBar({ mobile, onNavigate }) {
 
       {/* USER */}
       {user && (
-          <div className="p-4 border-b border-white/10 flex gap-3 items-center">
-          <img
-            src={`https://ui-avatars.com/api/?name=${user.email}`}
-            className="w-10 h-10 rounded-xl"
-          />
-            <div className="text-sm">
-              <div className="truncate">{user.email}</div>
-              <div className="text-xs opacity-60">{t(user.role) || user.role}</div>
-            </div>
+        <div className="p-4 border-b border-white/10 flex gap-3 items-center">
+          <div className="relative">
+            <img
+              src={
+                avatar ||
+                localStorage.getItem(`avatar_${user.email}`) ||
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email)}`
+              }
+              alt="avatar"
+              className="w-12 h-12 rounded-full object-cover"
+            />
+            <input
+              id="avatar-upload"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files && e.target.files[0];
+                if (!f) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                  localStorage.setItem(`avatar_${user.email}`, reader.result);
+                  setAvatar(reader.result);
+                };
+                reader.readAsDataURL(f);
+              }}
+            />
+          </div>
+          <div className="text-sm flex-1 min-w-0">
+            <div className="truncate">{user.email}</div>
+            <div className="text-xs opacity-60">{t(user.role) || user.role}</div>
+          </div>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="avatar-upload" className="text-xs text-indigo-300 hover:underline cursor-pointer">
+              Edit
+            </label>
+            <button
+              onClick={() => {
+                localStorage.removeItem(`avatar_${user.email}`);
+                setAvatar(null);
+              }}
+              className="text-xs text-red-400"
+            >
+              Delete
+            </button>
+          </div>
         </div>
       )}
 

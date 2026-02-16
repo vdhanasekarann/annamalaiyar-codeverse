@@ -103,17 +103,15 @@ useEffect(() => {
     GPTS.some(g => (usage[g.id] || 0) >= parseLimit(g.freeLimit));
 
   function WelcomeBanner({ user }) {
-  return (
-    <div className="rounded-2xl p-8 mb-10 bg-gradient-to-br from-orange-400 via-indigo-500 to-black">
-      <h1 className="text-3xl font-bold mb-2">
-        Welcome back, {user.email.split("@")[0]}
-      </h1>
-      <p className="opacity-90">
-        Build the future with CodeVerse AI
-      </p>
-    </div>
-  );
-}
+    return (
+      <div className="rounded-2xl p-6 mb-10 bg-gradient-to-br from-orange-400 via-indigo-500 to-black">
+        <h1 className="text-xl md:text-3xl font-bold mb-2 truncate">
+          {t("welcome") || "Welcome back"}, {user.email.split("@")[0]}
+        </h1>
+        <p className="opacity-90">Build the future with CodeVerse AI</p>
+      </div>
+    );
+  }
 
   return (
         <div
@@ -125,48 +123,43 @@ useEffect(() => {
         backgroundAttachment: "fixed",
       }}
     >
-      <div className="relative top-4 right-6 z-[999]">
-  <button onClick={e=>{
- e.stopPropagation();
- setOpen(o=>!o);
-}} className="px-4 py-2 bg-zinc-800 rounded-lg text-sm hover:bg-zinc-700 shadow">
-    AI Tools ▾
-  </button>
-{open && (
-  <div className="absolute right-0 mt-2 w-44 bg-black/70 backdrop-blur rounded-xl border border-white/10">
-    {[
-      ["ChatGPT","https://chat.openai.com"],
-      ["Claude","https://claude.ai"],
-      ["Gemini","https://gemini.google.com"],
-      ["Copilot","https://copilot.microsoft.com"],
-      ["CooklyHub","https://cooklyhub.com"],
-      ["CA-sentinel","https://ca.kannizconites.com"]
-    ].map(([name,url])=>(
-      <a
-        key={name}
-        href={url}
-        target="_blank"
-        className="block px-4 py-2 hover:bg-indigo-600"
-      >
-        {name}
-      </a>
-    ))}
-  </div>
-)}
-</div>
+      <div className="absolute top-6 right-6 z-[60]">
+        <div className="relative">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpen((o) => !o);
+            }}
+            className="px-4 py-2 bg-zinc-800 rounded-lg text-sm hover:bg-zinc-700 shadow"
+          >
+            {t("aiTools") || "AI Tools ▾"}
+          </button>
+          {open && (
+            <div className="absolute right-0 mt-2 w-44 bg-black/70 backdrop-blur rounded-xl border border-white/10">
+              {[
+                ["ChatGPT", "https://chat.openai.com"],
+                ["Claude", "https://claude.ai"],
+                ["Gemini", "https://gemini.google.com"],
+                ["Copilot", "https://copilot.microsoft.com"],
+                ["CooklyHub", "https://cooklyhub.com"],
+                ["CA-sentinel", "https://ca.kannizconites.com"],
+              ].map(([name, url]) => (
+                <a key={name} href={url} target="_blank" className="block px-4 py-2 hover:bg-indigo-600">
+                  {name}
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
 
        <WelcomeBanner user={user} />
-       <h2 className="text-lg font-semibold mt-12 mb-4">
-  {t("activeDevices")}
-</h2>
+       <h2 className="text-lg font-semibold mt-12 mb-4">{t("activeDevices") || "Active Devices"}</h2>
 
 <div className="grid gap-4">
   {devices && devices.length > 0 ? (
-    devices.map(d => (
-      <div
-        key={d.id}
-        className="bg-zinc-900 rounded-xl p-4 flex justify-between"
-      >
+    devices.map((d) => (
+      <div key={d.device_id} className="bg-zinc-900 rounded-xl p-4 flex justify-between">
         <div>
           <div className="font-semibold">
             {d.device_name || "Unknown Device"}
@@ -193,32 +186,28 @@ useEffect(() => {
     <UpgradeBanner show={hasAnyLimitHit} />
 
     {recentGPTs.length > 0 && (
-  <>
-    <h2 className="text-lg font-semibold mb-6">Recently Used</h2>
+      <>
+        <h2 className="text-lg font-semibold mb-6">{t("recent") || "Recently Used"}</h2>
 
-    <AppGrid
-      gpts={recentGPTs}
-      plan={user.plan}
-      usage={usage}
-      onUsed={refresh}
-    />
-  </>
-)}
+        <AppGrid gpts={recentGPTs} plan={user.plan} usage={usage} onUsed={refresh} />
+      </>
+    )}
 
 
-    <h2 className="text-lg font-semibold mt-12 mb-6">All GPT Apps</h2>
+    <h2 className="text-lg font-semibold mt-12 mb-6">{t("gptApps") || "All GPT Apps"}</h2>
 
     <AppGrid
       plan={user.plan}
       usage={usage}
       onUsed={refresh}
     />
-<div className="mt-10 p-6 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-700">
- <h3 className="font-bold text-lg mb-2">AI Insight</h3>
- <p className="text-sm opacity-90">
-  You are most active in Education category apps. Try more Lifestyle GPTs to balance your usage.
- </p>
-</div>
+    <div className="mt-10 p-6 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-700">
+      <h3 className="font-bold text-lg mb-2">{t("aiInsight") || "AI Insight"}</h3>
+      <p className="text-sm opacity-90">
+        {t("aiInsightText") ||
+          "You are most active in Education category apps. Try more Lifestyle GPTs to balance your usage."}
+      </p>
+    </div>
 
   </div>
 );

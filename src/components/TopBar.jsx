@@ -38,15 +38,29 @@ export default function TopBar({ onOpenMobileMenu }) {
 
       {/* SEARCH */}
       <div className="flex flex-1 justify-center px-2">
-        <input
-          value={query}
-          onChange={(e)=>setQuery(e.target.value)}
-          onKeyDown={(e)=>{
-            if(e.key==="Enter") navigate(`/gpts?q=${query}`)
-          }}
-          placeholder={t("searchPlaceholder") || "Search GPTs..."}
-          className="w-full max-w-md bg-zinc-800 border border-white/10 rounded-full px-4 py-1 text-sm"
-        />
+        {/* Desktop search input */}
+        <div className="hidden md:block w-full max-w-md">
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") navigate(`/gpts?q=${query}`);
+            }}
+            placeholder={t("searchPlaceholder") || "Search GPTs..."}
+            className="w-full bg-zinc-800 border border-white/10 rounded-full px-4 py-1 text-sm"
+          />
+        </div>
+
+        {/* Mobile search icon (opens gpts with query param) */}
+        <div className="md:hidden flex items-center">
+          <button
+            onClick={() => navigate(`/gpts?q=${query}`)}
+            className="p-2 rounded-full bg-zinc-800"
+            aria-label="Search"
+          >
+            🔍
+          </button>
+        </div>
       </div>
 
       {/* AI TOOLS */}
