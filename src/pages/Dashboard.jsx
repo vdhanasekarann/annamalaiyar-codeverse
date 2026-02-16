@@ -13,8 +13,8 @@ import { useTranslation } from "react-i18next";
 
 export default function DashboardPage() {
   const [localUsage, setUsage] = useState({});
+  const { user, setUser, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
-  const { user, setUser } = useAuth();
   const { usage, refresh } = useUsage(user?.email);
   const [devices, setDevices] = useState([]);
   const navigate = useNavigate();
@@ -54,57 +54,49 @@ useEffect(()=>{
 
 useEffect(() => {
   let mounted = true;
-
-  async function load() {
-  try {
-        const meRes = await apiFetch("/api/account/me", {
-      method: "GET",
-      credentials: "include"
-    });
-
-    if (!meRes.ok) throw new Error("unauth");
-
-    const me = await meRes.json();
-    if (!mounted) return;
-
-    setUser(me);
-
-    // 🔥 Fetch devices AFTER confirming auth
-    const res = await apiFetch("/api/account/devices");
-    const devicesData = res.ok ? await res.json() : [];
-    setDevices(devicesData);
-
-    const deviceId = getDeviceId();
-
-    const exists = devicesData.some(d => d.device_id === deviceId);
-
-    if (!exists) {
-      await apiFetch("/api/account/devices/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ deviceId }),
-        credentials: "include",
-      });
+  async function loadDevices() {
+    if (!user) {
+      if (mounted) setLoading(false);
+      return;
     }
 
-  } catch (err) {
-    console.error("Dashboard load error:", err);
-    setUser(null);
-  } finally {
-    if (mounted) setLoading(false);
+    try {
+      const res = await apiFetch("/api/account/devices");
+      const devicesData = res.ok ? await res.json() : [];
+      if (!mounted) return;
+      setDevices(devicesData);
+
+      const deviceId = getDeviceId();
+      const exists = devicesData.some((d) => d.device_id === deviceId);
+
+      if (!exists) {
+        await apiFetch("/api/account/devices/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ deviceId }),
+          credentials: "include",
+        });
+      }
+    } catch (err) {
+      console.error("Dashboard load error:", err);
+    } finally {
+      if (mounted) setLoading(false);
+    }
   }
-}
-  load();
-  return () => { mounted = false; };
-}, []);
 
-  if (loading) {
-  return <div className="text-white p-6">Loading…</div>;
-}
+  loadDevices();
+  return () => {
+    mounted = false;
+  };
+}, [user]);
 
-if (!user) {
-  return <Navigate to="/login" replace />;
-}
+  if (authLoading || loading) {
+    return <div className="text-white p-6">Loading…</div>;
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
   const hasAnyLimitHit =
     user.plan === "free" &&
