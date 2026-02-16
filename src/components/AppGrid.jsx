@@ -1,5 +1,6 @@
 import GPTCard from "./GPTCard";
 import { GPTS } from "../data/gpts";
+import { useSearch } from "../context/SearchContext";
 import { Navigate, Link } from "react-router-dom";
 
 export default function AppGrid({ plan, usage = {}, onUsed, limit }) {
