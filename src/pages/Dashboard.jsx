@@ -18,6 +18,7 @@ export default function DashboardPage() {
   const [devices, setDevices] = useState([]);
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const [open,setOpen] = useState(false);
 
   function handleSearch(q){
   navigate(`/gpts?q=${q}`);
@@ -33,6 +34,12 @@ export default function DashboardPage() {
 
   setDevices(prev => prev.filter(d => d.device_id !== deviceId));
 };
+
+useEffect(()=>{
+  const close = ()=>setOpen(false);
+  window.addEventListener("click",close);
+  return ()=>window.removeEventListener("click",close);
+},[]);
 
 useEffect(() => {
   let mounted = true;
@@ -113,7 +120,7 @@ if (!user) {
       }}
     >
       <h1>{t("welcome")}</h1>
-      <div className="relative inline-block z-[100]">
+      <div className="absolute top-4 right-6 z-[999]">
   <button onClick={()=>setOpen(!open)} className="px-4 py-2 bg-zinc-800 rounded-lg text-sm hover:bg-zinc-700 shadow">
     AI Tools ▾
   </button>

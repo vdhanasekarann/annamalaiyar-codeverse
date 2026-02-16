@@ -44,7 +44,7 @@ function handleSearch(q){
       backdrop-blur-xl
       bg-white/5
       border border-white/10
-      hover:border-yellow-500
+      hover:border-indigo-500
       hover:scale-105
       transition-all duration-300">
     {/* IMAGE CONTAINER */}
@@ -69,7 +69,7 @@ function handleSearch(q){
 
       <div className="mt-6 space-y-3">
       {reviews.map((r,i)=>(
-        <div key={gpt.id} className="bg-zinc-900 p-3 rounded">
+        <div key={r.email + i} className="bg-zinc-900 p-3 rounded">
           ⭐ {r.rating}/5
           <p className="text-sm opacity-80">{r.review}</p>
         </div>

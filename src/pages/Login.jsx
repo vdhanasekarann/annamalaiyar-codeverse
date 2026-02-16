@@ -49,7 +49,7 @@ export default function Login() {
     <div className="min-h-screen flex">
 
       {/* LEFT PANEL */}
-      <div className="flex md:w-1/2 w-full h-48 md:h-auto relative">
+      <div className="flex hidden md:flex md:w-1/2 relative">
         <div className="absolute inset-0 bg-gradient-to-br from-orange-400 via-indigo-500 to-black opacity-90" />
         <div className="relative z-10 text-white p-16 flex flex-col justify-center">
           <h1 className="text-4xl font-bold mb-4">AI CodeVerse OS</h1>

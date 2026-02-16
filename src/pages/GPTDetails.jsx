@@ -1,10 +1,9 @@
-import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { apiFetch } from "../lib/apiFetch";
 
 export default function GPTDetails() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
@@ -28,8 +27,8 @@ export default function GPTDetails() {
         <p className="opacity-60">No reviews yet.</p>
       )}
 
-      {reviews.map(r=>(
-        <div key={r.id} className="bg-zinc-900 p-4 rounded-xl mb-3">
+      {reviews.map(r => (
+        <div key={r.email} className="mb-3 bg-zinc-900 p-4 rounded">
           ⭐ {r.rating}/5
           <p>{r.review}</p>
         </div>

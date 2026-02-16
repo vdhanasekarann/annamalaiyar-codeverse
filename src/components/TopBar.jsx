@@ -45,7 +45,7 @@ export default function TopBar({ onOpenMobileMenu }) {
       </Link>
     </div>
 {/* CENTER – HIDDEN ON MOBILE */}
-    <div className="hidden md:flex flex-1 justify-center px-2">
+    <div className="flex md:flex flex-1 justify-center px-2">
   <input
    value={query}
    onChange={e=>setQuery(e.target.value)}
@@ -77,7 +77,7 @@ export default function TopBar({ onOpenMobileMenu }) {
         <span className="hidden md:block opacity-80">
           {user.role === "admin" ? "Admin" : "User"}
         </span>
-<select onChange={(e) => i18n.changeLanguage(e.target.value)}>
+<select value={i18n.language} onChange={(e) => i18n.changeLanguage(e.target.value)}>
   <option value="en">EN</option>
   <option value="ta">தமிழ்</option>
   <option value="hi">हिंदी</option>
