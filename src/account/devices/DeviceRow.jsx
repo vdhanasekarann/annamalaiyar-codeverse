@@ -1,6 +1,7 @@
 import { API_BASE } from "../../config/api";
 import { getDeviceId } from "../../utils/device";
 import { Navigate, Link } from "react-router-dom";
+import { apiFetch } from "../../lib/apiFetch";
 
 export default function DeviceRow({ device, onRevoked }) {
   const revoke = async () => {
@@ -9,19 +10,19 @@ export default function DeviceRow({ device, onRevoked }) {
     );
     if (!ok) return;
 
-    const res = await apiFetch(`${API_BASE}/api/account/devices/revoke`, {
-  method: "POST",
-  credentials: "include",
-  headers: {
-    "Content-Type": "application/json",
-    "x-device-id": getDeviceId(),
-  },
-  body: JSON.stringify({ deviceId: device.device_id }),
-});
+    const res = await apiFetch("/api/account/devices/revoke", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "x-device-id": getDeviceId(),
+      },
+      body: JSON.stringify({ deviceId: device.device_id }),
+    });
 
     if (res.ok) {
       alert("Device revoked. You will be logged out.");
-      await apiFetch("/auth/logout");
+      await apiFetch("/api/auth/logout", { method: "POST" });
       window.location.href = "/login";
     }
   };

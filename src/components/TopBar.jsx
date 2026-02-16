@@ -5,19 +5,19 @@ import { apiFetch } from "../lib/apiFetch";
 import i18n from "../i18n";
 import { useAuth } from "../context/AuthContext";
 import { useSearch } from "../context/SearchContext";
+import { useTranslation } from "react-i18next";
 
 export default function TopBar({ onOpenMobileMenu }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { query, setQuery } = useSearch();
+  const [aiOpen, setAiOpen] = React.useState(false);
 
   const logout = async () => {
-    await fetch(`${API_BASE}/api/auth/logout`, {
-      method: "POST",
-      credentials: "include",
-    });
+    await apiFetch("/api/auth/logout", { method: "POST" });
     navigate("/login");
   };
+  const { t } = useTranslation();
 
   return (
     <header className="glass flex items-center justify-between px-4 h-14 border-b border-white/10">
@@ -44,9 +44,35 @@ export default function TopBar({ onOpenMobileMenu }) {
           onKeyDown={(e)=>{
             if(e.key==="Enter") navigate(`/gpts?q=${query}`)
           }}
-          placeholder="Search GPTs..."
+          placeholder={t("searchPlaceholder") || "Search GPTs..."}
           className="w-full max-w-md bg-zinc-800 border border-white/10 rounded-full px-4 py-1 text-sm"
         />
+      </div>
+
+      {/* AI TOOLS */}
+      <div className="relative">
+        <button
+          onClick={() => setAiOpen((s) => !s)}
+          className="hidden md:inline-block px-3 py-1 rounded bg-zinc-800 text-xs mr-3"
+        >
+          AI Tools ▾
+        </button>
+        {aiOpen && (
+          <div className="absolute right-0 mt-2 w-44 bg-black/70 backdrop-blur rounded-xl border border-white/10">
+            {[
+              ["ChatGPT","https://chat.openai.com"],
+              ["Claude","https://claude.ai"],
+              ["Gemini","https://gemini.google.com"],
+              ["Copilot","https://copilot.microsoft.com"],
+              ["CooklyHub","https://cooklyhub.com"],
+              ["CA-sentinel","https://ca.kannizconites.com"]
+            ].map(([name, url]) => (
+              <a key={name} href={url} target="_blank" className="block px-4 py-2 hover:bg-indigo-600">
+                {name}
+              </a>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* RIGHT */}

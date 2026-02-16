@@ -3,19 +3,18 @@ import { GPTS } from "../data/gpts";
 import { useSearch } from "../context/SearchContext";
 import { Navigate, Link } from "react-router-dom";
 
-export default function AppGrid({ plan, usage = {}, onUsed, limit }) {
-  const list = limit ? GPTS.slice(0, limit) : GPTS;
+export default function AppGrid({ plan, usage = {}, onUsed, limit, gpts = null }) {
+  const { query } = useSearch();
+  const baseList = gpts || (limit ? GPTS.slice(0, limit) : GPTS);
 
-  const {query}=useSearch();
-
-const filtered = GPTS.filter(g =>
- g.title.toLowerCase().includes(query.toLowerCase())
-);
+  const filtered = baseList.filter((g) =>
+    g.title.toLowerCase().includes((query || "").toLowerCase())
+  );
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
       <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {list.map((gpt) => (
+        {filtered.map((gpt) => (
           <GPTCard
             key={gpt.id}
             gpt={gpt}

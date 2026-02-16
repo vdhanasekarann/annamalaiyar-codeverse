@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { apiFetch } from "../lib/apiFetch";
 
 export default function GPTDetails() {
   const { id } = useParams();
   const [reviews, setReviews] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     apiFetch(`/api/reviews/${id}`)
@@ -14,10 +15,7 @@ export default function GPTDetails() {
 
   return (
     <div className="glass min-h-screen bg-[#0f0f0f] text-white p-6">
-      <button
-        onClick={()=>navigate(-1)}
-        className="mb-4 text-indigo-400"
-      >
+      <button onClick={() => navigate(-1)} className="mb-4 text-indigo-400">
         ← Back
       </button>
 

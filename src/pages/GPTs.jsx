@@ -3,31 +3,34 @@ import GPTCard from "../components/GPTCard";
 import { useUsage } from "../hooks/useUsage";
 import { useEffect, useState } from "react";
 import { apiFetch } from "../lib/apiFetch";
-import { Link, useNavigate, Navigate } from "react-router-dom";
+import { Link, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useSearch } from "../context/SearchContext";
 
 export default function GPTsPage() {
   const { user, setUser } = useAuth();
   const [active,setActive]=useState("All");
   const navigate = useNavigate();
-  const [query,setQuery]=useState("");
-  
+  const { query, setQuery } = useSearch();
+  const location = useLocation();
 
-  function handleSearch(q){
-  navigate(`/gpts?q=${q}`);
-}
-
-const filtered = GPTS.filter(g =>
- g.title.toLowerCase().includes(query.toLowerCase())
-);
+  const filtered = GPTS.filter((g) =>
+    g.title.toLowerCase().includes((query || "").toLowerCase())
+  );
 
   useEffect(() => {
-    
     if (!user) return;
     apiFetch("/api/user")
-      .then(r => r.json())
+      .then((r) => r.json())
       .then(setUser);
-  }, []);
+  }, [user, setUser]);
+
+  // Sync query param to global search context so direct links work
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const q = params.get("q") || "";
+    setQuery(q);
+  }, [location.search, setQuery]);
 
   const { usage, refresh } = useUsage(user?.email);
   const categories = [...new Set(GPTS.map(g => g.category))];

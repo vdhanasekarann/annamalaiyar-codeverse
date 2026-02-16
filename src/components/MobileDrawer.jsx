@@ -8,7 +8,7 @@ export default function MobileDrawer({ open, onClose, children }) {
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/70"
+        className="absolute inset-0 bg-black/60 backdrop-blur"
         onClick={onClose}
       />
 
@@ -16,8 +16,8 @@ export default function MobileDrawer({ open, onClose, children }) {
       <div
         className={`
         absolute left-0 top-0 h-full w-[260px] max-w-[80%]
-        bg-black transition-transform
-        ${open ? "translate-x-0" : "-translate-x-full"}
+        bg-white/4 backdrop-blur-xl border-r border-white/10 transition-transform
+        ${open ? "translate-x-0 shadow-lg" : "-translate-x-full"}
       `}
       >
         {children}

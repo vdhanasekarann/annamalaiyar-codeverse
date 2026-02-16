@@ -2,8 +2,10 @@ import { parseLimit } from "../config/limits";
 import { apiFetch } from "../lib/apiFetch";
 import React from "react";
 import { Navigate, useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 function GPTCard({ gpt, used, plan, onUsed }) {
+  const { t } = useTranslation();
   const limit = plan === "free" ? parseLimit(gpt.freeLimit) : Infinity;
   const locked = plan === "free" && used >= limit;
   const navigate = useNavigate();
@@ -43,8 +45,8 @@ function handleSearch(q){
   );
 
   if (onUsed) await onUsed();
-
-  window.open(gpt.link, "_blank");
+  // navigate to internal GPT detail page (was opening external link)
+  navigate(`/gpt/${gpt.id}`);
 };
 
   return (
@@ -74,11 +76,11 @@ function handleSearch(q){
     {/* CONTENT */}
     <div className="p-4 flex flex-col min-h-[120px]">
       <h3 className="text-sm font-semibold text-white line-clamp-2">
-        {gpt.title}
+        {t(gpt.title) || gpt.title}
       </h3>
 
       <p className="text-xs text-zinc-400 mt-1 line-clamp-2 md:line-clamp-3">
-        {gpt.description}
+        {t(gpt.description) || gpt.description}
       </p>
       
       <div className="mt-6 space-y-3">
@@ -90,19 +92,16 @@ function handleSearch(q){
       ))}
       </div>
 
-      <Link
-        to={`/gpt/${gpt.id}`}
-        className="text-xs text-indigo-400 mt-2"
-      >
-        View Reviews
+      <Link to={`/gpt/${gpt.id}`} className="text-xs text-indigo-400 mt-2">
+        {t("viewReviews") || "View Reviews"}
       </Link>
 
       <div className="text-xs mt-2 text-zinc-300">
         {locked
-          ? "🔒 Limit reached"
+          ? `${t("locked") || "🔒 Limit reached"}`
           : plan === "free"
-          ? `${used} / ${limit} used today`
-          : "Unlimited"}
+          ? `${used} / ${limit} ${t("usedToday") || "used today"}`
+          : t("unlimited") || "Unlimited"}
       </div>
     </div>
   </div>
