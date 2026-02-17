@@ -4,7 +4,7 @@ import { useSidebar } from '../../context/SidebarContext';
 
 export default function ExpandSidebar({ items = [], mobile=false, onNavigate }) {
   const { collapsed, hovered, locked, unlock } = useSidebar();
-  const expanded = locked || hovered || !collapsed || mobile;
+  const expanded = mobile ? !collapsed : (locked || hovered || !collapsed);
   const location = useLocation();
 
   return (

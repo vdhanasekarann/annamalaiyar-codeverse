@@ -8,6 +8,8 @@ export default function SideBar({ mobile, onNavigate }) {
   const { user } = useAuth();
   const { t } = useTranslation();
 
+  const [allowed, setAllowed] = React.useState(true);
+
   const items = [
     { path: "/dashboard", label: t("home") || "Home", icon: "🏠" },
     { path: "/gpts", label: t("gptApps") || "GPT Apps", icon: "🤖" },
@@ -20,10 +22,24 @@ export default function SideBar({ mobile, onNavigate }) {
   }
 
   React.useEffect(()=>{
+    // prevent duplicate sidebar mounts in the app (guard global)
+    if (typeof window !== 'undefined'){
+      if (!mobile && window.__SIDEBAR_MOUNTED__) {
+        setAllowed(false);
+        return;
+      }
+      if (!mobile) window.__SIDEBAR_MOUNTED__ = true;
+    }
+
     const close = ()=>{ if (mobile && onNavigate) onNavigate(); };
     window.addEventListener('resize', close);
-    return ()=> window.removeEventListener('resize', close);
+    return ()=>{
+      window.removeEventListener('resize', close);
+      if (typeof window !== 'undefined' && !mobile) delete window.__SIDEBAR_MOUNTED__;
+    };
   }, [mobile, onNavigate]);
+
+  if (!allowed) return null;
 
   return <DoubleSidebar items={items} mobile={mobile} onNavigate={onNavigate} />;
 }

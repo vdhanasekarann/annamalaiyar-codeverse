@@ -13,6 +13,7 @@ import PromptAssistant from "./pages/PromptAssistant";
 import React, { Suspense } from "react";
 import { useTranslation } from 'react-i18next';
 import GPTDetails from "./pages/GPTDetails";
+const ReviewsPage = React.lazy(() => import("./pages/Reviews"));
 import Terms from "./pages/Terms";
 
 const GPTsPage = React.lazy(() => import("./pages/GPTs"));
@@ -46,6 +47,11 @@ export default function App() {
             }
           />
           <Route path="/gpt/:id" element={<GPTDetails />} />
+          <Route path="/reviews/:id" element={
+            <React.Suspense fallback={<div>{t('loading') || 'Loading...'}</div>}>
+              <ReviewsPage />
+            </React.Suspense>
+          } />
          <Route path="/premium" element={<Premium />} />
           <Route path="/terms" element={<Terms />} />
 

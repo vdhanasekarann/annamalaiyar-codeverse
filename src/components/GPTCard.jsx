@@ -104,7 +104,7 @@ function GPTCard({ gpt, used, plan, onUsed, theme = 'pink' }) {
         </div>
 
         <button
-            onClick={(e)=>{ e.stopPropagation(); navigate(`/reviews/${gpt.slug || gpt.id}`); }}
+          onClick={(e)=>{ e.stopPropagation(); navigate(`/reviews/${gpt.id}`); }}
             className={`text-xs mt-2 underline ${theme==='gold'?'text-yellow-400':'text-indigo-400'}`}
             aria-label={t('viewReviews') || 'View Reviews'}
           >

@@ -95,6 +95,9 @@
   border: 1px solid rgba(255,215,0,0.35);
   box-shadow: 0 0 25px rgba(255,215,0,0.25);
 }
+/* pointer rules: ensure glass panels accept pointer events, backdrops don't block */
+.glass-dark { pointer-events: auto; }
+.backdrop { pointer-events: none; }
 /* Page container baseline - not blurred */
 .page-container {
   background: transparent;

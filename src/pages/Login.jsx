@@ -61,7 +61,15 @@ export default function Login() {
             Join 100,000+ minds already building the future.<br/>
             Start free. Upgrade anytime.
           </p>
-          {/* Hero has no Continue button on mobile - action belongs inside the form */}
+          {/* Hero continue only visible on desktop */}
+          <div className="hidden md:block">
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="mt-2 inline-flex items-center px-4 py-2 rounded-lg bg-yellow-500 text-black font-semibold hover:opacity-95"
+            >
+              Continue →
+            </button>
+          </div>
         </div>
       </div>
 
