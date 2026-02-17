@@ -144,12 +144,11 @@ export default function SideBar({ mobile, onNavigate }) {
     
   return (
     <aside
-      {...(!mobile
-        ? { onMouseEnter: () => setHovered(true), onMouseLeave: () => setHovered(false) }
-        : {})}
-      className={`glass-dark h-screen relative overflow-hidden text-white flex flex-col before:absolute before:inset-0 before:bg-gradient-to-br before:from-indigo-600/10 before:via-purple-600/5 before:to-transparent before:pointer-events-none border-r border-white/6 transition-all duration-300 ${
-        expanded ? "w-[240px] shadow-[0_8px_48px_rgba(99,102,241,0.15)]" : "w-[72px]"
+      {...(!mobile ? { onMouseEnter: () => setHovered(true), onMouseLeave: () => setHovered(false) } : {})}
+      className={`${mobile ? 'relative' : 'fixed left-0 top-0 z-[1000]'} glass-dark h-screen overflow-hidden text-white flex flex-col before:absolute before:inset-0 before:bg-gradient-to-br before:from-indigo-600/10 before:via-purple-600/5 before:to-transparent before:pointer-events-none border-r border-white/6 transition-all duration-300 ${
+        expanded ? "w-60 shadow-[0_8px_48px_rgba(99,102,241,0.15)]" : "w-16"
       }`}
+      style={{backfaceVisibility: 'hidden'}}
     >
 
       {/* BRAND */}
@@ -162,7 +161,7 @@ export default function SideBar({ mobile, onNavigate }) {
       </div>
 
       {/* SVG blob for curved hover */}
-      <div id="blob" ref={blobRef} className="pointer-events-none absolute right-0 top-0 h-full overflow-visible" style={{width: 60}}>
+      <div id="blob" ref={blobRef} className="pointer-events-none absolute right-0 top-0 h-full overflow-visible w-16">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 800" className="h-full w-full">
           <path id="blob-path" ref={blobPathRef} d="M60,500H0V0h60c0,0,20,172,20,250S60,900,60,500z" fill="#0b1220" />
         </svg>
@@ -254,9 +253,15 @@ export default function SideBar({ mobile, onNavigate }) {
           navigate("/login");
         }}
         className="m-3 py-2 rounded-2xl bg-red-500/20 hover:bg-red-500/30"
+        title={t('logout') || 'Logout'}
+        aria-label={t('logout') || 'Logout'}
       >
         {expanded ? (t("logout") || "Logout") : "⎋"}
       </button>
+      {/* mobile overlay to close sidebar when open */}
+      {mobile && expanded && (
+        <div className="fixed inset-0 z-40" onClick={() => { setCollapsed(true); if (onNavigate) onNavigate(); }} />
+      )}
     </aside>
   );
 }

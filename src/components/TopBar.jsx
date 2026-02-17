@@ -14,6 +14,7 @@ export default function TopBar({ onOpenMobileMenu }) {
   const { query, setQuery } = useSearch();
   const [mobileSearchOpen, setMobileSearchOpen] = React.useState(false);
   const inputRef = useRef(null);
+  const dialogRef = useRef(null);
 
   const logout = async () => {
     await apiFetch("/api/auth/logout", { method: "POST" });
@@ -27,6 +28,29 @@ export default function TopBar({ onOpenMobileMenu }) {
         inputRef.current.focus();
       } catch (e) {}
     }
+  }, [mobileSearchOpen]);
+
+  // basic focus-trap & ESC handling for mobile search overlay
+  useEffect(() => {
+    function onKey(e) {
+      if (!mobileSearchOpen) return;
+      if (e.key === "Escape") setMobileSearchOpen(false);
+      if (e.key === "Tab" && dialogRef.current) {
+        const focusable = dialogRef.current.querySelectorAll('a,button,input,select,textarea,[tabindex]:not([tabindex="-1"])');
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
   }, [mobileSearchOpen]);
 
   // Desktop search input ref for focus button
@@ -92,10 +116,10 @@ export default function TopBar({ onOpenMobileMenu }) {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-[999] flex items-start justify-center pt-24 px-4 bg-black/30 backdrop-blur-sm"
+          className="fixed inset-0 z-[9999] flex items-start justify-center pt-24 px-4 bg-black/30 backdrop-blur-sm"
           onClick={() => setMobileSearchOpen(false)}
         >
-          <div className="w-full max-w-md pointer-events-auto" onClick={(e)=>e.stopPropagation()}>
+          <div ref={dialogRef} className="w-full max-w-md pointer-events-auto" onClick={(e)=>e.stopPropagation()}>
             <div className="bg-zinc-900/95 p-4 rounded-xl shadow-lg pointer-events-auto">
               <div className="flex gap-2">
                 <input
@@ -107,7 +131,6 @@ export default function TopBar({ onOpenMobileMenu }) {
                       setMobileSearchOpen(false);
                       navigate(`/gpts?q=${query}`);
                     }
-                    if (e.key === 'Escape') setMobileSearchOpen(false);
                   }}
                   placeholder={t("searchPlaceholder") || "Search GPTs..."}
                   className="w-full bg-transparent border border-white/10 rounded px-3 py-2"

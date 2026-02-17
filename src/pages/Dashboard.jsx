@@ -105,11 +105,15 @@ useEffect(() => {
 
   function WelcomeBanner({ user }) {
     return (
-      <div className="glass-gold p-6 mb-10">
-        <h1 className="text-xl md:text-3xl font-bold mb-2 truncate">
-          {t("welcome") || "Welcome back"}, {user.email.split("@")[0]}
-        </h1>
-        <p className="opacity-90">{t('welcomeSubtitle') || 'Build the future with CodeVerse AI'}</p>
+      <div className="glass-gold p-6 mb-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div>
+            <h1 className="text-lg md:text-3xl font-bold mb-1 break-words">
+              {t("welcome") || "Welcome back"}, <span className="truncate">{user.email.split("@")[0]}</span>
+            </h1>
+            <p className="opacity-90 max-w-xl">{t('welcomeSubtitle') || 'Build the future with CodeVerse AI'}</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -165,29 +169,30 @@ useEffect(() => {
 
           <div className="flex items-center gap-2">
             <div className="relative">
-              <button
-                onClick={(e)=>{e.stopPropagation(); setOpen(o=>!o);}}
-                className="px-4 py-2 bg-zinc-800 rounded-lg text-sm hover:bg-zinc-700 shadow z-40"
-              >
-                {t("aiTools") || "AI Tools ▾"}
-              </button>
-              {open && (
-                <div className="absolute right-0 mt-2 w-44 glass-clear">
-                  {[
-                    ["ChatGPT", "https://chat.openai.com"],
-                    ["Claude", "https://claude.ai"],
-                    ["Gemini", "https://gemini.google.com"],
-                    ["Copilot", "https://copilot.microsoft.com"],
-                    ["CooklyHub", "https://cooklyhub.com"],
-                    ["CA-sentinel", "https://ca.kannizconites.com"],
-                  ].map(([name, url]) => (
-                    <a key={name} href={url} target="_blank" rel="noreferrer" className="block px-4 py-2 hover:bg-indigo-600">
-                      {name}
-                    </a>
-                  ))}
-                </div>
-              )}
-            </div>
+                <button
+                  ref={(el)=>{if(el){el.dataset.tools='tools'}}}
+                  onClick={(e)=>{e.stopPropagation(); setOpen(o=>!o);} }
+                  className="px-4 py-2 bg-zinc-800 rounded-lg text-sm hover:bg-zinc-700 shadow z-40"
+                >
+                  {t("aiTools") || "AI Tools ▾"}
+                </button>
+                {open && (
+                  <div className="fixed right-6 top-20 mt-2 w-44 glass-clear z-[9999]" onClick={(e)=>e.stopPropagation()}>
+                    {[
+                      ["ChatGPT", "https://chat.openai.com"],
+                      ["Claude", "https://claude.ai"],
+                      ["Gemini", "https://gemini.google.com"],
+                      ["Copilot", "https://copilot.microsoft.com"],
+                      ["CooklyHub", "https://cooklyhub.com"],
+                      ["CA-sentinel", "https://ca.kannizconites.com"],
+                    ].map(([name, url]) => (
+                      <a key={name} href={url} target="_blank" rel="noreferrer" className="block px-4 py-2 hover:bg-indigo-600">
+                        {name}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
           </div>
         </div>
 
