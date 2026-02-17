@@ -4,7 +4,6 @@ import React from "react";
 import { Navigate, useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import clsx from 'clsx';
-import GlassCard from './GlassCard';
 
 function GPTCard({ gpt, used, plan, onUsed, theme = 'pink' }) {
   const { t } = useTranslation();
@@ -120,7 +119,7 @@ function GPTCard({ gpt, used, plan, onUsed, theme = 'pink' }) {
             : t("unlimited") || "Unlimited"}
         </div>
       </div>
-    </GlassCard>
+    </div>
   );
 }
 
