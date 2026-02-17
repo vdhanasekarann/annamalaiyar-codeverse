@@ -44,11 +44,12 @@ export default function SideBar({ mobile, onNavigate }) {
       if (!blob || !blobPath) return;
 
       // Respect reduced-motion and low-memory devices
+      let prefersReduced = false;
+      let lowMemory = false;
       if (typeof window !== 'undefined') {
         try {
-          const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-          const lowMemory = navigator.deviceMemory && navigator.deviceMemory < 1.5;
-          if (prefersReduced || lowMemory) return;
+          prefersReduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+          lowMemory = !!(navigator.deviceMemory && navigator.deviceMemory < 1.5);
         } catch (e) {}
       }
     if (prefersReduced || lowMemory) return;
