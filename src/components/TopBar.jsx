@@ -28,6 +28,9 @@ export default function TopBar({ onOpenMobileMenu }) {
     }
   }, [mobileSearchOpen]);
 
+  // Desktop search input ref for focus button
+  const desktopInputRef = React.useRef(null);
+
   return (
     <header className="glass flex items-center justify-between px-4 h-14 border-b border-white/10">
 
@@ -48,8 +51,9 @@ export default function TopBar({ onOpenMobileMenu }) {
       {/* SEARCH */}
       <div className="flex flex-1 justify-center px-2">
         {/* Desktop search input */}
-        <div className="hidden md:block w-full max-w-md">
+        <div className="hidden md:flex w-full max-w-md items-center gap-2">
           <input
+            ref={desktopInputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => {
@@ -58,6 +62,13 @@ export default function TopBar({ onOpenMobileMenu }) {
             placeholder={t("searchPlaceholder") || "Search GPTs..."}
             className="w-full bg-zinc-800 border border-white/10 rounded-full px-4 py-1 text-sm"
           />
+          <button
+            onClick={() => desktopInputRef.current && desktopInputRef.current.focus()}
+            className="p-2 rounded-full bg-zinc-800"
+            aria-label="Focus Search"
+          >
+            🔍
+          </button>
         </div>
 
         {/* Mobile search icon (opens small overlay input) */}
@@ -130,7 +141,6 @@ export default function TopBar({ onOpenMobileMenu }) {
             <option value="kn">ಕನ್ನಡ</option>
             <option value="te">తెలుగు</option>
           </select>
-
           {user.plan === "free" && (
             <Link
               to="/premium"
@@ -140,11 +150,10 @@ export default function TopBar({ onOpenMobileMenu }) {
             </Link>
           )}
 
-          <button
-            onClick={logout}
-            className="text-red-400 text-xs"
-          >
-            Logout
+          {/* Logout icon (also keep text for desktop) */}
+          <button onClick={logout} title="Logout" className="flex items-center gap-2">
+            <span className="md:hidden">🔓</span>
+            <span className="hidden md:inline text-red-400 text-xs">Logout</span>
           </button>
         </div>
       )}

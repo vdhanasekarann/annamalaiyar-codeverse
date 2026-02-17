@@ -4,7 +4,7 @@ import React from "react";
 import { Navigate, useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
-function GPTCard({ gpt, used, plan, onUsed }) {
+function GPTCard({ gpt, used, plan, onUsed, theme = 'gold' }) {
   const { t } = useTranslation();
   const limit = plan === "free" ? parseLimit(gpt.freeLimit) : Infinity;
   const locked = plan === "free" && used >= limit;
@@ -62,21 +62,30 @@ function GPTCard({ gpt, used, plan, onUsed }) {
     >
       <div className="gpt-badge">{gpt.category || 'GPT'}</div>
       <div className="pointer-events-none absolute inset-0 rounded-3xl overflow-hidden">
-        <div className="absolute -top-10 -left-20 w-60 h-40 bg-gradient-to-br from-pink-500/30 via-indigo-400/20 to-transparent opacity-40 blur-2xl transform rotate-12"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-white/2 to-transparent mix-blend-screen opacity-6"></div>
-      </div>
+          {theme === 'gold' ? (
+            <>
+              <div className="absolute -top-10 -left-20 w-60 h-40 bg-gradient-to-br from-yellow-400/30 via-amber-400/20 to-transparent opacity-40 blur-2xl transform rotate-12"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent mix-blend-screen opacity-10"></div>
+            </>
+          ) : (
+            <>
+              <div className="absolute -top-10 -left-20 w-60 h-40 bg-gradient-to-br from-pink-500/30 via-purple-400/18 to-transparent opacity-40 blur-2xl transform rotate-12"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-white/2 to-transparent mix-blend-screen opacity-6"></div>
+            </>
+          )}
+        </div>
       {/* IMAGE CONTAINER */}
-      <div className="h-44 md:h-52 rounded-xl overflow-hidden flex items-center justify-center p-4 bg-gradient-to-br from-indigo-900/10 via-purple-800/10 to-transparent border border-white/3">
+      <div className={`h-44 md:h-52 rounded-xl overflow-hidden flex items-center justify-center p-4 border ${theme==='gold' ? 'bg-gradient-to-br from-black/40 to-black/10 border-yellow-600/10' : 'bg-gradient-to-br from-indigo-900/10 via-purple-800/10 to-transparent border-white/3'}`}>
         <div className="w-full h-full flex items-center justify-center">
-          <img src={gpt.logo} alt={gpt.title} loading="lazy" className="max-h-28 max-w-28 object-contain rounded-md bg-white/6 p-2" />
+          <img src={gpt.logo} alt={gpt.title} loading="lazy" className={`max-h-28 max-w-28 object-contain rounded-md p-2 ${theme==='gold'?'bg-black/80 border border-yellow-500/20':'bg-white/6'}`} />
         </div>
       </div>
 
       {/* CONTENT */}
       <div className="p-4 flex flex-col min-h-[140px]">
-        <h3 className="text-sm font-semibold gpt-title line-clamp-2 drop-shadow-md">{t(gpt.title) || gpt.title}</h3>
+        <h3 className={`text-sm font-semibold gpt-title line-clamp-2 drop-shadow-md ${theme==='gold'?'text-yellow-300':'text-white'}`}>{t(gpt.title) || gpt.title}</h3>
 
-        <p className="text-sm text-zinc-200/80 mt-2 line-clamp-4">{t(gpt.description) || gpt.description}</p>
+        <p className={`text-sm mt-2 line-clamp-4 ${theme==='gold'?'text-zinc-200':'text-zinc-200/80'}`}>{t(gpt.description) || gpt.description}</p>
 
         <div className="mt-6 space-y-3">
           {reviews.map((r, i) => (
@@ -87,7 +96,7 @@ function GPTCard({ gpt, used, plan, onUsed }) {
           ))}
         </div>
 
-        <Link to={`/gpt/${gpt.id}`} className="text-xs text-yellow-500 mt-2">
+        <Link to={`/gpt/${gpt.id}`} className={`text-xs mt-2 ${theme==='gold'?'text-yellow-400':'text-indigo-400'}`}>
           {t("viewReviews") || "View Reviews"}
         </Link>
 

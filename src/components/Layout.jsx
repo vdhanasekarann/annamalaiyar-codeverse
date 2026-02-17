@@ -52,14 +52,18 @@ export default function Layout() {
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-7xl mx-auto px-4 py-6">
             <div
-              className="glass p-6 rounded-3xl min-h-screen"
+              className="glass p-6 rounded-3xl min-h-screen relative overflow-hidden"
               style={{
                 backgroundImage: bg ? `url('${bg}')` : "url('/bg-galaxy.jpg')",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
             >
-              <Outlet />
+              {/* full-bleed blur overlay for consistent glass effect */}
+              <div className="absolute inset-0 bg-black/30 backdrop-blur-[12px] pointer-events-none" />
+              <div className="relative z-10">
+                <Outlet />
+              </div>
             </div>
             <Link
               to="/prompt-assistant"
@@ -70,13 +74,6 @@ export default function Layout() {
           </div>
         </main>
       </div>
-
-      {/* Right slim secondary sidebar */}
-      <aside className="hidden lg:flex lg:flex-col w-20 items-center gap-4 py-6 bg-white/3 backdrop-blur border-l border-white/6">
-        <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center text-white">A</div>
-        <button className="w-10 h-10 rounded-xl bg-white/6 flex items-center justify-center hover:bg-white/10">🔔</button>
-        <button className="w-10 h-10 rounded-xl bg-white/6 flex items-center justify-center hover:bg-white/10">⚙️</button>
-      </aside>
     </div>
   );
 }

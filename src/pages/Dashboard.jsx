@@ -10,6 +10,7 @@ import { apiFetch } from "../lib/apiFetch";
 import { useUsage } from "../hooks/useUsage";
 import { useAuth } from "../context/AuthContext";
 import { useTranslation } from "react-i18next";
+import AnimatedStats from "../components/AnimatedStats";
 
 export default function DashboardPage() {
   const [localUsage, setUsage] = useState({});
@@ -112,6 +113,12 @@ useEffect(() => {
       </div>
     );
   }
+
+  const sampleStats = [
+    { key: 'active', label: t('activeDevices')||'Active Devices', value: (devices && devices.length) || 0 },
+    { key: 'gpts', label: t('gptApps')||'GPT Apps', value: GPTS.length },
+    { key: 'usage', label: 'Usage', value: Object.values(usage||{}).reduce((a,b)=>a+b,0) },
+  ];
 
   return (
     <>
@@ -222,6 +229,9 @@ useEffect(() => {
         <AppGrid gpts={recentGPTs} plan={user.plan} usage={usage} onUsed={refresh} />
       </>
     )}
+
+    {/* Animated stats */}
+    <AnimatedStats stats={sampleStats} />
 
 
     <h2 className="text-lg font-semibold mt-12 mb-6">{t("gptApps") || "All GPT Apps"}</h2>

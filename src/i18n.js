@@ -13,6 +13,8 @@ const resources = {
       users: "Users",
       aiInsight: "AI Insight",
       aiInsightText: "You are most active in Education category apps. Try more Lifestyle GPTs to balance your usage.",
+      active: "Active",
+      usage: "Usage",
       recent: "Recently Used",
       home: "Home",
       gptApps: "GPT Apps",
