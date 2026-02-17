@@ -86,6 +86,15 @@
   background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
 }
 
+/* Reusable global glass-panel for cards, panels, modals and dropdowns */
+.glass-panel {
+  border-radius: 1rem;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,215,0,0.35);
+  box-shadow: 0 0 25px rgba(255,215,0,0.25);
+}
 /* Page container baseline - not blurred */
 .page-container {
   background: transparent;

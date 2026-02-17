@@ -48,15 +48,14 @@ function GPTCard({ gpt, used, plan, onUsed, theme = 'pink' }) {
     );
 
     if (onUsed) await onUsed();
-    navigate(`/gpt/${gpt.id}`);
+    navigate(`/gpt/${gpt.slug || gpt.id}`);
   };
 
   return (
     <GlassCard
       theme={theme === 'gold' ? 'gold' : 'pink'}
-      className="relative p-6 transform-gpu will-change-transform perspective-1000 overflow-hidden transition-transform duration-200 hover:scale-[1.04]"
-      onClick={(e) => { if (e.target.tagName === 'A') return; click(); }}
-      style={{ minHeight: 280 }}
+      className="relative p-6 transform-gpu will-change-transform perspective-1000 overflow-hidden transition-transform duration-200 hover:scale-[1.04] min-h-[280px]"
+      onClick={(e) => { if (e.target && e.target.closest && e.target.closest('a,button')) return; click(); }}
     >
       <div className="gpt-badge">{gpt.category || 'GPT'}</div>
       <div className="pointer-events-none absolute inset-0 rounded-3xl overflow-hidden">
@@ -74,8 +73,8 @@ function GPTCard({ gpt, used, plan, onUsed, theme = 'pink' }) {
         </div>
       {/* IMAGE CONTAINER */}
       <div className="flex items-center justify-center mt-2">
-        <div className="w-18 h-18 md:w-20 md:h-20 flex items-center justify-center rounded-xl overflow-hidden">
-          <img src={gpt.logo} alt={gpt.title} loading="lazy" className="w-18 h-18 md:w-20 md:h-20 object-contain" />
+        <div className="w-20 h-20 md:w-20 md:h-20 flex items-center justify-center rounded-xl overflow-hidden">
+          <img src={gpt.logo} alt={gpt.title} loading="lazy" className="w-20 h-20 object-contain mx-auto" />
         </div>
       </div>
 
@@ -94,9 +93,13 @@ function GPTCard({ gpt, used, plan, onUsed, theme = 'pink' }) {
           ))}
         </div>
 
-        <Link to={`/gpt/${gpt.id}`} className={`text-xs mt-2 ${theme==='gold'?'text-yellow-400':'text-indigo-400'}`}>
+        <button
+          onClick={(e)=>{ e.stopPropagation(); navigate(`/reviews/${gpt.slug || gpt.id}`); }}
+          className={`text-xs mt-2 underline ${theme==='gold'?'text-yellow-400':'text-indigo-400'}`}
+          aria-label={t('viewReviews') || 'View Reviews'}
+        >
           {t("viewReviews") || "View Reviews"}
-        </Link>
+        </button>
 
         <div className="text-xs mt-2 text-zinc-300">
           {locked

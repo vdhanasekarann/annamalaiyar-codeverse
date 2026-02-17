@@ -48,7 +48,7 @@ export default function Login() {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex flex-col md:flex-row">
 
       {/* LEFT PANEL - on mobile this stacks above the form */}
       <div className="w-full md:w-1/2 relative flex-shrink-0">
@@ -98,6 +98,16 @@ export default function Login() {
             className="w-full bg-black text-white p-3 rounded mb-3"
           >
             {t("sendMagicLink")}
+          </button>
+
+          <button
+            onClick={() => {
+              const el = document.getElementById('email-input');
+              if (el) el.focus();
+            }}
+            className="w-full mt-2 bg-yellow-500 text-black p-3 rounded"
+          >
+            {t('continue') || 'Continue'}
           </button>
 
           <p className="text-xs opacity-50 text-center mt-6">{t("secureLoginLine")}</p>

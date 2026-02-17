@@ -6,6 +6,9 @@ const resources = {
   en: {
     translation: {
       welcome: "Welcome",
+      dashboard: {
+        slogan: "Build faster with AI-powered tools."
+      },
       devices: "Active Devices",
       activeDevices: "Active Devices",
       aiTools: "AI Tools ▾",
