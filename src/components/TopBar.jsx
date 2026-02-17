@@ -33,13 +33,14 @@ export default function TopBar({ onOpenMobileMenu }) {
   const desktopInputRef = React.useRef(null);
 
   return (
-    <header className="glass-dark flex items-center justify-between px-4 h-14 border-b border-white/10">
+    <header className="glass-dark flex items-center justify-between px-4 h-14 border-b border-white/10 z-50">
 
       {/* LEFT */}
       <div className="flex items-center gap-2">
         <button
           className="md:hidden p-2 rounded hover:bg-white/10"
           onClick={onOpenMobileMenu}
+          aria-label={t('openMenu')||'Open menu'}
         >
           ☰
         </button>
@@ -88,9 +89,14 @@ export default function TopBar({ onOpenMobileMenu }) {
       <div />
 
       {mobileSearchOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 px-4">
-          <div className="w-full max-w-md pointer-events-auto">
-            <div className="bg-zinc-900/90 p-4 rounded-xl backdrop-blur border border-white/10 pointer-events-auto">
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-[999] flex items-start justify-center pt-24 px-4 bg-black/30 backdrop-blur-sm"
+          onClick={() => setMobileSearchOpen(false)}
+        >
+          <div className="w-full max-w-md pointer-events-auto" onClick={(e)=>e.stopPropagation()}>
+            <div className="bg-zinc-900/95 p-4 rounded-xl shadow-lg pointer-events-auto">
               <div className="flex gap-2">
                 <input
                   ref={inputRef}
@@ -101,11 +107,12 @@ export default function TopBar({ onOpenMobileMenu }) {
                       setMobileSearchOpen(false);
                       navigate(`/gpts?q=${query}`);
                     }
+                    if (e.key === 'Escape') setMobileSearchOpen(false);
                   }}
                   placeholder={t("searchPlaceholder") || "Search GPTs..."}
                   className="w-full bg-transparent border border-white/10 rounded px-3 py-2"
                 />
-                <button onClick={() => setMobileSearchOpen(false)} className="px-3 py-2">Close</button>
+                <button onClick={() => setMobileSearchOpen(false)} className="px-3 py-2">{t('close')||'Close'}</button>
               </div>
             </div>
           </div>
@@ -152,9 +159,8 @@ export default function TopBar({ onOpenMobileMenu }) {
           )}
 
           {/* Logout icon (also keep text for desktop) */}
-            <button onClick={logout} title={t('logout') || 'Logout'} className="flex items-center gap-2">
-              <span className="md:hidden text-red-400"><LogOut size={16} /></span>
-              <span className="hidden md:inline text-red-400 text-xs flex items-center gap-2"><LogOut size={14} /> {t('logout') || 'Logout'}</span>
+            <button onClick={logout} title={t('logout') || 'Logout'} className="flex items-center" aria-label={t('logout')||'Logout'}>
+              <LogOut size={18} className="text-red-400" />
             </button>
         </div>
       )}

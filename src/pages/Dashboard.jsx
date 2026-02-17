@@ -122,78 +122,82 @@ useEffect(() => {
 
   return (
     <>
-      <div className="relative">
-        <WelcomeBanner user={user} />
-
-        <div className="absolute top-6 right-6 z-40">
-          <div className="relative">
+      <div className="space-y-4">
+        {/* Actions row: floating actions, placed in flow to avoid overlap on mobile */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 z-40">
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-zinc-200 bg-zinc-800/60 px-3 py-2 rounded cursor-pointer">
+              {t('changeBg') || 'Change BG'}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={async (e) => {
+                  const f = e.target.files && e.target.files[0];
+                  if (!f) return;
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    try {
+                      const key = `bg_${user.email}`;
+                      localStorage.setItem(key, reader.result);
+                      window.dispatchEvent(new Event('bgChange'));
+                    } catch (err) {
+                      console.error(err);
+                    }
+                  };
+                  reader.readAsDataURL(f);
+                }}
+              />
+            </label>
             <button
-              onClick={(e)=>{e.stopPropagation(); setOpen(o=>!o);}}
-              className="px-4 py-2 bg-zinc-800 rounded-lg text-sm hover:bg-zinc-700 shadow"
+              onClick={() => {
+                try {
+                  const key = `bg_${user.email}`;
+                  localStorage.removeItem(key);
+                  window.dispatchEvent(new Event('bgChange'));
+                } catch (e) {}
+              }}
+              className="text-xs text-zinc-200 bg-zinc-800/40 px-3 py-2 rounded"
             >
-              {t("aiTools") || "AI Tools ▾"}
+              {t('clearBg') || 'Clear BG'}
             </button>
-            {open && (
-              <div className="absolute right-0 mt-2 w-44 glass-clear">
-                {[
-                  ["ChatGPT", "https://chat.openai.com"],
-                  ["Claude", "https://claude.ai"],
-                  ["Gemini", "https://gemini.google.com"],
-                  ["Copilot", "https://copilot.microsoft.com"],
-                  ["CooklyHub", "https://cooklyhub.com"],
-                  ["CA-sentinel", "https://ca.kannizconites.com"],
-                ].map(([name, url]) => (
-                  <a key={name} href={url} target="_blank" rel="noreferrer" className="block px-4 py-2 hover:bg-indigo-600">
-                    {name}
-                  </a>
-                ))}
-              </div>
-            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <button
+                onClick={(e)=>{e.stopPropagation(); setOpen(o=>!o);}}
+                className="px-4 py-2 bg-zinc-800 rounded-lg text-sm hover:bg-zinc-700 shadow z-40"
+              >
+                {t("aiTools") || "AI Tools ▾"}
+              </button>
+              {open && (
+                <div className="absolute right-0 mt-2 w-44 glass-clear">
+                  {[
+                    ["ChatGPT", "https://chat.openai.com"],
+                    ["Claude", "https://claude.ai"],
+                    ["Gemini", "https://gemini.google.com"],
+                    ["Copilot", "https://copilot.microsoft.com"],
+                    ["CooklyHub", "https://cooklyhub.com"],
+                    ["CA-sentinel", "https://ca.kannizconites.com"],
+                  ].map(([name, url]) => (
+                    <a key={name} href={url} target="_blank" rel="noreferrer" className="block px-4 py-2 hover:bg-indigo-600">
+                      {name}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Background controls */}
-        <div className="absolute top-6 right-36 z-40 flex items-center gap-2">
-          <label className="text-xs text-zinc-200 bg-zinc-800/60 px-3 py-2 rounded cursor-pointer">
-            {t('changeBg') || 'Change BG'}
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={async (e) => {
-                const f = e.target.files && e.target.files[0];
-                if (!f) return;
-                const reader = new FileReader();
-                reader.onload = () => {
-                  try {
-                    const key = `bg_${user.email}`;
-                    localStorage.setItem(key, reader.result);
-                    window.dispatchEvent(new Event('bgChange'));
-                  } catch (err) {
-                    console.error(err);
-                  }
-                };
-                reader.readAsDataURL(f);
-              }}
-            />
-          </label>
-          <button
-            onClick={() => {
-              try {
-                const key = `bg_${user.email}`;
-                localStorage.removeItem(key);
-                window.dispatchEvent(new Event('bgChange'));
-              } catch (e) {}
-            }}
-            className="text-xs text-zinc-200 bg-zinc-800/40 px-3 py-2 rounded"
-          >
-            {t('clearBg') || 'Clear BG'}
-          </button>
+        <div className="z-10">
+          <WelcomeBanner user={user} />
         </div>
-      </div>
-      <h2 className="text-lg font-semibold mt-12 mb-4">{t("activeDevices") || "Active Devices"}</h2>
 
-    <div className="grid gap-4">
+        <h2 className="text-lg font-semibold mt-2 mb-4 z-10">{t("activeDevices") || "Active Devices"}</h2>
+
+        <div className="grid gap-4">
           {devices && devices.length > 0 ? (
     devices.map((d) => (
       <div key={d.device_id} className="glass-gold p-4 flex justify-between">
@@ -247,6 +251,7 @@ useEffect(() => {
         {t("aiInsightText") ||
           "You are most active in Education category apps. Try more Lifestyle GPTs to balance your usage."}
       </p>
+    </div>
     </div>
 
   </>

@@ -148,7 +148,7 @@ export default function SideBar({ mobile, onNavigate }) {
         ? { onMouseEnter: () => setHovered(true), onMouseLeave: () => setHovered(false) }
         : {})}
       className={`glass-dark h-screen relative overflow-hidden text-white flex flex-col before:absolute before:inset-0 before:bg-gradient-to-br before:from-indigo-600/10 before:via-purple-600/5 before:to-transparent before:pointer-events-none border-r border-white/6 transition-all duration-300 ${
-        expanded ? "w-[240px] shadow-[0_8px_48px_rgba(99,102,241,0.15)]" : "w-16"
+        expanded ? "w-[240px] shadow-[0_8px_48px_rgba(99,102,241,0.15)]" : "w-[72px]"
       }`}
     >
 

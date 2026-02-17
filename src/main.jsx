@@ -16,7 +16,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <SidebarProvider>
         <SearchProvider>
           <ErrorBoundary>
-            <I18nextProvider i18n={i18n}>
+            <I18nextProvider i18n={i18n} key={i18n.language}>
               <App />
             </I18nextProvider>
           </ErrorBoundary>

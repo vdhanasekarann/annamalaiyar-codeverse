@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState } from 'react';
 const SidebarContext = createContext();
 
 export function SidebarProvider({ children }) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const [hovered, setHovered] = useState(false);
   const [locked, setLocked] = useState(false);
 

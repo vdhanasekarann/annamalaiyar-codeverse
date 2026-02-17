@@ -56,13 +56,11 @@ function GPTCard({ gpt, used, plan, onUsed, theme = 'pink' }) {
         if (e.target.tagName === "A") return;
         click();
       }}
-      className={clsx("relative p-6 transform-gpu will-change-transform perspective-1000 rounded-3xl overflow-hidden", {
-        'gptcard-gold gptcard-gloss glass-gold': theme === 'gold',
-        'gptcard-pink glass-pink': theme === 'pink'
+      className={clsx("relative p-6 transform-gpu will-change-transform perspective-1000 rounded-3xl overflow-hidden transition-transform duration-300", {
+        'glass-gold bg-black/30 border border-yellow-400/20 shadow-[0_0_30px_rgba(255,215,0,0.15)] hover:scale-102 hover:shadow-[0_0_50px_rgba(255,215,0,0.25)]': theme === 'gold',
+        'glass-pink bg-pink-500/10 border border-pink-400/30 shadow-[0_0_30px_rgba(236,72,153,0.25)] hover:scale-102': theme === 'pink'
       })}
-      style={{
-        minHeight: 280,
-      }}
+      style={{ minHeight: 280 }}
     >
       <div className="gpt-badge">{gpt.category || 'GPT'}</div>
       <div className="pointer-events-none absolute inset-0 rounded-3xl overflow-hidden">
@@ -79,9 +77,9 @@ function GPTCard({ gpt, used, plan, onUsed, theme = 'pink' }) {
           )}
         </div>
       {/* IMAGE CONTAINER */}
-      <div className={`h-44 md:h-52 rounded-xl overflow-hidden flex items-center justify-center p-4 border ${theme==='gold' ? 'bg-gradient-to-br from-black/40 to-black/10 border-yellow-600/10' : 'bg-gradient-to-br from-indigo-900/10 via-purple-800/10 to-transparent border-white/3'}`}>
+      <div className={`aspect-square md:aspect-[3/2] rounded-xl overflow-hidden flex items-center justify-center p-4 ${theme==='gold' ? 'bg-black/30 border-yellow-400/10' : 'bg-pink-500/10 border-pink-400/30'}`}>
         <div className="w-full h-full flex items-center justify-center">
-          <img src={gpt.logo} alt={gpt.title} loading="lazy" className={`max-h-28 max-w-28 object-contain rounded-md p-2 ${theme==='gold'?'bg-black/80 border border-yellow-500/20':'bg-white/6'}`} />
+          <img src={gpt.logo} alt={gpt.title} loading="lazy" className="object-contain max-h-full max-w-full" />
         </div>
       </div>
 
