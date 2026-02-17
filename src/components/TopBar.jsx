@@ -163,7 +163,11 @@ export default function TopBar({ onOpenMobileMenu }) {
 
           <select
             value={i18n.language}
-            onChange={(e)=>i18n.changeLanguage(e.target.value)}
+            onChange={(e)=>{
+              i18n.changeLanguage(e.target.value);
+              // force remount via provider key handled in main.jsx
+            }}
+            aria-label={t('selectLanguage')||'Language'}
           >
             <option value="en">EN</option>
             <option value="ta">தமிழ்</option>

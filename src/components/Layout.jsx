@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, Outlet, Navigate, useNavigate, useLocation } from "react-router-dom";
 import SideBar from "./SideBar";
+import DoubleSidebar from "./ui/DoubleSidebar";
 import TopBar from "./TopBar";
 import { useAuth } from "../context/AuthContext";
 import MobileDrawer from "./MobileDrawer";
@@ -62,8 +63,8 @@ export default function Layout() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-[#050816] to-[#0b0b0b]">
-      {/* Left Sidebar is fixed; SideBar will overlay and main area adds left padding */}
-      <SideBar />
+      {/* Left Double Sidebar (icon rail + expanded panel) */}
+      <DoubleSidebar />
 
       {/* Mobile Drawer */}
       <MobileDrawer open={mobileOpen} onClose={() => setMobileOpen(false)}>
