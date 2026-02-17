@@ -61,15 +61,7 @@ export default function Login() {
             Join 100,000+ minds already building the future.<br/>
             Start free. Upgrade anytime.
           </p>
-          <button
-            onClick={() => {
-              const el = document.getElementById('email-input');
-              if (el) el.focus();
-            }}
-            className="mt-2 inline-flex items-center px-4 py-2 rounded-lg bg-yellow-500 text-black font-semibold hover:opacity-95"
-          >
-            Continue →
-          </button>
+          {/* Hero has no Continue button on mobile - action belongs inside the form */}
         </div>
       </div>
 
@@ -101,10 +93,7 @@ export default function Login() {
           </button>
 
           <button
-            onClick={() => {
-              const el = document.getElementById('email-input');
-              if (el) el.focus();
-            }}
+            onClick={() => navigate('/dashboard')}
             className="w-full mt-2 bg-yellow-500 text-black p-3 rounded"
           >
             {t('continue') || 'Continue'}

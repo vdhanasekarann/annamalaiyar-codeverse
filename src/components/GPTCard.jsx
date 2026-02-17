@@ -48,13 +48,24 @@ function GPTCard({ gpt, used, plan, onUsed, theme = 'pink' }) {
     );
 
     if (onUsed) await onUsed();
-    navigate(`/gpt/${gpt.slug || gpt.id}`);
+    // Primary navigation opens the actual GPT app URL in a new tab if provided
+    const targetUrl = gpt.url || (`/gpt/${gpt.slug || gpt.id}`);
+    try {
+      window.open(targetUrl, "_blank");
+    } catch (e) {
+      // fallback to client-side navigation
+      navigate(`/gpt/${gpt.slug || gpt.id}`);
+    }
   };
 
+  // Apply explicit glass token classes per page theme (gold for dashboard, pink for GPTs page)
+  const cardClasses = theme === 'gold' ? 
+    "rounded-2xl backdrop-blur-xl bg-white/5 border border-yellow-400/40 shadow-[0_0_40px_rgba(255,215,0,0.15)] hover:scale-[1.02] transition relative p-6 overflow-hidden cursor-pointer z-10" :
+    "rounded-2xl backdrop-blur-xl bg-white/5 border border-pink-400/40 shadow-[0_0_40px_rgba(255,0,150,0.18)] hover:scale-[1.02] transition relative p-6 overflow-hidden cursor-pointer z-10";
+
   return (
-    <GlassCard
-      theme={theme === 'gold' ? 'gold' : 'pink'}
-      className="relative p-6 transform-gpu will-change-transform perspective-1000 overflow-hidden transition-transform duration-200 hover:scale-[1.04] min-h-[280px]"
+    <div
+      className={cardClasses}
       onClick={(e) => { if (e.target && e.target.closest && e.target.closest('a,button')) return; click(); }}
     >
       <div className="gpt-badge">{gpt.category || 'GPT'}</div>
@@ -94,12 +105,12 @@ function GPTCard({ gpt, used, plan, onUsed, theme = 'pink' }) {
         </div>
 
         <button
-          onClick={(e)=>{ e.stopPropagation(); navigate(`/reviews/${gpt.slug || gpt.id}`); }}
-          className={`text-xs mt-2 underline ${theme==='gold'?'text-yellow-400':'text-indigo-400'}`}
-          aria-label={t('viewReviews') || 'View Reviews'}
-        >
-          {t("viewReviews") || "View Reviews"}
-        </button>
+            onClick={(e)=>{ e.stopPropagation(); navigate(`/reviews/${gpt.slug || gpt.id}`); }}
+            className={`text-xs mt-2 underline ${theme==='gold'?'text-yellow-400':'text-indigo-400'}`}
+            aria-label={t('viewReviews') || 'View Reviews'}
+          >
+            {t("viewReviews") || "View Reviews"}
+          </button>
 
         <div className="text-xs mt-2 text-zinc-300">
           {locked

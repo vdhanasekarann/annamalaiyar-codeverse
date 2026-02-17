@@ -111,7 +111,7 @@ useEffect(() => {
             <h1 className="text-lg md:text-3xl font-bold mb-1 break-words">
               {t("welcome") || "Welcome back"}, <span className="truncate">{user.email.split("@")[0]}</span>
             </h1>
-            <p className="opacity-90 max-w-xl">{t('dashboard.slogan') || 'Build faster with AI-powered tools.'}</p>
+            <p className="opacity-90 max-w-xl">{t('welcomeSubtitle') || 'Your AI workspace dashboard'}</p>
           </div>
         </div>
       </div>

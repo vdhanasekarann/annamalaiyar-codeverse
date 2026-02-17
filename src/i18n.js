@@ -9,6 +9,7 @@ const resources = {
       dashboard: {
         slogan: "Build faster with AI-powered tools."
       },
+      welcomeSubtitle: "Your AI workspace dashboard",
       devices: "Active Devices",
       activeDevices: "Active Devices",
       aiTools: "AI Tools ▾",
