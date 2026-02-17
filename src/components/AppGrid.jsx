@@ -26,11 +26,6 @@ export default function AppGrid({ plan, usage = {}, onUsed, limit, gpts = null }
             theme={theme}
           />
         ))}
-              plan={plan}
-              onUsed={onUsed}
-            />
-          </div>
-        ))}
       </div>
     </div>
   );
