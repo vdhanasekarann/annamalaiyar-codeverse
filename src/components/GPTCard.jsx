@@ -106,7 +106,7 @@ function GPTCard({ gpt, used, plan, onUsed, theme = 'pink' }) {
             : t("unlimited") || "Unlimited"}
         </div>
       </div>
-    </div>
+    </GlassCard>
   );
 }
 
