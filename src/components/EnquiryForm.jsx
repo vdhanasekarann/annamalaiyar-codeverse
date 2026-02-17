@@ -1,5 +1,6 @@
 // src/components/EnquiryForm.jsx
 import { useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { Navigate, Link } from "react-router-dom";
 import { apiFetch } from "../lib/apiFetch";
 
@@ -20,7 +21,7 @@ export default function EnquiryForm() {
     };
 
     if (!payload.name || !payload.email || !payload.details) {
-      alert("Please fill required fields.");
+      alert(t('pleaseFillRequired') || "Please fill required fields.");
       setLoading(false);
       return;
     }
@@ -35,11 +36,11 @@ export default function EnquiryForm() {
       const result = await resp.json();
       if (!resp.ok) throw new Error(result.error || "Failed");
 
-      alert("Thank you! Your enquiry was submitted.");
+      alert(t('enquiryThanks') || "Thank you! Your enquiry was submitted.");
       e.target.reset();
     } catch (err) {
       console.error(err);
-      alert("Something went wrong. Please try again.");
+      alert(t('errorTryAgain') || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -49,12 +50,12 @@ export default function EnquiryForm() {
     <form id="enquiryForm" onSubmit={handleSubmit}>
       <div className="form-row">
         <div className="form-field">
-          <label>Full Name</label>
+          <label>{t('fullName') || 'Full Name'}</label>
           <input name="name" required />
         </div>
 
         <div className="form-field">
-          <label>Email</label>
+          <label>{t('email') || 'Email'}</label>
           <input name="email" type="email" required />
         </div>
       </div>
@@ -79,13 +80,13 @@ export default function EnquiryForm() {
       </div>
 
       <div className="form-field">
-        <label>Project Details</label>
+        <label>{t('projectDetails') || 'Project Details'}</label>
         <textarea name="details" required />
       </div>
 
       <div className="enquiry-actions">
         <button type="submit" disabled={loading}>
-          {loading ? "Sending..." : "Send Enquiry"}
+          {loading ? (t('sending')||'Sending...') : (t('sendEnquiryBtn')||'Send Enquiry')}
         </button>
       </div>
     </form>

@@ -2,6 +2,7 @@ import { GPTS } from "../data/gpts";
 import GPTCard from "../components/GPTCard";
 import { useUsage } from "../hooks/useUsage";
 import { useEffect, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { apiFetch } from "../lib/apiFetch";
 import { Link, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -33,7 +34,9 @@ export default function GPTsPage() {
   const { usage, refresh } = useUsage(user?.email);
   const categories = [...new Set(GPTS.map(g => g.category))];
 
-  if (!user) return <div>Loading...</div>;
+  const { t } = useTranslation();
+
+  if (!user) return <div>{t('loading') || 'Loading...'}</div>;
 
   return (
     <div className="flex gap-2 mb-6 flex-wrap">

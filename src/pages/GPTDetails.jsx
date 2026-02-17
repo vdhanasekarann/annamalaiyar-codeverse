@@ -14,7 +14,7 @@ export default function GPTDetails() {
   }, [id]);
 
   return (
-    <div className="glass min-h-screen bg-[#0f0f0f] text-white p-6">
+    <div className="glass-dark min-h-screen bg-[#0f0f0f] text-white p-6">
       <button onClick={() => navigate(-1)} className="mb-4 text-indigo-400">
         ← Back
       </button>

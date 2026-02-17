@@ -11,12 +11,14 @@ import MagicLogin from "./pages/MagicLogin";
 import AuthGate from "./components/AuthGate";
 import PromptAssistant from "./pages/PromptAssistant";
 import React, { Suspense } from "react";
+import { useTranslation } from 'react-i18next';
 import GPTDetails from "./pages/GPTDetails";
 import Terms from "./pages/Terms";
 
 const GPTsPage = React.lazy(() => import("./pages/GPTs"));
 
 export default function App() {
+  const { t } = useTranslation();
   return (
     <BrowserRouter>
       <Routes>
@@ -38,7 +40,7 @@ export default function App() {
           <Route
             path="/gpts"
             element={
-              <Suspense fallback={<div>Loading...</div>}>
+              <Suspense fallback={<div>{t('loading') || 'Loading...'}</div>}>
                 <GPTsPage />
               </Suspense>
             }

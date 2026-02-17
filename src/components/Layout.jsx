@@ -33,6 +33,30 @@ export default function Layout() {
     };
   }, [user]);
 
+  // Apply background image to the document body (page background only)
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      if (bg) {
+        document.body.style.backgroundImage = `url('${bg}')`;
+        document.body.style.backgroundSize = "cover";
+        document.body.style.backgroundPosition = "center";
+      } else {
+        document.body.style.backgroundImage = "url('/bg-galaxy.jpg')";
+        document.body.style.backgroundSize = "cover";
+        document.body.style.backgroundPosition = "center";
+      }
+      // ensure body doesn't get blurred
+      document.body.style.backdropFilter = "";
+    }
+    return () => {
+      if (typeof document !== "undefined") {
+        document.body.style.backgroundImage = "";
+        document.body.style.backgroundSize = "";
+        document.body.style.backgroundPosition = "";
+      }
+    };
+  }, [bg]);
+
   return (
     <div className="flex h-screen overflow-hidden bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-[#050816] to-[#0b0b0b]">
       {/* Left Sidebar */}
@@ -51,16 +75,7 @@ export default function Layout() {
 
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-7xl mx-auto px-4 py-6">
-            <div
-              className="glass p-6 rounded-3xl min-h-screen relative overflow-hidden"
-              style={{
-                backgroundImage: bg ? `url('${bg}')` : "url('/bg-galaxy.jpg')",
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-            >
-              {/* full-bleed blur overlay for consistent glass effect */}
-              <div className="absolute inset-0 bg-black/30 backdrop-blur-[12px] pointer-events-none" />
+            <div className="page-container p-6 rounded-3xl min-h-screen relative overflow-hidden">
               <div className="relative z-10">
                 <Outlet />
               </div>

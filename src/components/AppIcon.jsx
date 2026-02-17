@@ -37,7 +37,7 @@ export default function AppIcon({ gpt, plan }) {
       <div className="mt-2 text-xs">
         {isPremium ? (
           <span className="text-green-300">Unlimited</span>
-        ) : locked ? (
+        <div className="p-2 rounded-md glass-clear transition">
           <span className="text-red-300">🔒 Limit reached</span>
         ) : (
           <span className="text-green-300">

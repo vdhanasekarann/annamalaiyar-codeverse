@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { API_BASE } from "../../config/api";
 import { getDeviceId } from "../../utils/device";
 import DeviceRow from "./DeviceRow";
@@ -24,8 +25,10 @@ export default function DeviceList() {
     load();
   }, []);
 
+  const { t } = useTranslation();
+
   if (loading) {
-    return <div className="text-white p-6">Loading devices…</div>;
+    return <div className="text-white p-6">{t('loadingDevices')||'Loading devices…'}</div>;
   }
 
   return (

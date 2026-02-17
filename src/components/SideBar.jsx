@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate, Link, useLocation, Navigate } from "react-router-dom";
 import { apiFetch } from "../lib/apiFetch";
 import { useAuth } from "../context/AuthContext";
+import { useSidebar } from "../context/SidebarContext";
 import { useTranslation } from "react-i18next";
 
 const linkClass = (isActive) => `px-3 py-2 rounded-xl transition ${isActive ? "bg-gradient-to-r from-indigo-500 to-purple-600 shadow" : "hover:bg-white/10"}`;
@@ -15,7 +16,8 @@ export default function SideBar({ mobile, onNavigate }) {
   const { user } = useAuth();
   const { t } = useTranslation();
   const [avatar, setAvatar] = useState(null);
-  const [expanded, setExpanded] = useState(!!mobile);
+  const { collapsed, hovered, locked, setHovered, setCollapsed, lock, unlock, toggleCollapse } = useSidebar();
+  const expanded = locked || hovered || !collapsed || !!mobile;
   const blobRef = useRef(null);
   const blobPathRef = useRef(null);
   const hamburgerRef = useRef(null);
@@ -143,10 +145,10 @@ export default function SideBar({ mobile, onNavigate }) {
   return (
     <aside
       {...(!mobile
-        ? { onMouseEnter: () => setExpanded(true), onMouseLeave: () => setExpanded(false) }
+        ? { onMouseEnter: () => setHovered(true), onMouseLeave: () => setHovered(false) }
         : {})}
-      className={`h-screen relative overflow-hidden text-white flex flex-col before:absolute before:inset-0 before:bg-gradient-to-br before:from-indigo-600/10 before:via-purple-600/5 before:to-transparent before:pointer-events-none backdrop-blur-2xl bg-white/3 border-r border-white/6 shadow-[0_8px_48px_rgba(99,102,241,0.15)] transition-all duration-300 ${
-        expanded ? "w-[240px]" : "w-16"
+      className={`glass-dark h-screen relative overflow-hidden text-white flex flex-col before:absolute before:inset-0 before:bg-gradient-to-br before:from-indigo-600/10 before:via-purple-600/5 before:to-transparent before:pointer-events-none border-r border-white/6 transition-all duration-300 ${
+        expanded ? "w-[240px] shadow-[0_8px_48px_rgba(99,102,241,0.15)]" : "w-16"
       }`}
     >
 
@@ -154,6 +156,9 @@ export default function SideBar({ mobile, onNavigate }) {
       <div className="p-4 border-b border-white/10 font-semibold text-lg flex items-center gap-3">
         <div className="w-9 h-9 rounded-xl bg-indigo-500/20 flex items-center justify-center text-white">CV</div>
         {expanded && <div>{t("brand") || "CodeVerse AI OS"}</div>}
+        {expanded && (
+          <button onClick={toggleCollapse} className="ml-auto text-xs text-indigo-200 px-2 py-1 rounded hover:bg-white/6">{collapsed ? 'Open' : 'Collapse'}</button>
+        )}
       </div>
 
       {/* SVG blob for curved hover */}

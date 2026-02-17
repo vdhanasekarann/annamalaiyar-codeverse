@@ -5,7 +5,7 @@ import { Navigate, useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import clsx from 'clsx';
 
-function GPTCard({ gpt, used, plan, onUsed, theme = 'gold' }) {
+function GPTCard({ gpt, used, plan, onUsed, theme = 'pink' }) {
   const { t } = useTranslation();
   const limit = plan === "free" ? parseLimit(gpt.freeLimit) : Infinity;
   const locked = plan === "free" && used >= limit;
@@ -57,8 +57,8 @@ function GPTCard({ gpt, used, plan, onUsed, theme = 'gold' }) {
         click();
       }}
       className={clsx("relative p-6 transform-gpu will-change-transform perspective-1000 rounded-3xl overflow-hidden", {
-        'gptcard-gold gptcard-gloss': theme === 'gold',
-        'gptcard-pink': theme === 'pink'
+        'gptcard-gold gptcard-gloss glass-gold': theme === 'gold',
+        'gptcard-pink glass-pink': theme === 'pink'
       })}
       style={{
         minHeight: 280,

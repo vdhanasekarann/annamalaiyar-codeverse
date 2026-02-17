@@ -105,11 +105,11 @@ useEffect(() => {
 
   function WelcomeBanner({ user }) {
     return (
-      <div className="rounded-2xl p-6 mb-10 bg-gradient-to-br from-orange-400 via-indigo-500 to-black">
+      <div className="glass-gold p-6 mb-10">
         <h1 className="text-xl md:text-3xl font-bold mb-2 truncate">
           {t("welcome") || "Welcome back"}, {user.email.split("@")[0]}
         </h1>
-        <p className="opacity-90">Build the future with CodeVerse AI</p>
+        <p className="opacity-90">{t('welcomeSubtitle') || 'Build the future with CodeVerse AI'}</p>
       </div>
     );
   }
@@ -134,7 +134,7 @@ useEffect(() => {
               {t("aiTools") || "AI Tools ▾"}
             </button>
             {open && (
-              <div className="absolute right-0 mt-2 w-44 bg-black/70 backdrop-blur rounded-xl border border-white/10">
+              <div className="absolute right-0 mt-2 w-44 glass-clear">
                 {[
                   ["ChatGPT", "https://chat.openai.com"],
                   ["Claude", "https://claude.ai"],
@@ -155,7 +155,7 @@ useEffect(() => {
         {/* Background controls */}
         <div className="absolute top-6 right-36 z-40 flex items-center gap-2">
           <label className="text-xs text-zinc-200 bg-zinc-800/60 px-3 py-2 rounded cursor-pointer">
-            Change BG
+            {t('changeBg') || 'Change BG'}
             <input
               type="file"
               accept="image/*"
@@ -187,29 +187,29 @@ useEffect(() => {
             }}
             className="text-xs text-zinc-200 bg-zinc-800/40 px-3 py-2 rounded"
           >
-            Clear BG
+            {t('clearBg') || 'Clear BG'}
           </button>
         </div>
       </div>
       <h2 className="text-lg font-semibold mt-12 mb-4">{t("activeDevices") || "Active Devices"}</h2>
 
-<div className="grid gap-4">
-  {devices && devices.length > 0 ? (
+    <div className="grid gap-4">
+          {devices && devices.length > 0 ? (
     devices.map((d) => (
-      <div key={d.device_id} className="bg-zinc-900 rounded-xl p-4 flex justify-between">
+      <div key={d.device_id} className="glass-gold p-4 flex justify-between">
         <div>
           <div className="font-semibold">
             {d.device_name || "Unknown Device"}
           </div>
           <div className="text-xs opacity-60">
-            Last active: {d.last_seen || "Recently"}
+            {t('lastActive')||'Last active'}: {d.last_seen || (t('recently')||'Recently')}
           </div>
         </div>
         <button
           onClick={() => revokeDevice(d.device_id)}
           className="text-red-400"
         >
-          Revoke
+          {t('revoke')||'Revoke'}
         </button>
       </div>
     ))

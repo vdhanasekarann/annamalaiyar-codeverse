@@ -6,6 +6,7 @@ import i18n from "../i18n";
 import { useAuth } from "../context/AuthContext";
 import { useSearch } from "../context/SearchContext";
 import { useTranslation } from "react-i18next";
+import { LogOut } from "lucide-react";
 
 export default function TopBar({ onOpenMobileMenu }) {
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ export default function TopBar({ onOpenMobileMenu }) {
   const desktopInputRef = React.useRef(null);
 
   return (
-    <header className="glass flex items-center justify-between px-4 h-14 border-b border-white/10">
+    <header className="glass-dark flex items-center justify-between px-4 h-14 border-b border-white/10">
 
       {/* LEFT */}
       <div className="flex items-center gap-2">
@@ -44,7 +45,7 @@ export default function TopBar({ onOpenMobileMenu }) {
         </button>
 
         <Link to="/" className="font-semibold text-base">
-          CodeVerse AI OS
+          {t('brand') || 'CodeVerse AI OS'}
         </Link>
       </div>
 
@@ -87,9 +88,9 @@ export default function TopBar({ onOpenMobileMenu }) {
       <div />
 
       {mobileSearchOpen && (
-        <div className="fixed inset-0 z-60 flex items-start justify-center pt-24 px-4">
-          <div className="w-full max-w-md">
-            <div className="bg-zinc-900/90 p-4 rounded-xl backdrop-blur border border-white/10">
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 px-4">
+          <div className="w-full max-w-md pointer-events-auto">
+            <div className="bg-zinc-900/90 p-4 rounded-xl backdrop-blur border border-white/10 pointer-events-auto">
               <div className="flex gap-2">
                 <input
                   ref={inputRef}
@@ -151,10 +152,10 @@ export default function TopBar({ onOpenMobileMenu }) {
           )}
 
           {/* Logout icon (also keep text for desktop) */}
-          <button onClick={logout} title="Logout" className="flex items-center gap-2">
-            <span className="md:hidden">🔓</span>
-            <span className="hidden md:inline text-red-400 text-xs">Logout</span>
-          </button>
+            <button onClick={logout} title={t('logout') || 'Logout'} className="flex items-center gap-2">
+              <span className="md:hidden text-red-400"><LogOut size={16} /></span>
+              <span className="hidden md:inline text-red-400 text-xs flex items-center gap-2"><LogOut size={14} /> {t('logout') || 'Logout'}</span>
+            </button>
         </div>
       )}
     </header>
