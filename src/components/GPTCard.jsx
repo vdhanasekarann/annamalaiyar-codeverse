@@ -3,6 +3,7 @@ import { apiFetch } from "../lib/apiFetch";
 import React from "react";
 import { Navigate, useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import clsx from 'clsx';
 
 function GPTCard({ gpt, used, plan, onUsed, theme = 'gold' }) {
   const { t } = useTranslation();
@@ -55,7 +56,10 @@ function GPTCard({ gpt, used, plan, onUsed, theme = 'gold' }) {
         if (e.target.tagName === "A") return;
         click();
       }}
-      className="relative gptcard-gold gptcard-gloss p-6 transform-gpu will-change-transform perspective-1000"
+      className={clsx("relative p-6 transform-gpu will-change-transform perspective-1000 rounded-3xl overflow-hidden", {
+        'gptcard-gold gptcard-gloss': theme === 'gold',
+        'gptcard-pink': theme === 'pink'
+      })}
       style={{
         minHeight: 280,
       }}

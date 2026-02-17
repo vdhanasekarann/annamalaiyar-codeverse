@@ -2,11 +2,13 @@ import { API_BASE } from "../../config/api";
 import { getDeviceId } from "../../utils/device";
 import { Navigate, Link } from "react-router-dom";
 import { apiFetch } from "../../lib/apiFetch";
+import { useTranslation } from 'react-i18next';
 
 export default function DeviceRow({ device, onRevoked }) {
+  const { t } = useTranslation();
   const revoke = async () => {
     const ok = confirm(
-      "Revoke this device?\n\nYou will be logged out on all devices."
+      (t('revokeConfirm') || 'Revoke this device?') + "\n\n" + (t('revokeConfirmNote') || 'You will be logged out on all devices.')
     );
     if (!ok) return;
 
@@ -21,7 +23,7 @@ export default function DeviceRow({ device, onRevoked }) {
     });
 
     if (res.ok) {
-      alert("Device revoked. You will be logged out.");
+      alert(t('deviceRevoked') || "Device revoked. You will be logged out.");
       await apiFetch("/api/auth/logout", { method: "POST" });
       window.location.href = "/login";
     }

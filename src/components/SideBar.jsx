@@ -41,8 +41,16 @@ export default function SideBar({ mobile, onNavigate }) {
     const blobPath = blobPathRef.current;
     const hamburger = hamburgerRef.current;
     // Respect reduced motion and low-memory devices
-    const prefersReduced = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const lowMemory = typeof navigator !== 'undefined' && navigator.deviceMemory && navigator.deviceMemory < 1.5;
+      if (!blob || !blobPath) return;
+
+      // Respect reduced-motion and low-memory devices
+      if (typeof window !== 'undefined') {
+        try {
+          const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          const lowMemory = navigator.deviceMemory && navigator.deviceMemory < 1.5;
+          if (prefersReduced || lowMemory) return;
+        } catch (e) {}
+      }
     if (prefersReduced || lowMemory) return;
     if (!blob || !blobPath) return;
 
