@@ -19,7 +19,13 @@ export default function SideBar({ mobile, onNavigate }) {
     items.push({ path: "/admin/users", label: t("users") || "Users", icon: "👥" });
   }
 
+  React.useEffect(()=>{
+    const close = ()=>{ if (mobile && onNavigate) onNavigate(); };
+    window.addEventListener('resize', close);
+    return ()=> window.removeEventListener('resize', close);
+  }, [mobile, onNavigate]);
+
   return <DoubleSidebar items={items} mobile={mobile} onNavigate={onNavigate} />;
 }
 
-      
+  

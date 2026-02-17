@@ -48,7 +48,7 @@ function GPTCard({ gpt, used, plan, onUsed, theme = 'pink' }) {
 
     if (onUsed) await onUsed();
     // Primary navigation opens the actual GPT app URL in a new tab if provided
-    const targetUrl = gpt.url || (`/gpt/${gpt.slug || gpt.id}`);
+    const targetUrl = gpt.link ?? gpt.url ?? `/gpt/${gpt.slug || gpt.id}`;
     try {
       window.open(targetUrl, "_blank");
     } catch (e) {

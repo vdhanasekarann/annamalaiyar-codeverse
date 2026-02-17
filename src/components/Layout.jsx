@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, Outlet, Navigate, useNavigate, useLocation } from "react-router-dom";
-import SideBar from "./SideBar";
+import IconSidebar from "./ui/IconSidebar";
+import ExpandSidebar from "./ui/ExpandSidebar";
 import TopBar from "./TopBar";
 import { useAuth } from "../context/AuthContext";
 import MobileDrawer from "./MobileDrawer";
@@ -62,13 +63,18 @@ export default function Layout() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-[#050816] to-[#0b0b0b]">
-      {/* Left Sidebar (user-aware) */}
-      <SideBar />
+      {/* LEFT SIDEBAR - Icon bar + Expandable panel (single source of truth) */}
+      <div className="relative">
+        <IconSidebar />
 
-      {/* Mobile Drawer */}
-      <MobileDrawer open={mobileOpen} onClose={() => setMobileOpen(false)}>
-        <SideBar mobile onNavigate={() => setMobileOpen(false)} />
-      </MobileDrawer>
+        {/* Expanded sidebar responds to sidebar context (hover/locked/collapsed) */}
+        <ExpandSidebar />
+
+        {/* Mobile drawer shows expanded sidebar on small screens */}
+        <MobileDrawer open={mobileOpen} onClose={() => setMobileOpen(false)}>
+          <ExpandSidebar mobile onNavigate={() => setMobileOpen(false)} />
+        </MobileDrawer>
+      </div>
 
       {/* Main area */}
       <div className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ${collapsed ? 'md:pl-16' : 'md:pl-60'}`}>
