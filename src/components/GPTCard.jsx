@@ -58,9 +58,15 @@ function GPTCard({ gpt, used, plan, onUsed, theme = 'pink' }) {
   };
 
   // Apply explicit glass token classes per page theme (gold for dashboard, pink for GPTs page)
-  const cardClasses = theme === 'gold' ? 
-    "rounded-2xl backdrop-blur-xl bg-white/5 border border-yellow-400/40 shadow-[0_0_40px_rgba(255,215,0,0.15)] hover:scale-[1.02] transition relative p-6 overflow-hidden cursor-pointer z-10" :
-    "rounded-2xl backdrop-blur-xl bg-white/5 border border-pink-400/40 shadow-[0_0_40px_rgba(255,0,150,0.18)] hover:scale-[1.02] transition relative p-6 overflow-hidden cursor-pointer z-10";
+  const glassBase =
+ "rounded-3xl backdrop-blur-xl border transition duration-300 relative overflow-hidden cursor-pointer";
+
+const themeStyle =
+ theme === "gold"
+  ? "bg-gradient-to-br from-yellow-300/10 to-white/5 border-yellow-400/40 shadow-[0_0_40px_rgba(255,215,0,0.25)]"
+  : "bg-gradient-to-br from-pink-500/10 to-white/5 border-pink-400/40 shadow-[0_0_40px_rgba(255,0,150,0.25)]";
+
+const cardClasses = `${glassBase} ${themeStyle} hover:scale-[1.03] p-6`;
 
   return (
     <div
@@ -94,6 +100,12 @@ function GPTCard({ gpt, used, plan, onUsed, theme = 'pink' }) {
 
         <p className={`text-sm mt-2 line-clamp-4 ${theme==='gold'?'text-zinc-200':'text-zinc-200/80'}`}>{t(gpt.description) || gpt.description}</p>
 
+        {avg && (
+<div className="text-xs text-yellow-400 mt-1">
+⭐ {avg} ({reviews.length})
+</div>
+)}
+
         <div className="mt-6 space-y-3">
           {reviews.map((r, i) => (
             <div key={r.id || `${gpt.id}-${i}`} className="bg-zinc-900 p-3 rounded">
@@ -104,7 +116,10 @@ function GPTCard({ gpt, used, plan, onUsed, theme = 'pink' }) {
         </div>
 
         <button
-          onClick={(e)=>{ e.stopPropagation(); navigate(`/reviews/${gpt.id}`); }}
+ onClick={(e)=>{
+   e.stopPropagation();
+   navigate(`/reviews/${gpt.id}`);
+ }}
             className={`text-xs mt-2 underline ${theme==='gold'?'text-yellow-400':'text-indigo-400'}`}
             aria-label={t('viewReviews') || 'View Reviews'}
           >

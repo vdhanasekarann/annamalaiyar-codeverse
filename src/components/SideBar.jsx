@@ -4,11 +4,26 @@ import { useAuth } from "../context/AuthContext";
 import { useTranslation } from "react-i18next";
 import DoubleSidebar from "./ui/DoubleSidebar";
 
-export default function SideBar({ mobile, onNavigate }) {
+let sidebarMounted = false;
+
+export default function SideBar({ mobile = false, onNavigate }) {
   const { user } = useAuth();
   const { t } = useTranslation();
-
   const [allowed, setAllowed] = React.useState(true);
+
+  React.useEffect(() => {
+    if (!mobile && sidebarMounted) {
+      setAllowed(false);
+      return;
+    }
+    if (!mobile) sidebarMounted = true;
+
+    return () => {
+      if (!mobile) sidebarMounted = false;
+    };
+  }, [mobile]);
+
+  if (!allowed) return null;
 
   const items = [
     { path: "/dashboard", label: t("home") || "Home", icon: "🏠" },
@@ -16,32 +31,13 @@ export default function SideBar({ mobile, onNavigate }) {
     { path: "/terms", label: t("terms") || "Terms", icon: "📄" },
     { path: "/premium", label: t("premium") || "Premium", icon: "💎" },
   ];
+
   if (user?.role === "admin") {
-    items.push({ path: "/admin/revenue", label: t("revenue") || "Revenue", icon: "📊" });
-    items.push({ path: "/admin/users", label: t("users") || "Users", icon: "👥" });
+    items.push(
+      { path: "/admin/revenue", label: t("revenue") || "Revenue", icon: "📊" },
+      { path: "/admin/users", label: t("users") || "Users", icon: "👥" }
+    );
   }
-
-  React.useEffect(()=>{
-    // prevent duplicate sidebar mounts in the app (guard global)
-    if (typeof window !== 'undefined'){
-      if (!mobile && window.__SIDEBAR_MOUNTED__) {
-        setAllowed(false);
-        return;
-      }
-      if (!mobile) window.__SIDEBAR_MOUNTED__ = true;
-    }
-
-    const close = ()=>{ if (mobile && onNavigate) onNavigate(); };
-    window.addEventListener('resize', close);
-    return ()=>{
-      window.removeEventListener('resize', close);
-      if (typeof window !== 'undefined' && !mobile) delete window.__SIDEBAR_MOUNTED__;
-    };
-  }, [mobile, onNavigate]);
-
-  if (!allowed) return null;
 
   return <DoubleSidebar items={items} mobile={mobile} onNavigate={onNavigate} />;
 }
-
-  
