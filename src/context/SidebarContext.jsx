@@ -1,25 +1,26 @@
-import React, { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState } from "react";
 
 const SidebarContext = createContext();
 
 export function SidebarProvider({ children }) {
   const [collapsed, setCollapsed] = useState(true);
   const [hovered, setHovered] = useState(false);
-  const [locked, setLocked] = useState(false);
 
-  const lock = () => setLocked(true);
-  const unlock = () => setLocked(false);
-  const toggleCollapse = () => setCollapsed((c) => !c);
+  const isExpanded = hovered || !collapsed;
 
   return (
-    <SidebarContext.Provider value={{ collapsed, hovered, locked, setHovered, setCollapsed, lock, unlock, toggleCollapse }}>
+    <SidebarContext.Provider
+      value={{
+        collapsed,
+        setCollapsed,
+        hovered,
+        setHovered,
+        isExpanded,
+      }}
+    >
       {children}
     </SidebarContext.Provider>
   );
 }
 
-export function useSidebar() {
-  const ctx = useContext(SidebarContext);
-  if (!ctx) throw new Error('useSidebar must be used within SidebarProvider');
-  return ctx;
-}
+export const useSidebar = () => useContext(SidebarContext);
