@@ -3,7 +3,7 @@ import ExpandSidebar from "./ExpandSidebar";
 import BackdropOverlay from "./BackdropOverlay";
 import { useSidebar } from "../../context/SidebarContext";
 
-export default function DoubleSidebar({ items, mobile, onNavigate }) {
+export default function DoubleSidebar({ items = [], mobile=false, onNavigate }) {
   const { collapsed, setCollapsed } = useSidebar();
 
   return (

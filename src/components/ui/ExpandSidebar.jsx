@@ -15,7 +15,7 @@ export default function ExpandSidebar({ items, mobile, onNavigate }) {
       `}
     >
       <div className="h-full backdrop-blur-xl bg-black/70 border-r border-white/10 p-4">
-        {items.map((i) => (
+        {(items || []).map((i) => (
           <Link
             key={i.path}
             to={i.path}

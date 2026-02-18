@@ -24,7 +24,7 @@ export default function IconSidebar({ items, mobile }) {
       </div>
 
       <nav className="mt-6 flex flex-col gap-2">
-        {items.map((it) => (
+        {(items || []).map((it) => (
           <Link
             key={it.path}
             to={it.path}

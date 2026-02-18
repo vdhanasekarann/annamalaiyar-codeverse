@@ -55,8 +55,8 @@ export default function GPTsPage() {
   </button>
  ))}
   
-      <div className="p-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {filtered.map((gpt) => (
+      <div className="p-4 grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6">
+      {(filtered || []).map((gpt) => (
         <LazyGPTCard
           key={gpt.id}
           gpt={gpt}
