@@ -108,7 +108,7 @@ const cardClasses = `${glassBase} hover:scale-[1.03] p-6`;
         <h3 className={`text-base font-semibold gpt-title line-clamp-2 ${theme==='gold'?'text-yellow-300':'text-white'}`}>{t(gpt.title) || gpt.title}</h3>
 
         <p className={`text-sm mt-2 line-clamp-4 ${theme==='gold'?'text-zinc-200':'text-zinc-200/80'}`}>{t(gpt.description) || gpt.description}</p>
-          ⭐ <CountUp value={avg}/>
+          {avg && <>⭐ <CountUp value={avg}/></>}
         {avg && (
           <div className="text-xs text-yellow-400 mt-1">
             <span className="rating-pulse">⭐ {avg}</span> ({reviews.length})
