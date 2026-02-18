@@ -20,5 +20,11 @@ export default function SideBar({ mobile = false, onNavigate }) {
     );
   }
 
-  return <DoubleSidebar items={items} mobile={mobile} onNavigate={onNavigate} />;
+  return (
+    <DoubleSidebar
+      items={items}
+      mobile={mobile}
+      onNavigate={onNavigate}
+    />
+  );
 }

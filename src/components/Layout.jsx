@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Link, Outlet, Navigate, useNavigate, useLocation } from "react-router-dom";
-import IconSidebar from "./ui/IconSidebar";
-import ExpandSidebar from "./ui/ExpandSidebar";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import TopBar from "./TopBar";
 import { useAuth } from "../context/AuthContext";
 import MobileDrawer from "./MobileDrawer";
+import SideBar from "./SideBar"; // ✅ use only this
 import { useSidebar } from "../context/SidebarContext";
 
 export default function Layout() {
@@ -16,6 +15,7 @@ export default function Layout() {
 
   if (location.pathname === "/login") return null;
 
+  /* ---------- LOAD BACKGROUND ---------- */
   useEffect(() => {
     function loadBg() {
       try {
@@ -23,62 +23,54 @@ export default function Layout() {
         const key = `bg_${user.email}`;
         const val = localStorage.getItem(key);
         setBg(val || null);
-      } catch (e) {
+      } catch {
         setBg(null);
       }
     }
     loadBg();
-    const onChange = () => loadBg();
-    window.addEventListener("bgChange", onChange);
-    window.addEventListener("storage", onChange);
+    window.addEventListener("bgChange", loadBg);
+    window.addEventListener("storage", loadBg);
     return () => {
-      window.removeEventListener("bgChange", onChange);
-      window.removeEventListener("storage", onChange);
+      window.removeEventListener("bgChange", loadBg);
+      window.removeEventListener("storage", loadBg);
     };
   }, [user]);
 
-  // Apply background image to the document body (page background only)
+  /* ---------- APPLY BODY BG ---------- */
   useEffect(() => {
     if (typeof document !== "undefined") {
-      if (bg) {
-        document.body.style.backgroundImage = `url('${bg}')`;
-        document.body.style.backgroundSize = "cover";
-        document.body.style.backgroundPosition = "center";
-      } else {
-        document.body.style.backgroundImage = "url('/bg-galaxy.jpg')";
-        document.body.style.backgroundSize = "cover";
-        document.body.style.backgroundPosition = "center";
-      }
-      // ensure body doesn't get blurred
+      document.body.style.backgroundImage = `url('${bg || "/bg-galaxy.jpg"}')`;
+      document.body.style.backgroundSize = "cover";
+      document.body.style.backgroundPosition = "center";
       document.body.style.backdropFilter = "";
     }
     return () => {
-      if (typeof document !== "undefined") {
-        document.body.style.backgroundImage = "";
-        document.body.style.backgroundSize = "";
-        document.body.style.backgroundPosition = "";
-      }
+      document.body.style.backgroundImage = "";
     };
   }, [bg]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-[#050816] to-[#0b0b0b]">
-      {/* LEFT SIDEBAR - Icon bar + Expandable panel (single source of truth) */}
+    <div className="flex h-screen overflow-hidden">
+
+      {/* SIDEBAR */}
       <div className="relative">
-        {/* Desktop sidebars: hidden on small screens to avoid duplicate mobile drawer */}
+        {/* Desktop */}
         <div className="hidden md:block">
-          <IconSidebar />
-          <ExpandSidebar />
+          <SideBar />
         </div>
 
-        {/* Mobile drawer shows expanded sidebar on small screens */}
+        {/* Mobile */}
         <MobileDrawer open={mobileOpen} onClose={() => setMobileOpen(false)}>
-          <ExpandSidebar mobile onNavigate={() => setMobileOpen(false)} />
+          <SideBar mobile onNavigate={() => setMobileOpen(false)} />
         </MobileDrawer>
       </div>
 
-      {/* Main area */}
-      <div className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ${collapsed ? 'md:pl-16' : 'md:pl-60'}`}>
+      {/* MAIN CONTENT */}
+      <div
+        className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ${
+          collapsed ? "md:pl-[72px]" : "md:pl-[312px]"
+        }`}
+      >
         <TopBar onOpenMobileMenu={() => setMobileOpen(true)} />
 
         <main className="flex-1 overflow-y-auto">
@@ -88,6 +80,8 @@ export default function Layout() {
                 <Outlet />
               </div>
             </div>
+
+            {/* Floating Assistant */}
             <Link
               to="/prompt-assistant"
               className="fixed bottom-6 right-6 z-50 bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-xl"
