@@ -77,8 +77,7 @@ const cardClasses = `${glassBase} hover:scale-[1.03] p-6`;
       className="float-slow"
       onClick={(e) => { if (e.target && e.target.closest && e.target.closest('a,button')) return; click(); }}
     >
-      <div className="gpt-badge">{gpt.category || 'GPT'}</div>
-      <div className="pointer-events-none absolute inset-0 rounded-3xl overflow-hidden">
+       <div className="pointer-events-none absolute inset-0 rounded-3xl overflow-hidden">
           {theme === 'gold' ? (
             <>
               <div className="absolute -top-10 -left-20 w-60 h-40 bg-gradient-to-br from-yellow-400/30 via-amber-400/20 to-transparent opacity-40 blur-2xl transform rotate-12"></div>
@@ -93,10 +92,10 @@ const cardClasses = `${glassBase} hover:scale-[1.03] p-6`;
         </div>
       {/* IMAGE CONTAINER */}
       <div className="flex items-center justify-center mt-2">
-        <div className="w-20 h-20 md:w-20 md:h-20 flex items-center justify-center rounded-xl overflow-hidden relative">
+        <div className="w-30 h-30 md:w-20 md:h-20 flex items-center justify-center rounded-xl overflow-hidden relative">
           {!imgLoaded && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-16 h-16 rounded-lg skeleton" />
+              <div className="w-26 h-26 rounded-lg skeleton" />
             </div>
           )}
           <img src={gpt.logo} alt={gpt.title} loading="lazy" onLoad={() => setImgLoaded(true)} onError={() => setImgLoaded(true)} className="w-20 h-20 object-contain mx-auto" />
