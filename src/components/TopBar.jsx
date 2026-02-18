@@ -7,6 +7,7 @@ import { useAuth } from "../context/AuthContext";
 import { useSearch } from "../context/SearchContext";
 import { useTranslation } from "react-i18next";
 import { LogOut } from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
 
 export default function TopBar({ onOpenMobileMenu }) {
   const navigate = useNavigate();
@@ -29,6 +30,22 @@ export default function TopBar({ onOpenMobileMenu }) {
       } catch (e) {}
     }
   }, [mobileSearchOpen]);
+
+function ThemeSwitcher(){
+  const {theme,setTheme}=useTheme();
+
+  return(
+    <select
+      value={theme}
+      onChange={e=>setTheme(e.target.value)}
+      className="bg-black/40 text-white rounded px-2 py-1 text-sm"
+    >
+      <option value="gold">Gold</option>
+      <option value="pink">Pink</option>
+      <option value="blue">Blue</option>
+    </select>
+  );
+}
 
   // basic focus-trap & ESC handling for mobile search overlay
   useEffect(() => {
@@ -56,6 +73,7 @@ export default function TopBar({ onOpenMobileMenu }) {
   // Desktop search input ref for focus button
   const desktopInputRef = React.useRef(null);
 
+ 
   return (
     <header className="glass-dark flex items-center justify-between px-4 h-14 border-b border-white/10 z-50">
 

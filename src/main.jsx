@@ -9,10 +9,12 @@ import i18n from "./i18n";
 import { AuthProvider } from "./context/AuthContext";
 import { SearchProvider } from "./context/SearchContext";
 import { SidebarProvider } from "./context/SidebarContext";
+import { ThemeProvider } from "./context/ThemeContext";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AuthProvider>
+      <ThemeProvider>
       <SidebarProvider>
         <SearchProvider>
           <ErrorBoundary>
@@ -22,6 +24,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           </ErrorBoundary>
         </SearchProvider>
       </SidebarProvider>
+      </ThemeProvider>
     </AuthProvider>
   </React.StrictMode>
 );
