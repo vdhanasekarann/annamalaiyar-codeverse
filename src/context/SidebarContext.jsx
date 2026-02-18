@@ -1,12 +1,17 @@
 import { createContext, useContext, useState } from "react";
 
-const SidebarContext = createContext(null);
+const SidebarContext = createContext();
 
 export function SidebarProvider({ children }) {
   const [collapsed, setCollapsed] = useState(true);
   const [hovered, setHovered] = useState(false);
 
+  // DESKTOP → hover expands
+  // MOBILE → collapsed=false expands
   const isExpanded = hovered || !collapsed;
+
+  const openMobile = () => setCollapsed(false);
+  const closeMobile = () => setCollapsed(true);
 
   return (
     <SidebarContext.Provider
@@ -16,6 +21,8 @@ export function SidebarProvider({ children }) {
         hovered,
         setHovered,
         isExpanded,
+        openMobile,
+        closeMobile
       }}
     >
       {children}
@@ -23,8 +30,4 @@ export function SidebarProvider({ children }) {
   );
 }
 
-export function useSidebar() {
-  const ctx = useContext(SidebarContext);
-  if (!ctx) throw new Error("useSidebar must be used inside SidebarProvider");
-  return ctx;
-}
+export const useSidebar = () => useContext(SidebarContext);

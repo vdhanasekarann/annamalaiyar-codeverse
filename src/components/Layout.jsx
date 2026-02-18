@@ -54,16 +54,15 @@ export default function Layout() {
 
       {/* SIDEBAR */}
       <div className="relative">
-        {/* Desktop */}
-        <div className="hidden md:block">
-          <SideBar />
-        </div>
+  <div className="hidden md:block">
+    <IconSidebar items={items} />
+    <ExpandSidebar items={items} />
+  </div>
 
-        {/* Mobile */}
-        <MobileDrawer open={mobileOpen} onClose={() => setMobileOpen(false)}>
-          <SideBar mobile onNavigate={() => setMobileOpen(false)} />
-        </MobileDrawer>
-      </div>
+  <MobileDrawer open={mobileOpen} onClose={() => setMobileOpen(false)}>
+    <ExpandSidebar items={items} mobile />
+  </MobileDrawer>
+</div>
 
       {/* MAIN CONTENT */}
       <div
