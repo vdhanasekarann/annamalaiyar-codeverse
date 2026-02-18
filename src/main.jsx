@@ -10,6 +10,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { SearchProvider } from "./context/SearchContext";
 import { SidebarProvider } from "./context/SidebarContext";
 import { ThemeProvider } from "./context/ThemeContext";
+import "./styles/motion.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

@@ -74,7 +74,7 @@ const cardClasses = `${glassBase} hover:scale-[1.03] p-6`;
   return (
     <GlassCard
       theme={theme}
-      className={cardClasses}
+      className="float-slow"
       onClick={(e) => { if (e.target && e.target.closest && e.target.closest('a,button')) return; click(); }}
     >
       <div className="gpt-badge">{gpt.category || 'GPT'}</div>

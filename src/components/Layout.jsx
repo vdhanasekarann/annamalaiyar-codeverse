@@ -15,6 +15,15 @@ export default function Layout() {
 
   if (location.pathname === "/login") return null;
 
+  useEffect(()=>{
+ const move=e=>{
+  document.body.style.setProperty("--x",e.clientX+"px");
+  document.body.style.setProperty("--y",e.clientY+"px");
+ };
+ window.addEventListener("mousemove",move);
+ return()=>window.removeEventListener("mousemove",move);
+},[]);
+
   /* ---------- LOAD BACKGROUND ---------- */
   useEffect(() => {
     function loadBg() {
@@ -50,8 +59,13 @@ export default function Layout() {
   }, [bg]);
 
   return (
-    <div className="flex h-screen overflow-hidden">
-
+    <div
+ onMouseMove={(e)=>{
+  const x=(e.clientX/window.innerWidth-.5)*10;
+  const y=(e.clientY/window.innerHeight-.5)*10;
+  document.body.style.backgroundPosition=`${50+x}% ${50+y}%`;
+ }}
+>
       {/* SIDEBAR */}
       <div className="relative">
   <div className="hidden md:block">

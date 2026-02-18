@@ -8,11 +8,10 @@ export default function ExpandSidebar({ items = [], mobile, onNavigate }) {
   return (
     <aside
       className={`
-      fixed top-0 left-[72px] h-screen
-      transition-all duration-300 ease-in-out
-      ${isExpanded ? "w-[240px]" : "w-0"}
-      overflow-hidden z-30
-      `}
+fixed top-0 left-[72px] h-screen sidebar-slide
+${isExpanded ? "w-[240px]" : "w-0"}
+overflow-hidden z-30
+`}
     >
       <div className="h-full backdrop-blur-xl bg-black/70 border-r border-white/10 p-4">
         {items.map((i) => (

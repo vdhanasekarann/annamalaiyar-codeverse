@@ -9,7 +9,7 @@ export default function IconSidebar({ items = [], mobile }) {
     <div
       onMouseEnter={() => !mobile && setHovered(true)}
       onMouseLeave={() => !mobile && setHovered(false)}
-      className="fixed left-0 top-0 h-screen w-[72px]
+      className="fixed left-0 top-0 h-screen w-[72px] sidebar-slide
                  flex flex-col items-center py-4
                  backdrop-blur-md bg-black/30
                  border-r border-white/10 z-40"

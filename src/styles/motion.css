@@ -1,0 +1,58 @@
+/* GPU smooth */
+.motion {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* ripple */
+.ripple {
+  position:absolute;
+  border-radius:50%;
+  background:rgba(255,255,255,0.35);
+  transform:scale(0);
+  animation:rippleAnim .6s linear;
+  pointer-events:none;
+}
+
+@keyframes rippleAnim{
+  to{ transform:scale(4); opacity:0;}
+}
+
+/* hover glow */
+.glow-hover:hover{
+ box-shadow:
+ 0 0 40px rgba(255,215,0,.25),
+ 0 0 80px rgba(255,215,0,.18);
+ transform:translateY(-6px) scale(1.01);
+}
+
+/* floating animation */
+.float-slow{
+ animation:float 6s ease-in-out infinite;
+}
+@keyframes float{
+ 0%,100%{transform:translateY(0)}
+ 50%{transform:translateY(-8px)}
+}
+
+/* sidebar slide */
+.sidebar-slide{
+ transition:
+ width .28s cubic-bezier(.4,0,.2,1),
+ transform .28s cubic-bezier(.4,0,.2,1);
+}
+
+/* premium shimmer */
+.shimmer-premium{
+ background:linear-gradient(
+ 110deg,
+ transparent 20%,
+ rgba(255,255,255,.2) 40%,
+ transparent 60%
+ );
+ background-size:200% 100%;
+ animation:shine 3s linear infinite;
+}
+@keyframes shine{
+ to{background-position:-200% 0}
+}

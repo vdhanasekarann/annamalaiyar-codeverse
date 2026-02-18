@@ -8,7 +8,26 @@ html, body, #root {
   height: 100%;
   active:scale-95
 }
-
+body::after{
+ content:"";
+ position:fixed;
+ inset:0;
+ pointer-events:none;
+ background:radial-gradient(
+ circle at var(--x,50%) var(--y,50%),
+ rgba(255,255,255,.08),
+ transparent 40%
+ );
+ transition:background .15s;
+}
+body:active::after{
+ background:radial-gradient(
+ circle at var(--x,50%) var(--y,50%),
+ rgba(255,255,255,.15),
+ transparent 40%
+ );
+ transition:background 0s;
+}
 body {
   font-family: 'Inter', system-ui, sans-serif;
   background: #0b1220;
