@@ -136,6 +136,37 @@
 .glass-card--gold { border: 1px solid rgba(245,201,112,0.18); box-shadow: 0 0 40px rgba(255,215,0,0.12); background: linear-gradient(180deg, rgba(255,245,230,0.04), rgba(255,230,200,0.02)); }
 .glass-card--pink { border: 1px solid rgba(236,72,153,0.14); box-shadow: 0 0 40px rgba(236,72,153,0.08); background: linear-gradient(180deg, rgba(255,230,240,0.03), rgba(255,200,230,0.01)); }
 .glass-card--dark { border: 1px solid rgba(255,255,255,0.04); box-shadow: 0 8px 40px rgba(2,6,23,0.45); background: linear-gradient(180deg, rgba(8,10,20,0.6), rgba(6,8,15,0.45)); }
+.glass-card--blue { border: 1px solid rgba(99,102,241,0.12); box-shadow: 0 0 40px rgba(59,130,246,0.08); background: linear-gradient(180deg, rgba(240,249,255,0.04), rgba(235,245,255,0.01)); }
+
+/* Hover glow and subtle lift for interactive cards */
+.glass-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.35), 0 0 80px rgba(255,215,0,0.06);
+}
+
+/* Live rating pulse animation */
+.rating-pulse {
+  display: inline-block;
+  animation: ratingPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes ratingPulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.06); opacity: 0.9; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Skeleton placeholder */
+.skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.03) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s linear infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 /* pointer rules: ensure glass panels accept pointer events, backdrops don't block */
 .glass-dark { pointer-events: auto; }
 .backdrop { pointer-events: none; }

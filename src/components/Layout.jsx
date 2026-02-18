@@ -65,10 +65,11 @@ export default function Layout() {
     <div className="flex h-screen overflow-hidden bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-[#050816] to-[#0b0b0b]">
       {/* LEFT SIDEBAR - Icon bar + Expandable panel (single source of truth) */}
       <div className="relative">
-        <IconSidebar />
-
-        {/* Expanded sidebar responds to sidebar context (hover/locked/collapsed) */}
-        <ExpandSidebar />
+        {/* Desktop sidebars: hidden on small screens to avoid duplicate mobile drawer */}
+        <div className="hidden md:block">
+          <IconSidebar />
+          <ExpandSidebar />
+        </div>
 
         {/* Mobile drawer shows expanded sidebar on small screens */}
         <MobileDrawer open={mobileOpen} onClose={() => setMobileOpen(false)}>

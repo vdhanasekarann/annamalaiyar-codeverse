@@ -1,5 +1,7 @@
 import { GPTS } from "../data/gpts";
 import GPTCard from "../components/GPTCard";
+import LazyGPTCard from "../components/LazyGPTCard";
+import { recommendSort } from "../utils/recommend";
 import { useUsage } from "../hooks/useUsage";
 import { useEffect, useState } from "react";
 import { useTranslation } from 'react-i18next';
@@ -15,10 +17,12 @@ export default function GPTsPage() {
   const { query, setQuery } = useSearch();
   const location = useLocation();
 
-  const filtered = GPTS.filter((g) =>
+  const baseFiltered = GPTS.filter((g) =>
     g.title.toLowerCase().includes((query || "").toLowerCase()) &&
-    (active === "All" || g.category === active)
+    (active === "All" || g.category === active || active === 'Recommended')
   );
+
+  const filtered = active === 'Recommended' ? recommendSort(baseFiltered, usage) : baseFiltered;
 
   useEffect(() => {
     // No server `/api/user` endpoint in this app; rely on AuthProvider's `user`
@@ -40,7 +44,7 @@ export default function GPTsPage() {
 
   return (
     <div className="flex gap-2 mb-6 flex-wrap">
- {["All",...categories].map(c=>(
+ {["Recommended","All",...categories].map(c=>(
   <button
    key={c}
    onClick={()=>setActive(c)}
@@ -53,7 +57,7 @@ export default function GPTsPage() {
   
       <div className="p-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {filtered.map((gpt) => (
-        <GPTCard
+        <LazyGPTCard
           key={gpt.id}
           gpt={gpt}
           used={usage[gpt.id] || 0}

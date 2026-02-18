@@ -194,6 +194,10 @@ function ThemeSwitcher(){
             <option value="kn">ಕನ್ನಡ</option>
             <option value="te">తెలుగు</option>
           </select>
+          {/* Theme switcher */}
+          <div className="hidden sm:block">
+            <ThemeSwitcher />
+          </div>
           {user.plan === "free" && (
             <Link
               to="/premium"

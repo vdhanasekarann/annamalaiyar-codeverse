@@ -13,6 +13,7 @@ function GPTCard({ gpt, used, plan, onUsed, theme = 'pink' }) {
   const navigate = useNavigate();
 
   const [reviews, setReviews] = React.useState([]);
+  const [imgLoaded, setImgLoaded] = React.useState(false);
 
   const avg = React.useMemo(() => {
     if (!reviews || reviews.length === 0) return null;
@@ -67,15 +68,11 @@ function GPTCard({ gpt, used, plan, onUsed, theme = 'pink' }) {
   const glassBase =
  "rounded-3xl backdrop-blur-xl border transition duration-300 relative overflow-hidden cursor-pointer";
 
-const themeStyle =
- theme === "gold"
-  ? "bg-gradient-to-br from-yellow-300/10 to-white/5 border-yellow-400/40 shadow-[0_0_40px_rgba(255,215,0,0.25)]"
-  : "bg-gradient-to-br from-pink-500/10 to-white/5 border-pink-400/40 shadow-[0_0_40px_rgba(255,0,150,0.25)]";
-
-const cardClasses = `${glassBase} ${themeStyle} hover:scale-[1.03] p-6`;
+const cardClasses = `${glassBase} hover:scale-[1.03] p-6`;
 
   return (
     <GlassCard
+      theme={theme}
       className={cardClasses}
       onClick={(e) => { if (e.target && e.target.closest && e.target.closest('a,button')) return; click(); }}
     >
@@ -95,8 +92,13 @@ const cardClasses = `${glassBase} ${themeStyle} hover:scale-[1.03] p-6`;
         </div>
       {/* IMAGE CONTAINER */}
       <div className="flex items-center justify-center mt-2">
-        <div className="w-20 h-20 md:w-20 md:h-20 flex items-center justify-center rounded-xl overflow-hidden">
-          <img src={gpt.logo} alt={gpt.title} loading="lazy" className="w-20 h-20 object-contain mx-auto" />
+        <div className="w-20 h-20 md:w-20 md:h-20 flex items-center justify-center rounded-xl overflow-hidden relative">
+          {!imgLoaded && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-16 h-16 rounded-lg skeleton" />
+            </div>
+          )}
+          <img src={gpt.logo} alt={gpt.title} loading="lazy" onLoad={() => setImgLoaded(true)} onError={() => setImgLoaded(true)} className="w-20 h-20 object-contain mx-auto" />
         </div>
       </div>
 
@@ -105,12 +107,12 @@ const cardClasses = `${glassBase} ${themeStyle} hover:scale-[1.03] p-6`;
         <h3 className={`text-base font-semibold gpt-title line-clamp-2 ${theme==='gold'?'text-yellow-300':'text-white'}`}>{t(gpt.title) || gpt.title}</h3>
 
         <p className={`text-sm mt-2 line-clamp-4 ${theme==='gold'?'text-zinc-200':'text-zinc-200/80'}`}>{t(gpt.description) || gpt.description}</p>
-
+          ⭐ <CountUp value={avg}/>
         {avg && (
-<div className="text-xs text-yellow-400 mt-1">
-⭐ {avg} ({reviews.length})
-</div>
-)}
+          <div className="text-xs text-yellow-400 mt-1">
+            <span className="rating-pulse">⭐ {avg}</span> ({reviews.length})
+          </div>
+        )}
 
         <div className="mt-6 space-y-3">
           {reviews.map((r, i) => (
