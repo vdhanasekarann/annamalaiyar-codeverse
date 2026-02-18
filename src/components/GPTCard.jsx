@@ -13,6 +13,11 @@ function GPTCard({ gpt, used, plan, onUsed, theme = 'pink' }) {
 
   const [reviews, setReviews] = React.useState([]);
 
+  const avg = React.useMemo(() => {
+    if (!reviews || reviews.length === 0) return null;
+    const sum = reviews.reduce((s, r) => s + (Number(r.rating) || 0), 0);
+    return Math.round((sum / reviews.length) * 10) / 10;
+  }, [reviews]);
   React.useEffect(() => {
     let mounted = true;
     apiFetch(`/api/reviews/${gpt.id}`)
