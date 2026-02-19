@@ -97,8 +97,8 @@
 }
 /* Reusable glass-card (cards use this base) */
 .glass-card {
-  width: 240px;
-  height: 360px;
+  width: 320px;
+  min-height: 520px;
   background: rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);

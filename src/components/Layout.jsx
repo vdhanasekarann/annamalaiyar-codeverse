@@ -15,6 +15,13 @@ export default function Layout() {
 
   if (location.pathname === "/login") return null;
 
+  const { setTheme } = useTheme();
+
+useEffect(()=>{
+ if(user?.plan==="premium") setTheme("gold");
+ else setTheme("blue");
+},[user]);
+
   useEffect(() => {
     if (!user) return setBg(null);
     const key = `bg_${user.email}`;

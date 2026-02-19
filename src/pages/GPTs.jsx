@@ -16,13 +16,16 @@ export default function GPTsPage() {
   const navigate = useNavigate();
   const { query, setQuery } = useSearch();
   const location = useLocation();
-
+  const { usage, refresh } = useUsage(user?.email);
+  
   const baseFiltered = GPTS.filter((g) =>
     g.title.toLowerCase().includes((query || "").toLowerCase()) &&
     (active === "All" || g.category === active || active === 'Recommended')
   );
 
-  const filtered = active === 'Recommended' ? recommendSort(baseFiltered, usage) : baseFiltered;
+  const filtered = active === 'Recommended'
+ ? recommendSort(baseFiltered, usage)
+ : baseFiltered;
 
   useEffect(() => {
     // No server `/api/user` endpoint in this app; rely on AuthProvider's `user`
@@ -35,7 +38,6 @@ export default function GPTsPage() {
     setQuery(q);
   }, [location.search, setQuery]);
 
-  const { usage, refresh } = useUsage(user?.email);
   const categories = [...new Set(GPTS.map(g => g.category))];
 
   const { t } = useTranslation();

@@ -73,10 +73,10 @@ const cardClasses = `${glassBase} hover:scale-[1.03] p-6`;
 
   return (
     <GlassCard
-      theme={theme}
-      className="float-slow"
-      onClick={(e) => { if (e.target && e.target.closest && e.target.closest('a,button')) return; click(); }}
-    >
+  theme={theme}
+  className="float-slow magnetic gpu p-6"
+  onClick={(e)=>{ if(e.target.closest('a,button')) return; click(); }}
+>
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[30px]" />
        <div className="pointer-events-none absolute inset-0 rounded-3xl overflow-hidden">
           {theme === 'gold' ? (
@@ -99,7 +99,7 @@ const cardClasses = `${glassBase} hover:scale-[1.03] p-6`;
               <div className="w-36 h-36 rounded-lg skeleton" />
             </div>
           )}
-          <img src={gpt.logo} alt={gpt.title} loading="lazy" onLoad={() => setImgLoaded(true)} onError={() => setImgLoaded(true)} className="w-28 h-28 object-contain mx-auto" />
+          <img src={gpt.logo} alt={gpt.title} loading="lazy" onLoad={() => setImgLoaded(true)} onError={() => setImgLoaded(true)} className="w-36 h-36 object-contain mx-auto" />
         </div>
       </div>
 
