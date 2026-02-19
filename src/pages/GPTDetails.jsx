@@ -21,17 +21,24 @@ export default function GPTDetails() {
   };
 
   const submit = async () => {
-    if (!text) return;
+    if (!text || !user?.email) return;
 
-    await apiFetch(`/api/reviews/${id}`, {
+    const res = await apiFetch("/api/reviews", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        gpt: id,
         rating,
         review: text,
         email: user.email,
       }),
     });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      alert(err.error || "Failed to submit review");
+      return;
+    }
 
     setText("");
     loadReviews();

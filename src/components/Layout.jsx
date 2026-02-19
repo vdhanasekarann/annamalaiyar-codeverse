@@ -11,7 +11,7 @@ export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user } = useAuth();
   const [bg, setBg] = useState(null);
-  const { collapsed } = useSidebar();
+  const { collapsed, setCollapsed } = useSidebar();
   const location = useLocation();
 
   if (location.pathname === "/login") return null;
@@ -45,17 +45,28 @@ useEffect(()=>{
       </div>
 
       {/* MOBILE SIDEBAR */}
-      <MobileDrawer open={mobileOpen} onClose={() => setMobileOpen(false)}>
+      <MobileDrawer
+        open={mobileOpen}
+        onClose={() => {
+          setMobileOpen(false);
+          setCollapsed(true);
+        }}
+      >
         <DoubleSidebar mobile onNavigate={()=>setMobileOpen(false)} />
       </MobileDrawer>
 
       {/* MAIN AREA */}
       <div className={`flex-1 flex flex-col transition-all duration-300 ${collapsed ? "md:pl-[72px]" : "md:pl-[240px]"}`}>
         
-        <TopBar onOpenMobileMenu={() => setMobileOpen(true)} />
+        <TopBar
+          onOpenMobileMenu={() => {
+            setCollapsed(false);
+            setMobileOpen(true);
+          }}
+        />
 
         <main className="flex-1 overflow-y-auto">
-          <div className="max-w-7xl mx-auto px-4 py-6">
+          <div className="max-w-7xl mx-auto px-4 pt-20 pb-6">
             <div className="page-container p-6 rounded-3xl min-h-screen">
               <Outlet />
             </div>

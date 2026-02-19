@@ -8,14 +8,14 @@ export default function MobileDrawer({ open, onClose, children }) {
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60"
+        className="absolute inset-x-0 top-16 bottom-0 bg-black/60"
         onClick={onClose}
       />
 
       {/* Drawer */}
       <div
         className={`
-        absolute left-0 top-0 h-full w-[260px] max-w-[80%]
+        absolute left-0 top-16 h-[calc(100%-4rem)] w-[260px] max-w-[80%]
         glass-dark transition-transform
         ${open ? "translate-x-0 shadow-lg" : "-translate-x-full"}
       `}
