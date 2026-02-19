@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import MobileDrawer from "./MobileDrawer";
 import DoubleSidebar from "./ui/DoubleSidebar";
 import { useSidebar } from "../context/SidebarContext";
+import { useTheme } from "../context/ThemeContext";
 
 export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -20,7 +21,7 @@ export default function Layout() {
 useEffect(()=>{
  if(user?.plan==="premium") setTheme("gold");
  else setTheme("blue");
-},[user]);
+},[user,setTheme]);
 
   useEffect(() => {
     if (!user) return setBg(null);
