@@ -196,11 +196,11 @@ useEffect(() => {
           </div>
         </div>
 
-        <div className="z-10">
+        <div className="float-slow magnetic glass-depth gpu z-10">
           <WelcomeBanner user={user} />
         </div>
 
-        <h2 className="text-lg font-semibold mt-2 mb-4 z-10">{t("activeDevices") || "Active Devices"}</h2>
+        <h2 className="float-slow magnetic glass-depth gpu z-10 text-lg font-semibold mt-2 mb-4">{t("activeDevices") || "Active Devices"}</h2>
 
         <div className="grid gap-4">
           {devices && devices.length > 0 ? (
@@ -242,7 +242,6 @@ useEffect(() => {
     {/* Animated stats */}
     <AnimatedStats stats={sampleStats} />
 
-
     <h2 className="text-lg font-semibold mt-12 mb-6">{t("gptApps") || "All GPT Apps"}</h2>
 
     <AppGrid
@@ -250,7 +249,7 @@ useEffect(() => {
       usage={usage}
       onUsed={refresh}
     />
-    <div className="mt-10 p-6 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-700">
+    <div className="float-slow magnetic glass-depth gpu mt-10 p-6 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-700">
       <h3 className="font-bold text-lg mb-2">{t("aiInsight") || "AI Insight"}</h3>
       <p className="text-sm opacity-90">
         {t("aiInsightText") ||
@@ -258,7 +257,6 @@ useEffect(() => {
       </p>
     </div>
     </div>
-
   </>
   );
 }

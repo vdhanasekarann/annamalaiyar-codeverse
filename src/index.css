@@ -3,6 +3,10 @@
 @source "./index.html";
 @source "./src/**/*.{js,jsx,ts,tsx}";
 
+:root[data-theme="gold"] { --accent: #facc15; }
+:root[data-theme="pink"] { --accent: #ec4899; }
+:root[data-theme="blue"] { --accent: #3b82f6; }
+
 /* ===== GLOBAL RESET ===== */
 html, body, #root {
   height: 100%;
@@ -70,4 +74,27 @@ body {
 img {
   max-width: 100%;
   height: auto;
+}
+
+.float-slow{
+ animation: float 6s ease-in-out infinite;
+}
+@keyframes float{
+ 0%{transform:translateY(0)}
+ 50%{transform:translateY(-10px)}
+ 100%{transform:translateY(0)}
+}
+
+.magnetic:hover{
+ transform:scale(1.05) rotateX(4deg) rotateY(-4deg);
+ transition:all .2s cubic-bezier(.2,.8,.2,1);
+}
+
+.glass-depth{
+ transform:perspective(900px) rotateX(2deg);
+}
+
+.gpu{
+ transform:translateZ(0);
+ will-change:transform;
 }

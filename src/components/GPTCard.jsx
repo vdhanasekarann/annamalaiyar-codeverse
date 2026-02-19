@@ -77,6 +77,7 @@ const cardClasses = `${glassBase} hover:scale-[1.03] p-6`;
       className="float-slow"
       onClick={(e) => { if (e.target && e.target.closest && e.target.closest('a,button')) return; click(); }}
     >
+      <div className="absolute inset-0 bg-white/5 backdrop-blur-[30px]" />
        <div className="pointer-events-none absolute inset-0 rounded-3xl overflow-hidden">
           {theme === 'gold' ? (
             <>
@@ -92,22 +93,25 @@ const cardClasses = `${glassBase} hover:scale-[1.03] p-6`;
         </div>
       {/* IMAGE CONTAINER */}
       <div className="flex items-center justify-center mt-4">
-        <div className="w-30 h-30 md:w-30 md:h-30 flex items-center justify-center rounded-xl overflow-hidden relative">
+        <div className="w-28 h-28 md:w-28 md:h-28 flex items-center justify-center rounded-xl overflow-hidden relative">
           {!imgLoaded && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-36 h-36 rounded-lg skeleton" />
             </div>
           )}
-          <img src={gpt.logo} alt={gpt.title} loading="lazy" onLoad={() => setImgLoaded(true)} onError={() => setImgLoaded(true)} className="w-30 h-30 object-contain mx-auto" />
+          <img src={gpt.logo} alt={gpt.title} loading="lazy" onLoad={() => setImgLoaded(true)} onError={() => setImgLoaded(true)} className="w-28 h-28 object-contain mx-auto" />
         </div>
       </div>
 
       {/* CONTENT */}
       <div className="p-4 flex flex-col min-h-[140px]">
-        <h3 className={`text-base font-semibold gpt-title line-clamp-2 ${theme==='gold'?'text-yellow-300':'text-white'}`}>{t(gpt.title) || gpt.title}</h3>
+        <h3 className={`text-lg font-bold tracking-wide gpt-title line-clamp-2 ${theme==='gold'?'text-yellow-300':'text-white'}`}>{t(gpt.title) || gpt.title}</h3>
 
-        <p className={`text-sm mt-2 line-clamp-5 ${theme==='gold'?'text-zinc-300':'text-zinc-300/80'}`}>{t(gpt.description) || gpt.description}</p>
-          {avg && <>⭐ <CountUp value={avg}/></>}
+        <p className={`text-sm mt-2 line-clamp-none ${theme==='gold'?'text-zinc-300':'text-zinc-300/80'}`}>{t(gpt.description) || gpt.description}</p>
+          <div className="mt-2 text-yellow-400 text-sm">
+⭐ {avg ? <CountUp value={avg}/> : "No ratings"}
+</div>
+
         {avg && (
           <div className="text-xs text-yellow-400 mt-1">
             <span className="rating-pulse">⭐ {avg}</span> ({reviews.length})
@@ -133,14 +137,24 @@ const cardClasses = `${glassBase} hover:scale-[1.03] p-6`;
           >
             {t("viewReviews") || "View Reviews"}
           </button>
+          <button
+onClick={(e)=>{
+ e.stopPropagation();
+ navigate(`/gpt/${gpt.id}`);
+}}
+className="text-xs underline mt-2 text-indigo-400"
+>
+Write Review
+</button>
 
-        <div className="text-s mt-2 text-zinc-600">
+        <div className="text-s mt-2 text-zinc-300">
           {locked
             ? `${t("locked") || "🔒 Limit reached"}`
             : plan === "free"
             ? `${used} / ${limit} ${t("usedToday") || "used today"}`
             : t("unlimited") || "Unlimited"}
         </div>
+        
       </div>
     </GlassCard>
   );

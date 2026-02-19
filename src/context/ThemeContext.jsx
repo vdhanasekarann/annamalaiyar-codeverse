@@ -7,6 +7,12 @@ export function ThemeProvider({ children }) {
     localStorage.getItem("cv_theme") || "gold"
   );
 
+useEffect(()=>{
+ document.documentElement.dataset.theme = theme;
+ localStorage.setItem("cv_theme",theme);
+},[theme]);
+
+
   useEffect(() => {
     localStorage.setItem("cv_theme", theme);
   }, [theme]);
