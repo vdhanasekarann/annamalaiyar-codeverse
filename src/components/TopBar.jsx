@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useSearch } from "../context/SearchContext";
 import { useTranslation } from "react-i18next";
 import { LogOut } from "lucide-react";
-import { useTheme } from "../context/ThemeContext";
+import { useTheme } from "../context/ThemeContext.jsx";
 import { apiFetch } from "../lib/apiFetch";
 
 export default function TopBar({ onOpenMobileMenu }) {
