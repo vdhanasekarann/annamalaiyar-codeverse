@@ -16,29 +16,31 @@ export default function ExpandSidebar({ items = [], mobile, onNavigate }) {
         z-30
       `}
     >
-      <div className="h-full bg-black/70 backdrop-blur-xl border-r border-white/10 px-3 py-4 space-y-1">
+      <div className="h-full bg-black/60 backdrop-blur-lg border-r border-white/10 px-3 py-4 space-y-1">
 
         {items.map((i) => (
           <Link
-            key={i.path}
-            to={i.path}
-            onClick={() => mobile && (setCollapsed(true), onNavigate?.())}
-            className={`
-              grid grid-cols-[40px_1fr]
-              items-center
-              rounded-lg
-              px-2 py-2
-              transition
-              ${location.pathname === i.path
-                ? "bg-indigo-600/40"
-                : "hover:bg-white/10"}
-            `}
-          >
-            <span className="text-xl flex justify-center">{i.icon}</span>
-            <span className="text-sm font-medium whitespace-nowrap">
-              {i.label}
-            </span>
-          </Link>
+ key={i.path}
+ to={i.path}
+ onClick={()=>mobile && (setCollapsed(true),onNavigate?.())}
+ className={`
+ flex items-center gap-3 px-4 py-2 rounded-lg mb-2
+ text-white whitespace-nowrap
+ transition-all duration-200
+ ${location.pathname===i.path
+   ?"bg-indigo-600/40"
+   :"hover:bg-white/10"}
+ `}
+>
+ <span className="w-6 flex justify-center text-lg">
+  {i.icon}
+ </span>
+
+ <span className="text-sm font-medium tracking-wide">
+  {i.label}
+ </span>
+</Link>
+
         ))}
 
       </div>

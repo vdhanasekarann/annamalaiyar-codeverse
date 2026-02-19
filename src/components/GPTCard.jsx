@@ -118,7 +118,7 @@ const cardClasses = `${glassBase} hover:scale-[1.03] p-6`;
           </div>
         )}
 
-        <div className="mt-6 space-y-3">
+        <div className="mt-6 space-y-3 max-h-40 overflow-auto pr-1">
           {(reviews || []).map((r, i) => (
             <div key={r.id || `${gpt.id}-${i}`} className="bg-zinc-900 p-3 rounded">
               ⭐ {r.rating}/5

@@ -26,4 +26,4 @@ export function recommendSort(gpts = [], usage = {}) {
   return scored.map((s) => s.g);
 }
 
-export default { recommendSort };
+export default recommendSort ;

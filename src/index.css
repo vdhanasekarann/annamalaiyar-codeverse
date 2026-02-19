@@ -98,3 +98,37 @@ img {
  transform:translateZ(0);
  will-change:transform;
 }
+
+:root{
+ --accent: #facc15;
+}
+
+:root[data-theme="gold"]{ --accent:#facc15 }
+:root[data-theme="pink"]{ --accent:#ec4899 }
+:root[data-theme="blue"]{ --accent:#3b82f6 }
+
+*{
+ outline-color: var(--accent);
+}
+
+[data-theme="gold"] {
+ --accent-color:#facc15;
+}
+
+[data-theme="pink"] {
+ --accent-color:#ec4899;
+}
+
+[data-theme="blue"] {
+ --accent-color:#3b82f6;
+}
+
+.accent{
+ color:var(--accent-color);
+}
+.bg-accent{
+ background:var(--accent-color);
+}
+.border-accent{
+ border-color:var(--accent-color);
+}
