@@ -15,8 +15,6 @@ import { useTranslation } from 'react-i18next';
 import GPTDetails from "./pages/GPTDetails";
 const ReviewsPage = React.lazy(() => import("./pages/Reviews"));
 import Terms from "./pages/Terms";
-import { useTheme } from "./context/ThemeContext";
-
 
 const GPTsPage = React.lazy(() => import("./pages/GPTs"));
 
@@ -48,7 +46,6 @@ export default function App() {
               </Suspense>
             }
           />
-          <Route path="/reviews/:id" element={<GPTDetails />} />
           <Route path="/gpt/:id" element={<GPTDetails />} />
           <Route path="/reviews/:id" element={
             <React.Suspense fallback={<div>{t('loading') || 'Loading...'}</div>}>

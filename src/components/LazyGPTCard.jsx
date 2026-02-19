@@ -27,7 +27,7 @@ export default function LazyGPTCard(props) {
   if (!visible) {
     // Render skeleton placeholder matching card dimensions
     return (
-      <div ref={ref} className="glass-card skeleton p-6" style={{ width: 240, height: 360 }}>
+      <div ref={ref} className="glass-card skeleton p-6 w-full h-full min-h-[520px]">
         <div className="w-full h-full flex flex-col">
           <div className="h-10 w-24 rounded-md mb-3 skeleton" />
           <div className="flex-1">

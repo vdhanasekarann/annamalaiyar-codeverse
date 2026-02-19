@@ -17,7 +17,7 @@ export default function GPTsPage() {
   const { query, setQuery } = useSearch();
   const location = useLocation();
   const { usage, refresh } = useUsage(user?.email);
-  
+    
   const baseFiltered = GPTS.filter((g) =>
     g.title.toLowerCase().includes((query || "").toLowerCase()) &&
     (active === "All" || g.category === active || active === 'Recommended')
@@ -45,28 +45,31 @@ export default function GPTsPage() {
   if (!user) return <div>{t('loading') || 'Loading...'}</div>;
 
   return (
-    <div className="flex gap-2 mb-6 flex-wrap">
- {["Recommended","All",...categories].map(c=>(
-  <button
-   key={c}
-   onClick={()=>setActive(c)}
-   className={`px-3 py-1 rounded-full border
-     ${active===c?"bg-indigo-600":"bg-zinc-800"}`}
-  >
-   {c}
-  </button>
- ))}
-  
-      <div className="p-4 grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6">
-      {(filtered || []).map((gpt) => (
-        <LazyGPTCard
-          key={gpt.id}
-          gpt={gpt}
-          used={usage[gpt.id] || 0}
-          plan={user.plan}
-          onUsed={refresh}
-        />
-      ))}
+    <div>
+      <div className="flex gap-2 mb-6 flex-wrap">
+        {["Recommended", "All", ...categories].map((c) => (
+          <button
+            key={c}
+            onClick={() => setActive(c)}
+            className={`px-3 py-1 rounded-full border ${active === c ? "bg-indigo-600" : "bg-zinc-800"}`}
+          >
+            {c}
+          </button>
+        ))}
+      </div>
+
+      <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
+        {(filtered || []).map((gpt) => (
+          <div key={gpt.id} className="h-full">
+            <LazyGPTCard
+              gpt={gpt}
+              used={usage[gpt.id] || 0}
+              plan={user.plan}
+              onUsed={refresh}
+            />
+          </div>
+        ))}
+      </div>
     </div>
-    </div>);
+  );
 }
