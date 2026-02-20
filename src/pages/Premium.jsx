@@ -2,13 +2,39 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../lib/apiFetch";
 import { useAuth } from "../context/AuthContext";
+import { PLAN_LIMITS } from "../config/limits";
 
 const PLANS = [
-  { title: "Starter", price: "₹199 / month", key: "starter" },
-  { title: "Pro", price: "₹399 / month", key: "pro", highlight: true },
-  { title: "Yearly", price: "₹1999 / year", key: "yearly" },
-  { title: "Lifetime", price: "₹6999 / lifetime", key: "lifetime" },
+  {
+    title: "Starter",
+    price: "\u20B9199 / month",
+    key: "starter",
+    subtitle: "Great for individual creators",
+  },
+  {
+    title: "Pro",
+    price: "\u20B9399 / month",
+    key: "pro",
+    subtitle: "Best for power users",
+    highlight: true,
+  },
+  {
+    title: "Yearly",
+    price: "\u20B91999 / year",
+    key: "yearly",
+    subtitle: "Lower annual cost",
+  },
+  {
+    title: "Lifetime",
+    price: "\u20B96999 / lifetime",
+    key: "lifetime",
+    subtitle: "One-time purchase",
+  },
 ];
+
+function toLimitText(value) {
+  return Number.isFinite(value) ? String(value) : "Unlimited";
+}
 
 export default function PremiumPage() {
   const { user } = useAuth();
@@ -26,7 +52,7 @@ export default function PremiumPage() {
             {t("upgradeTitle") || "Upgrade to CodeVerse PRO"}
           </h1>
           <p className="text-zinc-300">
-            {t("upgradeSubtitle") || "Unlimited GPT access • Faster responses • Priority features"}
+            {t("upgradeSubtitle") || "Unlimited GPT access \u2022 Faster responses \u2022 Priority features"}
           </p>
         </section>
 
@@ -37,6 +63,7 @@ export default function PremiumPage() {
               title={plan.title}
               price={plan.price}
               planKey={plan.key}
+              subtitle={plan.subtitle}
               highlight={plan.highlight}
               user={user}
               navigate={navigate}
@@ -48,9 +75,10 @@ export default function PremiumPage() {
   );
 }
 
-function PlanCard({ title, price, planKey, highlight, user, navigate }) {
+function PlanCard({ title, price, planKey, subtitle, highlight, user, navigate }) {
   const { t } = useTranslation();
   const accent = "var(--accent, #4f46e5)";
+  const limits = PLAN_LIMITS[planKey] || { daily: 0, devices: 1 };
 
   const upgrade = async () => {
     if (!user) {
@@ -101,7 +129,7 @@ function PlanCard({ title, price, planKey, highlight, user, navigate }) {
 
   return (
     <article
-      className={`glass-card glass-card--dark relative rounded-2xl p-5 sm:p-6 flex flex-col justify-between min-h-[260px] ${
+      className={`glass-card glass-card--dark relative rounded-2xl p-5 sm:p-6 flex flex-col min-h-[350px] ${
         highlight ? "ring-2 ring-white/25 shadow-2xl" : ""
       }`}
       style={{
@@ -120,12 +148,20 @@ function PlanCard({ title, price, planKey, highlight, user, navigate }) {
 
       <div>
         <h3 className="text-xl font-semibold">{title}</h3>
+        <p className="text-zinc-300 text-xs mt-1">{subtitle}</p>
         <p className="text-3xl font-bold mt-4">{price}</p>
       </div>
 
+      <ul className="mt-4 space-y-2 text-sm text-zinc-200">
+        <li>{`Daily GPT Usage: ${toLimitText(limits.daily)}`}</li>
+        <li>{`Device Limit: ${limits.devices}`}</li>
+        <li>Priority checkout enabled</li>
+        <li>Plan auto-activation after payment</li>
+      </ul>
+
       <button
         onClick={upgrade}
-        className="mt-6 w-full py-2.5 rounded-lg font-semibold text-black"
+        className="mt-auto w-full py-2.5 rounded-lg font-semibold text-black"
         style={{ backgroundColor: accent }}
       >
         {t("upgrade") || "Upgrade"}

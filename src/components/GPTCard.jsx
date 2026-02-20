@@ -118,7 +118,7 @@ function GPTCard({ gpt, used, plan, onUsed, theme = "pink" }) {
         <div className="mt-3 h-5 text-sm text-yellow-400">
           {avg ? (
             <>
-              <span className="rating-pulse">{"⭐ "}</span>
+              <span className="rating-pulse">{"\u2B50 "}</span>
               <CountUp value={avg} /> ({reviews.length})
             </>
           ) : (
@@ -132,13 +132,13 @@ function GPTCard({ gpt, used, plan, onUsed, theme = "pink" }) {
             : t("noReviewsYet") || "No reviews yet"}
         </div>
 
-        <div className="mt-auto pt-3 flex items-center justify-between gap-3">
+        <div className="mt-auto pt-3 grid grid-cols-2 gap-2 items-stretch">
           <button
             onClick={(e) => {
               e.stopPropagation();
               navigate(`/gpt/${gpt.id}`);
             }}
-            className="px-3 py-1.5 text-[13px] font-semibold rounded-md bg-black/45 border border-white/15 text-white hover:bg-black/60 transition-colors"
+            className="w-full min-w-0 px-2 py-2 text-xs font-semibold leading-tight text-center rounded-md bg-black/45 border border-white/15 text-white hover:bg-black/60 transition-colors whitespace-normal break-words"
             style={{ boxShadow: `0 0 0 1px ${accent}25 inset` }}
           >
             {t("writeReview") || "Write Review"}
@@ -149,7 +149,7 @@ function GPTCard({ gpt, used, plan, onUsed, theme = "pink" }) {
               e.stopPropagation();
               navigate(`/reviews/${gpt.id}`);
             }}
-            className="px-3 py-1.5 text-[13px] font-semibold rounded-md text-black transition-colors"
+            className="w-full min-w-0 px-2 py-2 text-xs font-semibold leading-tight text-center rounded-md text-black transition-colors whitespace-normal break-words"
             style={{ backgroundColor: accent }}
             aria-label={t("viewReviews") || "View Reviews"}
           >

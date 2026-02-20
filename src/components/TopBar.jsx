@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { LogOut, Menu } from "lucide-react";
+import { LogOut, Menu, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import { useSearch } from "../context/SearchContext";
@@ -37,11 +37,7 @@ export default function TopBar({ onOpenMobileMenu }) {
         <span className="w-3 h-3 bg-green-500 rounded-full" />
       </div>
 
-      <button
-        onClick={onOpenMobileMenu}
-        className="md:hidden mr-2 text-white"
-        aria-label="Open menu"
-      >
+      <button onClick={onOpenMobileMenu} className="md:hidden mr-2 text-white" aria-label="Open menu">
         <Menu className="w-5 h-5" />
       </button>
 
@@ -53,18 +49,29 @@ export default function TopBar({ onOpenMobileMenu }) {
       </Link>
 
       <div className="flex-1 flex justify-center px-2 md:px-4">
-        <input
-          ref={inputRef}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && navigate(`/gpts?q=${query}`)}
-          placeholder={t("searchPlaceholder") || "Search GPTs..."}
-          className="hidden md:block w-full max-w-md bg-zinc-900 border border-white/10 rounded-full px-4 py-1 text-sm"
-        />
+        <div className="hidden md:flex w-full max-w-md items-center bg-zinc-900 border border-white/10 rounded-full px-3 py-1">
+          <Search className="w-4 h-4 text-zinc-400 mr-2" />
+          <input
+            ref={inputRef}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && navigate(`/gpts?q=${query}`)}
+            placeholder={t("searchPlaceholder") || "Search GPTs..."}
+            className="w-full bg-transparent text-sm outline-none"
+          />
+        </div>
+
+        <button
+          className="md:hidden text-zinc-300 p-1.5 rounded-md border border-white/10 bg-zinc-900/70"
+          aria-label="Search GPTs"
+          onClick={() => navigate(`/gpts${query ? `?q=${encodeURIComponent(query)}` : ""}`)}
+        >
+          <Search className="w-4 h-4" />
+        </button>
       </div>
 
       {user && (
-        <div className="flex items-center gap-2 text-xs md:text-sm">
+        <div className="flex items-center gap-2 text-xs md:text-sm shrink-0">
           <span className="hidden sm:inline px-2 py-1 rounded bg-zinc-800 text-xs">{user.plan}</span>
 
           <select
@@ -74,7 +81,7 @@ export default function TopBar({ onOpenMobileMenu }) {
               localStorage.setItem("cv_lang", lang);
               i18n.changeLanguage(lang);
             }}
-            className="bg-zinc-800 px-2 py-1 rounded text-xs"
+            className="bg-zinc-800 px-2 py-1 rounded text-xs max-w-[88px]"
           >
             {LANGUAGE_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
