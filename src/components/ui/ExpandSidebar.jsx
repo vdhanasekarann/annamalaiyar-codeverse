@@ -1,6 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
 import { useSidebar } from "../../context/SidebarContext";
 
+function isRenderableIcon(icon) {
+  return typeof icon === "function" || (typeof icon === "object" && icon !== null);
+}
+
 export default function ExpandSidebar({ items = [], mobile, onNavigate }) {
   const { isExpanded, setCollapsed } = useSidebar();
   const location = useLocation();
@@ -31,7 +35,7 @@ export default function ExpandSidebar({ items = [], mobile, onNavigate }) {
             `}
           >
             <span className="w-6 flex justify-center items-center leading-none shrink-0">
-              {typeof i.icon === "function" ? (
+              {isRenderableIcon(i.icon) ? (
                 <i.icon className="w-5 h-5" strokeWidth={2.2} />
               ) : (
                 i.icon

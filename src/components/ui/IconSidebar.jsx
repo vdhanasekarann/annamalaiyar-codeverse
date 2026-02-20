@@ -1,6 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
 import { useSidebar } from "../../context/SidebarContext";
 
+function isRenderableIcon(icon) {
+  return typeof icon === "function" || (typeof icon === "object" && icon !== null);
+}
+
 export default function IconSidebar({ items = [], mobile }) {
   const { setHovered, setCollapsed } = useSidebar();
   const location = useLocation();
@@ -45,7 +49,7 @@ export default function IconSidebar({ items = [], mobile }) {
                 : "text-white/80 hover:bg-white/10"}
             `}
           >
-            {typeof it.icon === "function" ? (
+            {isRenderableIcon(it.icon) ? (
               <it.icon className="w-5 h-5" strokeWidth={2.2} />
             ) : (
               <span className="text-xl leading-none">{it.icon}</span>
