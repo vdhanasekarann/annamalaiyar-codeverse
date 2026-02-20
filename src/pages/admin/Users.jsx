@@ -1,78 +1,150 @@
-import { useEffect, useState } from "react";
-import { requireAuth } from "../../utils/auth";
-import { API_BASE } from "../../config/api";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../lib/apiFetch";
-import { Link, Navigate, useNavigate } from "react-router-dom";
 
 export default function AdminUsers() {
+  const { t } = useTranslation();
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    requireAuth("admin").then(load);
+    load();
   }, []);
 
   async function load() {
-    const res = await apiFetch("/api/admin/users", {
-      credentials: "include",
-    });
-    setUsers(await res.json());
+    const res = await apiFetch("/api/admin/users", { credentials: "include" });
+    const data = res.ok ? await res.json() : [];
+    setUsers(Array.isArray(data) ? data : []);
   }
 
-  async function action(email, action, value) {
+  async function action(email, actionType, value) {
     await apiFetch("/api/admin/users/action", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, action, value }),
+      body: JSON.stringify({ email, action: actionType, value }),
     });
     load();
   }
 
+  const stats = useMemo(
+    () => ({
+      total: users.length,
+      blocked: users.filter((u) => u.blocked).length,
+      admins: users.filter((u) => u.role === "admin").length,
+    }),
+    [users]
+  );
+
   return (
-    <div className="p-6 text-white">
-      <h1 className="text-2xl font-bold mb-4">👥 Users</h1>
+    <div className="p-3 sm:p-6 text-white space-y-4">
+      <h1 className="text-2xl sm:text-3xl font-bold">{`👥 ${t("adminUsers") || "Admin Users"}`}</h1>
 
-      <div className="overflow-x-auto">
-      <table className="w-full text-sm min-w-[650px]">
-            <thead>
-          <tr className="border-b border-zinc-700">
-            <th>Email</th>
-            <th>Plan</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <StatCard label="Total Users" value={stats.total} />
+        <StatCard label="Admins" value={stats.admins} />
+        <StatCard label={t("blockedStatus") || "Blocked"} value={stats.blocked} />
+      </div>
 
-        <tbody>
-          {users.map(u => (
-            <tr key={u.email} className="border-b border-zinc-800">
-              <td>{u.email}</td>
-              <td>{u.plan}</td>
-              <td>{u.role}</td>
-              <td>{u.blocked ? "Blocked" : "Active"}</td>
-              <td className="space-x-2">
-                <button onClick={() => action(u.email, u.blocked ? "unblock" : "block")}>
-                  {u.blocked ? "Unblock" : "Block"}
-                </button>
+      <div className="md:hidden space-y-3">
+        {users.map((u) => (
+          <div key={u.email} className="glass-panel border border-white/10 p-4 rounded-xl">
+            <div className="font-semibold break-all">{u.email}</div>
+            <div className="text-sm text-zinc-300 mt-1">
+              {(t("planLabel") || "Plan") + `: ${u.plan}`}
+            </div>
+            <div className="text-sm text-zinc-300">
+              {`Role: ${u.role}`}
+            </div>
+            <div className="text-sm text-zinc-300">
+              {(t("status") || "Status") + `: ${u.blocked ? t("blockedStatus") || "Blocked" : t("activeStatus") || "Active"}`}
+            </div>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <ActionButton onClick={() => action(u.email, u.blocked ? "unblock" : "block")}>
+                {u.blocked ? "Unblock" : "Block"}
+              </ActionButton>
+              <ActionButton onClick={() => action(u.email, "plan", "pro")}>
+                Upgrade Pro
+              </ActionButton>
+              <ActionButton
+                onClick={() => action(u.email, "role", u.role === "admin" ? "user" : "admin")}
+              >
+                Toggle Role
+              </ActionButton>
+              <ActionButton onClick={() => action(u.email, "delete")} danger>
+                Delete
+              </ActionButton>
+            </div>
+          </div>
+        ))}
+      </div>
 
-                <button onClick={() => action(u.email, "plan", "pro")}>
-                  Upgrade Pro
-                </button>
-
-                <button onClick={() => action(u.email, "role", u.role === "admin" ? "user" : "admin")}>
-                  Toggle Role
-                </button>
-
-                <button onClick={() => action(u.email, "delete")}>
-                  Delete
-                </button>
-              </td>
+      <div className="hidden md:block overflow-x-auto glass-panel border border-white/10 p-4 rounded-xl">
+        <table className="w-full text-sm min-w-[900px]">
+          <thead>
+            <tr className="border-b border-white/10 text-left">
+              <th className="py-2 pr-2">Email</th>
+              <th className="py-2 pr-2">{t("planLabel") || "Plan"}</th>
+              <th className="py-2 pr-2">Role</th>
+              <th className="py-2 pr-2">{t("status") || "Status"}</th>
+              <th className="py-2 pr-2">{t("actions") || "Actions"}</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-        </div>
+          </thead>
+          <tbody>
+            {users.map((u) => (
+              <tr key={u.email} className="border-b border-white/10 align-top">
+                <td className="py-3 pr-2 break-all">{u.email}</td>
+                <td className="py-3 pr-2">{u.plan}</td>
+                <td className="py-3 pr-2">{u.role}</td>
+                <td className="py-3 pr-2">
+                  {u.blocked ? t("blockedStatus") || "Blocked" : t("activeStatus") || "Active"}
+                </td>
+                <td className="py-3 pr-2">
+                  <div className="flex flex-wrap gap-2">
+                    <ActionButton onClick={() => action(u.email, u.blocked ? "unblock" : "block")}>
+                      {u.blocked ? "Unblock" : "Block"}
+                    </ActionButton>
+                    <ActionButton onClick={() => action(u.email, "plan", "pro")}>
+                      Upgrade Pro
+                    </ActionButton>
+                    <ActionButton
+                      onClick={() => action(u.email, "role", u.role === "admin" ? "user" : "admin")}
+                    >
+                      Toggle Role
+                    </ActionButton>
+                    <ActionButton onClick={() => action(u.email, "delete")} danger>
+                      Delete
+                    </ActionButton>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
+  );
+}
+
+function StatCard({ label, value }) {
+  return (
+    <div className="glass-panel border border-white/10 p-4 rounded-xl">
+      <div className="text-xs text-zinc-300">{label}</div>
+      <div className="text-2xl font-bold mt-1">{value}</div>
+    </div>
+  );
+}
+
+function ActionButton({ children, onClick, danger = false }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+        danger
+          ? "bg-red-600/80 hover:bg-red-500 text-white"
+          : "bg-black/45 border border-white/15 hover:bg-black/65 text-white"
+      }`}
+    >
+      {children}
+    </button>
   );
 }

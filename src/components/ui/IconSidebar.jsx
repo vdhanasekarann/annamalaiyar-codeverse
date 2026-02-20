@@ -45,7 +45,11 @@ export default function IconSidebar({ items = [], mobile }) {
                 : "text-white/80 hover:bg-white/10"}
             `}
           >
-            <span className="text-xl">{it.icon}</span>
+            {typeof it.icon === "function" ? (
+              <it.icon className="w-5 h-5" strokeWidth={2.2} />
+            ) : (
+              <span className="text-xl leading-none">{it.icon}</span>
+            )}
           </Link>
         ))}
       </nav>

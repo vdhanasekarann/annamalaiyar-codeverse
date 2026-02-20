@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link, Navigate } from "react-router-dom";
 import { apiFetch } from "../lib/apiFetch";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");

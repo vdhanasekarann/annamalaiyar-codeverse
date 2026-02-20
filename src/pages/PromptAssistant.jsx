@@ -1,9 +1,16 @@
 import { useState } from "react";
-import { Link, Navigate } from "react-router-dom";
-import { useTranslation } from 'react-i18next';
+import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const tones = ["Professional", "Friendly", "Persuasive", "Creative", "Technical"];
-const languages = ["English", "Tamil", "Hindi", "Malayalam", "Kannada", "Telugu"];
+const languages = [
+  "English",
+  "\u0BA4\u0BAE\u0BBF\u0BB4\u0BCD",
+  "\u0939\u093F\u0928\u094D\u0926\u0940",
+  "\u0D2E\u0D32\u0D2F\u0D3E\u0D33\u0D02",
+  "\u0C95\u0CA8\u0CCD\u0CA8\u0CA1",
+  "\u0C24\u0C46\u0C32\u0C41\u0C17\u0C41",
+];
 const styles = ["Detailed", "Concise", "Bullet Points", "Story Format", "Step-by-Step"];
 const formats = ["Plain Text", "Markdown", "Table", "JSON"];
 
@@ -15,13 +22,12 @@ export default function PromptAssistant() {
     tone: "",
     language: "",
     style: "",
-    format: ""
+    format: "",
   });
-
   const [result, setResult] = useState("");
 
-  const next = () => setStep(s => s + 1);
-  const back = () => setStep(s => s - 1);
+  const next = () => setStep((s) => s + 1);
+  const back = () => setStep((s) => s - 1);
 
   const generatePrompt = () => {
     const prompt = `
@@ -43,70 +49,79 @@ Make the output high-quality, well-structured and optimized.
   };
 
   return (
-    <div className="glass-dark min-h-screen bg-[#0f0f0f] text-white p-6">
-      <div className="max-w-2xl mx-auto bg-zinc-900 rounded-xl p-6 shadow-xl">
-        <Link
-  to="/dashboard"
-  className="text-sm text-indigo-400 hover:underline mb-4 inline-block"
->
-  {t('backToDashboard') || '← Back to Dashboard'}
-</Link>
+    <div className="glass-dark min-h-screen bg-[#0f0f0f] text-white p-3 sm:p-6">
+      <div className="max-w-2xl mx-auto bg-zinc-900 rounded-xl p-5 sm:p-6 shadow-xl">
+        <Link to="/dashboard" className="text-sm text-indigo-400 hover:underline mb-4 inline-block">
+          {"\u2190 " + (t("backToDashboard") || "Back to Dashboard")}
+        </Link>
 
-        <h1 className="text-2xl font-bold mb-6">🤖 {t('promptAssistant') || 'Ask AI Prompt Assistant'}</h1>
-        <p className="text-sm opacity-60 mb-6">
-          Create perfectly structured prompts in 5 easy steps.
-          Choose tone, language, style and generate production-ready AI prompts.
-          </p>
+        <h1 className="text-2xl font-bold mb-6">{t("promptAssistant") || "Ask AI Prompt Assistant"}</h1>
+        <p className="text-sm opacity-70 mb-6">
+          Create perfectly structured prompts in 5 easy steps. Choose tone, language,
+          style and generate production-ready prompts.
+        </p>
 
         {step === 1 && (
           <>
-            <label className="block mb-2 text-sm">{t('whatGenerate') || 'What do you want to generate?'}</label>
+            <label className="block mb-2 text-sm">
+              {t("whatGenerate") || "What do you want to generate?"}
+            </label>
             <textarea
               className="w-full p-3 rounded bg-zinc-800"
               rows={4}
               value={form.goal}
-              onChange={e => setForm({...form, goal: e.target.value})}
+              onChange={(e) => setForm({ ...form, goal: e.target.value })}
             />
-            <button onClick={next} className="mt-4 bg-indigo-600 px-4 py-2 rounded">{t('next')||'Next'}</button>
+            <button onClick={next} className="mt-4 bg-indigo-600 px-4 py-2 rounded">
+              {t("next") || "Next"}
+            </button>
           </>
         )}
 
         {step === 2 && (
           <>
-            <SelectStep title={t('selectTone')||'Select Tone'} options={tones}
-              onSelect={(v) => setForm({...form, tone: v})}
+            <SelectStep
+              title={t("selectTone") || "Select Tone"}
+              options={tones}
+              onSelect={(v) => setForm({ ...form, tone: v })}
             />
-            <NavButtons back={back} next={next}/>
+            <NavButtons back={back} next={next} />
           </>
         )}
 
         {step === 3 && (
           <>
-            <SelectStep title={t('selectLanguage')||'Select Language'} options={languages}
-              onSelect={(v) => setForm({...form, language: v})}
+            <SelectStep
+              title={t("selectLanguage") || "Select Language"}
+              options={languages}
+              onSelect={(v) => setForm({ ...form, language: v })}
             />
-            <NavButtons back={back} next={next}/>
+            <NavButtons back={back} next={next} />
           </>
         )}
 
         {step === 4 && (
           <>
-            <SelectStep title={t('selectStyle')||'Select Style'} options={styles}
-              onSelect={(v) => setForm({...form, style: v})}
+            <SelectStep
+              title={t("selectStyle") || "Select Style"}
+              options={styles}
+              onSelect={(v) => setForm({ ...form, style: v })}
             />
-            <NavButtons back={back} next={next}/>
+            <NavButtons back={back} next={next} />
           </>
         )}
 
         {step === 5 && (
           <>
-            <SelectStep title={t('selectOutputFormat')||'Select Output Format'} options={formats}
-              onSelect={(v) => setForm({...form, format: v})}
+            <SelectStep
+              title={t("selectOutputFormat") || "Select Output Format"}
+              options={formats}
+              onSelect={(v) => setForm({ ...form, format: v })}
             />
             <div className="flex justify-between mt-4">
-              <button onClick={back}>{t('back')||'Back'}</button>
+              <button onClick={back}>{t("back") || "Back"}</button>
               <button onClick={generatePrompt} className="bg-indigo-600 px-4 py-2 rounded">
-                {t('generatePrompt')||'Generate Prompt'}
+                {t("generatePrompt") || "Generate Prompt"}
               </button>
             </div>
           </>
@@ -114,17 +129,16 @@ Make the output high-quality, well-structured and optimized.
 
         {step === 6 && (
           <>
-            <h2 className="text-lg mb-3">✨ {t('optimizedPrompt')||'Optimized Prompt'}</h2>
-            <pre className="bg-black p-4 rounded text-xs overflow-auto">
-              {result}
-            </pre>
-            <button onClick={() => navigator.clipboard.writeText(result)}
-              className="mt-4 bg-green-600 px-4 py-2 rounded">
-              {t('copy')||'Copy'}
+            <h2 className="text-lg mb-3">{t("optimizedPrompt") || "Optimized Prompt"}</h2>
+            <pre className="bg-black p-4 rounded text-xs overflow-auto">{result}</pre>
+            <button
+              onClick={() => navigator.clipboard.writeText(result)}
+              className="mt-4 bg-green-600 px-4 py-2 rounded"
+            >
+              {t("copy") || "Copy"}
             </button>
           </>
         )}
-
       </div>
     </div>
   );
@@ -135,10 +149,12 @@ function SelectStep({ title, options, onSelect }) {
     <>
       <h2 className="mb-4">{title}</h2>
       <div className="grid grid-cols-2 gap-3">
-        {options.map(opt => (
-          <button key={opt}
+        {options.map((opt) => (
+          <button
+            key={opt}
             onClick={() => onSelect(opt)}
-            className="bg-zinc-800 hover:bg-indigo-600 px-3 py-2 rounded text-sm">
+            className="bg-zinc-800 hover:bg-indigo-600 px-3 py-2 rounded text-sm"
+          >
             {opt}
           </button>
         ))}
@@ -151,7 +167,9 @@ function NavButtons({ back, next }) {
   return (
     <div className="flex justify-between mt-4">
       <button onClick={back}>Back</button>
-      <button onClick={next} className="bg-indigo-600 px-4 py-2 rounded">Next</button>
+      <button onClick={next} className="bg-indigo-600 px-4 py-2 rounded">
+        Next
+      </button>
     </div>
   );
 }

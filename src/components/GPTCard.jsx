@@ -11,6 +11,7 @@ function GPTCard({ gpt, used, plan, onUsed, theme = "pink" }) {
   const navigate = useNavigate();
   const limit = plan === "free" ? parseLimit(gpt.freeLimit) : Infinity;
   const locked = plan === "free" && used >= limit;
+  const accent = "var(--accent, #facc15)";
 
   const [reviews, setReviews] = React.useState([]);
   const [imgLoaded, setImgLoaded] = React.useState(false);
@@ -66,7 +67,7 @@ function GPTCard({ gpt, used, plan, onUsed, theme = "pink" }) {
   return (
     <GlassCard
       theme={theme}
-      className="float-slow magnetic gpu p-6 h-full flex flex-col relative"
+      className="magnetic gpu p-6 h-full min-h-[540px] flex flex-col relative"
       onClick={(e) => {
         if (e.target.closest("a,button")) return;
         click();
@@ -76,22 +77,22 @@ function GPTCard({ gpt, used, plan, onUsed, theme = "pink" }) {
       <div className="pointer-events-none absolute inset-0 rounded-3xl overflow-hidden">
         {theme === "gold" ? (
           <>
-            <div className="absolute -top-10 -left-20 w-60 h-40 bg-gradient-to-br from-yellow-400/30 via-amber-400/20 to-transparent opacity-40 blur-2xl transform rotate-12" />
+            <div className="absolute -top-10 -left-20 w-60 h-40 bg-gradient-to-br from-yellow-400/30 via-amber-400/20 to-transparent opacity-40 blur-2xl rotate-12" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent mix-blend-screen opacity-10" />
           </>
         ) : (
           <>
-            <div className="absolute -top-10 -left-20 w-60 h-40 bg-gradient-to-br from-pink-500/30 via-purple-400/18 to-transparent opacity-40 blur-2xl transform rotate-12" />
+            <div className="absolute -top-10 -left-20 w-60 h-40 bg-gradient-to-br from-pink-500/30 via-purple-400/18 to-transparent opacity-40 blur-2xl rotate-12" />
             <div className="absolute inset-0 bg-gradient-to-t from-white/2 to-transparent mix-blend-screen opacity-6" />
           </>
         )}
       </div>
 
-      <div className="flex items-center justify-center mt-4 relative z-10">
-        <div className="w-28 h-28 flex items-center justify-center rounded-xl overflow-hidden relative">
+      <div className="flex items-center justify-center mt-2 relative z-10">
+        <div className="w-36 h-36 flex items-center justify-center rounded-xl overflow-hidden relative">
           {!imgLoaded && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-24 h-24 rounded-lg skeleton" />
+              <div className="w-28 h-28 rounded-lg skeleton" />
             </div>
           )}
           <img
@@ -100,74 +101,68 @@ function GPTCard({ gpt, used, plan, onUsed, theme = "pink" }) {
             loading="lazy"
             onLoad={() => setImgLoaded(true)}
             onError={() => setImgLoaded(true)}
-            className="w-24 h-24 object-contain mx-auto"
+            className="w-32 h-32 object-contain mx-auto"
           />
         </div>
       </div>
 
       <div className="p-4 flex flex-col flex-1 relative z-10">
-        <h3
-          className={`text-lg font-bold tracking-wide gpt-title line-clamp-2 ${
-            theme === "gold" ? "text-yellow-300" : "text-white"
-          }`}
-        >
+        <h3 className="text-lg font-bold tracking-wide gpt-title text-white line-clamp-2">
           {t(gpt.title) || gpt.title}
         </h3>
 
-        <p
-          className={`text-sm mt-2 line-clamp-6 ${
-            theme === "gold" ? "text-zinc-300" : "text-zinc-300/80"
-          }`}
-        >
+        <p className="text-sm mt-2 text-zinc-300 line-clamp-6">
           {t(gpt.description) || gpt.description}
         </p>
 
-        <div className="mt-2 text-yellow-400 text-sm">
-          {"⭐ "}
-          {avg ? <CountUp value={avg} /> : "No ratings"}
+        <div className="mt-3 h-5 text-sm text-yellow-400">
+          {avg ? (
+            <>
+              <span className="rating-pulse">{"⭐ "}</span>
+              <CountUp value={avg} /> ({reviews.length})
+            </>
+          ) : (
+            t("noRatings") || "No ratings"
+          )}
         </div>
 
-        {avg && (
-          <div className="text-xs text-yellow-400 mt-1">
-            <span className="rating-pulse">{"⭐ " + avg}</span> ({reviews.length})
-          </div>
-        )}
-
-        <div className="mt-4 h-6 text-xs text-zinc-400">
-          {reviews.length > 0 ? `${reviews.length} review(s)` : "No reviews yet"}
+        <div className="mt-2 h-5 text-xs text-zinc-400">
+          {reviews.length > 0
+            ? t("reviewCount", { count: reviews.length }) || `${reviews.length} review(s)`
+            : t("noReviewsYet") || "No reviews yet"}
         </div>
 
-        <div className="mt-auto space-y-2">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/reviews/${gpt.id}`);
-            }}
-            className={`block text-xs underline ${
-              theme === "gold" ? "text-yellow-200" : "text-indigo-400"
-            }`}
-            aria-label={t("viewReviews") || "View Reviews"}
-          >
-            {t("viewReviews") || "View Reviews"}
-          </button>
-
+        <div className="mt-auto pt-3 flex items-center justify-between gap-3">
           <button
             onClick={(e) => {
               e.stopPropagation();
               navigate(`/gpt/${gpt.id}`);
             }}
-            className="block text-xs underline text-indigo-400"
+            className="px-3 py-1.5 text-[13px] font-semibold rounded-md bg-black/45 border border-white/15 text-white hover:bg-black/60 transition-colors"
+            style={{ boxShadow: `0 0 0 1px ${accent}25 inset` }}
           >
-            Write Review
+            {t("writeReview") || "Write Review"}
+          </button>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/reviews/${gpt.id}`);
+            }}
+            className="px-3 py-1.5 text-[13px] font-semibold rounded-md text-black transition-colors"
+            style={{ backgroundColor: accent }}
+            aria-label={t("viewReviews") || "View Reviews"}
+          >
+            {t("viewReviews") || "View Reviews"}
           </button>
         </div>
 
-        <div className="text-sm mt-2 text-zinc-300">
+        <div className="text-sm mt-3 text-zinc-300">
           {locked
             ? `${t("locked") || "Limit reached"}`
             : plan === "free"
-            ? `${used} / ${limit} ${t("usedToday") || "used today"}`
-            : t("unlimited") || "Unlimited"}
+              ? `${used} / ${limit} ${t("usedToday") || "used today"}`
+              : t("unlimited") || "Unlimited"}
         </div>
       </div>
     </GlassCard>

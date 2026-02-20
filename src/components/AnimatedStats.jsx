@@ -23,15 +23,19 @@ function useCountUp(target, duration = 1000) {
 export default function AnimatedStats({ stats = [] }){
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-      {stats.map((s, i) => {
-        const val = useCountUp(s.value, 900 + i * 100);
-        return (
-          <div key={s.key||i} className="p-4 rounded-xl glass-gold">
-            <div className="text-sm text-zinc-300">{s.label}</div>
-            <div className="text-2xl font-bold text-white mt-2">{val}</div>
-          </div>
-        )
-      })}
+      {stats.map((s, i) => (
+        <CountStat key={s.key || i} label={s.label} value={s.value} duration={900 + i * 100} />
+      ))}
     </div>
-  )
+  );
+}
+
+function CountStat({ label, value, duration }) {
+  const val = useCountUp(value, duration);
+  return (
+    <div className="p-4 rounded-xl glass-gold">
+      <div className="text-sm text-zinc-300">{label}</div>
+      <div className="text-2xl font-bold text-white mt-2">{val}</div>
+    </div>
+  );
 }

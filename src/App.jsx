@@ -1,8 +1,7 @@
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import GPTs from "./pages/GPTs";
 import Premium from "./pages/Premium";
 import AdminRevenue from "./pages/admin/AdminRevenue";
 import AdminUsers from "./pages/admin/Users";

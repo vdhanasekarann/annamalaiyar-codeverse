@@ -3,23 +3,33 @@ import ExpandSidebar from "./ExpandSidebar";
 import { useSidebar } from "../../context/SidebarContext";
 import { useAuth } from "../../context/AuthContext";
 import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import {
+  Bot,
+  ChartColumn,
+  FileText,
+  Gem,
+  House,
+  Users,
+} from "lucide-react";
 
-export default function DoubleSidebar({ mobile=false, onNavigate }) {
+export default function DoubleSidebar({ mobile = false, onNavigate }) {
   const { setCollapsed } = useSidebar();
   const { user } = useAuth();
   const location = useLocation();
+  const { t } = useTranslation();
 
   const items = [
-    { path:"/dashboard", label:"Home", icon:"🏠" },
-    { path:"/gpts", label:"GPT Apps", icon:"🤖" },
-    { path:"/terms", label:"Terms", icon:"📄" },
-    { path:"/premium", label:"Premium", icon:"💎" }
+    { path: "/dashboard", label: t("home") || "Home", icon: House },
+    { path: "/gpts", label: t("gptApps") || "GPT Apps", icon: Bot },
+    { path: "/terms", label: t("terms") || "Terms", icon: FileText },
+    { path: "/premium", label: t("premium") || "Premium", icon: Gem },
   ];
 
-  if(user?.role==="admin"){
+  if (user?.role === "admin") {
     items.push(
-      { path:"/admin/revenue", label:"Revenue", icon:"📊" },
-      { path:"/admin/users", label:"Users", icon:"👥" }
+      { path: "/admin/revenue", label: t("revenue") || "Revenue", icon: ChartColumn },
+      { path: "/admin/users", label: t("users") || "Users", icon: Users }
     );
   }
 
@@ -39,8 +49,8 @@ export default function DoubleSidebar({ mobile=false, onNavigate }) {
                 location.pathname === i.path ? "bg-indigo-600/40" : "hover:bg-white/10"
               }`}
             >
-              <span className="text-lg">{i.icon}</span>
-              <span className="text-sm font-medium">{i.label}</span>
+              <i.icon className="w-5 h-5 shrink-0" strokeWidth={2.2} />
+              <span className="text-sm font-medium leading-none">{i.label}</span>
             </Link>
           ))}
         </nav>
@@ -50,8 +60,8 @@ export default function DoubleSidebar({ mobile=false, onNavigate }) {
 
   return (
     <>
-      <IconSidebar items={items} mobile={mobile}/>
-      <ExpandSidebar items={items} mobile={mobile} onNavigate={onNavigate}/>
+      <IconSidebar items={items} mobile={mobile} />
+      <ExpandSidebar items={items} mobile={mobile} onNavigate={onNavigate} />
     </>
   );
 }

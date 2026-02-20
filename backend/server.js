@@ -750,11 +750,30 @@ app.post("/api/reviews", requireUser, async (req, res) => {
 
 app.get("/api/reviews/:gpt", async (req, res) => {
   const r = await db.query(
-    "SELECT rating, review, email FROM gpt_reviews WHERE gpt=$1",
+    `SELECT id, rating, review, email
+     FROM gpt_reviews
+     WHERE gpt=$1`,
     [req.params.gpt]
   );
 
   res.json(r.rows);
+});
+
+app.post("/api/inbound-email", express.json(), async (req,res)=>{
+  console.log("Incoming email:", req.body);
+
+  const { from, subject, text, html } = req.body;
+
+  // Save email to database
+  await db.collection("emails").insertOne({
+    from,
+    subject,
+    text,
+    html,
+    receivedAt: new Date()
+  });
+
+  res.status(200).send("ok");
 });
 
 app.listen(3000, () =>

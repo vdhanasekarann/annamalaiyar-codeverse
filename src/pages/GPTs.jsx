@@ -1,22 +1,21 @@
 import { GPTS } from "../data/gpts";
-import GPTCard from "../components/GPTCard";
 import LazyGPTCard from "../components/LazyGPTCard";
 import { recommendSort } from "../utils/recommend";
 import { useUsage } from "../hooks/useUsage";
 import { useEffect, useState } from "react";
 import { useTranslation } from 'react-i18next';
-import { apiFetch } from "../lib/apiFetch";
-import { Link, useNavigate, Navigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useSearch } from "../context/SearchContext";
+import { useTheme } from "../context/ThemeContext";
 
 export default function GPTsPage() {
-  const { user, setUser } = useAuth();
+  const { user } = useAuth();
   const [active,setActive]=useState("All");
-  const navigate = useNavigate();
   const { query, setQuery } = useSearch();
   const location = useLocation();
   const { usage, refresh } = useUsage(user?.email);
+  const { theme } = useTheme();
     
   const baseFiltered = GPTS.filter((g) =>
     g.title.toLowerCase().includes((query || "").toLowerCase()) &&
@@ -26,10 +25,6 @@ export default function GPTsPage() {
   const filtered = active === 'Recommended'
  ? recommendSort(baseFiltered, usage)
  : baseFiltered;
-
-  useEffect(() => {
-    // No server `/api/user` endpoint in this app; rely on AuthProvider's `user`
-  }, [user, setUser]);
 
   // Sync query param to global search context so direct links work
   useEffect(() => {
@@ -66,6 +61,7 @@ export default function GPTsPage() {
               used={usage[gpt.id] || 0}
               plan={user.plan}
               onUsed={refresh}
+              theme={theme}
             />
           </div>
         ))}

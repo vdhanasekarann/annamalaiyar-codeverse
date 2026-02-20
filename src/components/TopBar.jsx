@@ -1,11 +1,20 @@
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { LogOut, Menu } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import { useSearch } from "../context/SearchContext";
-import { useTranslation } from "react-i18next";
-import { LogOut } from "lucide-react";
 import { apiFetch } from "../lib/apiFetch";
 import { useTheme } from "../context/ThemeContext";
+
+const LANGUAGE_OPTIONS = [
+  { value: "en", label: "English" },
+  { value: "ta", label: "\u0BA4\u0BAE\u0BBF\u0BB4\u0BCD" },
+  { value: "hi", label: "\u0939\u093F\u0928\u094D\u0926\u0940" },
+  { value: "ml", label: "\u0D2E\u0D32\u0D2F\u0D3E\u0D33\u0D02" },
+  { value: "kn", label: "\u0C95\u0CA8\u0CCD\u0CA8\u0CA1" },
+  { value: "te", label: "\u0C24\u0C46\u0C32\u0C41\u0C17\u0C41" },
+];
 
 export default function TopBar({ onOpenMobileMenu }) {
   const navigate = useNavigate();
@@ -28,11 +37,18 @@ export default function TopBar({ onOpenMobileMenu }) {
         <span className="w-3 h-3 bg-green-500 rounded-full" />
       </div>
 
-      <button onClick={onOpenMobileMenu} className="md:hidden mr-2 text-white text-xl" aria-label="Open menu">
-        ☰
+      <button
+        onClick={onOpenMobileMenu}
+        className="md:hidden mr-2 text-white"
+        aria-label="Open menu"
+      >
+        <Menu className="w-5 h-5" />
       </button>
 
-      <Link to="/" className="font-semibold tracking-wide text-sm md:text-base truncate max-w-[140px] md:max-w-none">
+      <Link
+        to="/"
+        className="font-semibold tracking-wide text-sm md:text-base truncate max-w-[140px] md:max-w-none"
+      >
         CodeVerse AI OS
       </Link>
 
@@ -53,18 +69,25 @@ export default function TopBar({ onOpenMobileMenu }) {
 
           <select
             value={i18n.language}
-            onChange={(e) => i18n.changeLanguage(e.target.value)}
+            onChange={(e) => {
+              const lang = e.target.value;
+              localStorage.setItem("cv_lang", lang);
+              i18n.changeLanguage(lang);
+            }}
             className="bg-zinc-800 px-2 py-1 rounded text-xs"
           >
-            <option value="en">EN</option>
-            <option value="ta">TA</option>
-            <option value="hi">HI</option>
-            <option value="ml">ML</option>
-            <option value="kn">KN</option>
-            <option value="te">TE</option>
+            {LANGUAGE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
 
-          <select value={theme} onChange={(e) => setTheme(e.target.value)} className="bg-zinc-800 px-2 py-1 rounded text-xs">
+          <select
+            value={theme}
+            onChange={(e) => setTheme(e.target.value)}
+            className="bg-zinc-800 px-2 py-1 rounded text-xs"
+          >
             <option value="gold">Gold</option>
             <option value="pink">Pink</option>
             <option value="blue">Blue</option>

@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
+import { Bot } from "lucide-react";
 import TopBar from "./TopBar";
 import { useAuth } from "../context/AuthContext";
 import MobileDrawer from "./MobileDrawer";
 import DoubleSidebar from "./ui/DoubleSidebar";
 import { useSidebar } from "../context/SidebarContext";
-import { useTheme } from "../context/ThemeContext";
 
 export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -16,21 +16,20 @@ export default function Layout() {
 
   if (location.pathname === "/login") return null;
 
-  const { setTheme } = useTheme();
-
-useEffect(()=>{
- if(user?.plan==="premium") setTheme("gold");
- else setTheme("blue");
-},[user,setTheme]);
-
   useEffect(() => {
-    if (!user) return setBg(null);
+    if (!user) {
+      setBg(null);
+      return;
+    }
+
     const key = `bg_${user.email}`;
-    setBg(localStorage.getItem(key));
+    const syncBg = () => setBg(localStorage.getItem(key));
+    syncBg();
+    window.addEventListener("bgChange", syncBg);
+    return () => window.removeEventListener("bgChange", syncBg);
   }, [user]);
 
   useEffect(() => {
-    if (!document) return;
     document.body.style.backgroundImage = `url('${bg || "/bg-galaxy.jpg"}')`;
     document.body.style.backgroundSize = "cover";
     document.body.style.backgroundPosition = "center";
@@ -38,13 +37,10 @@ useEffect(()=>{
 
   return (
     <div className="flex h-screen overflow-hidden">
-
-      {/* SIDEBAR SYSTEM */}
       <div className="hidden md:block">
         <DoubleSidebar />
       </div>
 
-      {/* MOBILE SIDEBAR */}
       <MobileDrawer
         open={mobileOpen}
         onClose={() => {
@@ -52,12 +48,14 @@ useEffect(()=>{
           setCollapsed(true);
         }}
       >
-        <DoubleSidebar mobile onNavigate={()=>setMobileOpen(false)} />
+        <DoubleSidebar mobile onNavigate={() => setMobileOpen(false)} />
       </MobileDrawer>
 
-      {/* MAIN AREA */}
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${collapsed ? "md:pl-[72px]" : "md:pl-[240px]"}`}>
-        
+      <div
+        className={`flex-1 flex flex-col transition-all duration-300 ${
+          collapsed ? "md:pl-[72px]" : "md:pl-[240px]"
+        }`}
+      >
         <TopBar
           onOpenMobileMenu={() => {
             setCollapsed(false);
@@ -74,10 +72,10 @@ useEffect(()=>{
             <Link
               to="/prompt-assistant"
               className="fixed bottom-6 right-6 z-50 bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-xl"
+              aria-label="Open Prompt Assistant"
             >
-              🤖
+              <Bot className="w-5 h-5" />
             </Link>
-
           </div>
         </main>
       </div>
