@@ -2,12 +2,15 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../lib/apiFetch";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
-  const [sending, setSending] = useState(false);
+  const [sendingMagic, setSendingMagic] = useState(false);
+  const [signingIn, setSigningIn] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { setUser } = useAuth();
 
   const focusEmailInput = () => {
     const input = document.getElementById("email-input");
@@ -22,7 +25,7 @@ export default function Login() {
     }
 
     try {
-      setSending(true);
+      setSendingMagic(true);
       const res = await apiFetch("/api/auth/magic-link", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -36,10 +39,47 @@ export default function Login() {
         return;
       }
 
-      if (data.devLink) window.location.href = data.devLink;
-      else alert(t("magicLinkSent") || "Magic link sent to your email");
+      if (data.devLink) {
+        window.location.href = data.devLink;
+      } else {
+        alert(t("magicLinkSent") || "Magic link sent to your email");
+      }
     } finally {
-      setSending(false);
+      setSendingMagic(false);
+    }
+  };
+
+  const continueWithEmail = async () => {
+    if (!email) {
+      alert(t("emailRequired") || "Email required");
+      focusEmailInput();
+      return;
+    }
+
+    try {
+      setSigningIn(true);
+      const loginRes = await apiFetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email }),
+      });
+
+      if (!loginRes.ok) {
+        const err = await loginRes.json().catch(() => ({}));
+        alert(err.error || t("errorTryAgain") || "Unable to login");
+        return;
+      }
+
+      const meRes = await apiFetch("/api/auth/me", { credentials: "include" });
+      if (meRes.ok) {
+        const me = await meRes.json();
+        setUser(me);
+      }
+
+      navigate("/dashboard");
+    } finally {
+      setSigningIn(false);
     }
   };
 
@@ -113,24 +153,26 @@ export default function Login() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") sendMagicLink();
+              if (e.key === "Enter") continueWithEmail();
             }}
           />
 
           <button
             onClick={sendMagicLink}
-            disabled={sending}
+            disabled={sendingMagic || signingIn}
             className="w-full bg-black text-white p-3 rounded mb-3 disabled:opacity-60"
           >
-            {sending ? (t("sending") || "Sending...") : (t("sendMagicLink") || "Send Magic Link")}
+            {sendingMagic
+              ? t("sending") || "Sending..."
+              : t("sendMagicLink") || "Send Magic Link"}
           </button>
 
           <button
-            onClick={sendMagicLink}
-            disabled={sending}
+            onClick={continueWithEmail}
+            disabled={sendingMagic || signingIn}
             className="w-full mt-2 bg-yellow-500 text-black p-3 rounded font-semibold disabled:opacity-60"
           >
-            {sending ? (t("sending") || "Sending...") : (t("continue") || "Continue")}
+            {signingIn ? t("sending") || "Signing in..." : t("continue") || "Continue"}
           </button>
 
           <p className="text-xs opacity-50 text-center mt-6">

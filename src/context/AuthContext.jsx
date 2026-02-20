@@ -8,6 +8,12 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const path = window.location.pathname;
+    if (path === "/login" || path === "/magic-login") {
+      setLoading(false);
+      return;
+    }
+
     async function loadUser() {
       try {
         const res = await apiFetch("/api/auth/me", {
