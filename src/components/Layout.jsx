@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import MobileDrawer from "./MobileDrawer";
 import DoubleSidebar from "./ui/DoubleSidebar";
 import { useSidebar } from "../context/SidebarContext";
+import { getBackgroundObjectUrl } from "../utils/backgroundStorage";
 
 export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -22,11 +23,41 @@ export default function Layout() {
       return;
     }
 
+    let activeUrl = null;
+    let disposed = false;
     const key = `bg_${user.email}`;
-    const syncBg = () => setBg(localStorage.getItem(key));
+
+    const syncBg = async () => {
+      if (activeUrl) {
+        URL.revokeObjectURL(activeUrl);
+        activeUrl = null;
+      }
+
+      try {
+        const objectUrl = await getBackgroundObjectUrl(user.email);
+        if (disposed) {
+          if (objectUrl) URL.revokeObjectURL(objectUrl);
+          return;
+        }
+        if (objectUrl) {
+          activeUrl = objectUrl;
+          setBg(objectUrl);
+          return;
+        }
+      } catch {
+        // Fallback to localStorage only if IndexedDB path is unavailable.
+      }
+
+      setBg(localStorage.getItem(key));
+    };
+
     syncBg();
     window.addEventListener("bgChange", syncBg);
-    return () => window.removeEventListener("bgChange", syncBg);
+    return () => {
+      disposed = true;
+      window.removeEventListener("bgChange", syncBg);
+      if (activeUrl) URL.revokeObjectURL(activeUrl);
+    };
   }, [user]);
 
   useEffect(() => {

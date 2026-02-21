@@ -14,7 +14,7 @@ export default function AppGrid({ plan, usage = {}, onUsed, limit, gpts = null }
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
-      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
         {filtered.map((gpt, i) => (
           <div key={gpt.id} style={{ animationDelay: `${i * 75}ms` }} className="animate-card-enter h-full">
             <GPTCard

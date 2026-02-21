@@ -10,12 +10,19 @@ import { useUsage } from "../hooks/useUsage";
 import { useAuth } from "../context/AuthContext";
 import { useTranslation } from "react-i18next";
 import AnimatedStats from "../components/AnimatedStats";
+import { clearBackground, saveBackground } from "../utils/backgroundStorage";
 
 const EXTERNAL_TOOLS = [
   ["ChatGPT", "https://chat.openai.com"],
   ["Claude", "https://claude.ai"],
   ["Gemini", "https://gemini.google.com"],
   ["Copilot", "https://copilot.microsoft.com"],
+  ["Sarvam AI", "https://sarvam.ai"],
+  ["Grok", "https://grok.com"],
+  ["Perplexity AI", "https://www.perplexity.ai"],
+  ["Meta AI", "https://www.meta.ai"],
+  ["CrewAI", "https://www.crewai.com"],
+  ["Jasper AI", "https://www.jasper.ai"],
   ["CooklyHub", "https://cooklyhub.com"],
   ["CA-sentinel", "https://ca.kannizconites.com"],
 ];
@@ -182,23 +189,27 @@ export default function DashboardPage() {
               type="file"
               accept="image/*"
               className="hidden"
-              onChange={(e) => {
+              onChange={async (e) => {
                 const f = e.target.files && e.target.files[0];
                 if (!f) return;
-                const reader = new FileReader();
-                reader.onload = () => {
-                  const key = `bg_${user.email}`;
-                  localStorage.setItem(key, reader.result);
+                try {
+                  await saveBackground(user.email, f);
+                  localStorage.removeItem(`bg_${user.email}`);
                   window.dispatchEvent(new Event("bgChange"));
-                };
-                reader.readAsDataURL(f);
+                } catch (err) {
+                  console.error("Background upload failed:", err);
+                }
               }}
             />
           </label>
           <button
-            onClick={() => {
-              const key = `bg_${user.email}`;
-              localStorage.removeItem(key);
+            onClick={async () => {
+              try {
+                await clearBackground(user.email);
+              } catch (err) {
+                console.error("Background clear failed:", err);
+              }
+              localStorage.removeItem(`bg_${user.email}`);
               window.dispatchEvent(new Event("bgChange"));
             }}
             className="text-xs text-zinc-200 bg-zinc-800/40 px-3 py-2 rounded"

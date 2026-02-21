@@ -67,13 +67,13 @@ function GPTCard({ gpt, used, plan, onUsed, theme = "pink" }) {
   return (
     <GlassCard
       theme={theme}
-      className="magnetic gpu p-6 h-full min-h-[540px] flex flex-col relative"
+      className="magnetic gpu p-6 h-full min-h-[560px] flex flex-col relative"
       onClick={(e) => {
         if (e.target.closest("a,button")) return;
         click();
       }}
     >
-      <div className="absolute inset-0 bg-white/5 backdrop-blur-[30px] pointer-events-none" />
+      <div className="absolute inset-0 bg-black/25 backdrop-blur-[30px] pointer-events-none" />
       <div className="pointer-events-none absolute inset-0 rounded-3xl overflow-hidden">
         {theme === "gold" ? (
           <>
@@ -107,11 +107,11 @@ function GPTCard({ gpt, used, plan, onUsed, theme = "pink" }) {
       </div>
 
       <div className="p-4 flex flex-col flex-1 relative z-10">
-        <h3 className="text-lg font-bold tracking-wide gpt-title text-white line-clamp-2">
+        <h3 className="text-xl font-bold tracking-wide gpt-title text-zinc-100 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] line-clamp-2">
           {t(gpt.title) || gpt.title}
         </h3>
 
-        <p className="text-sm mt-2 text-zinc-300 line-clamp-6">
+        <p className="text-sm mt-2 text-zinc-100/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.75)] line-clamp-6">
           {t(gpt.description) || gpt.description}
         </p>
 
@@ -126,7 +126,7 @@ function GPTCard({ gpt, used, plan, onUsed, theme = "pink" }) {
           )}
         </div>
 
-        <div className="mt-2 h-5 text-xs text-zinc-400">
+        <div className="mt-2 h-5 text-xs text-zinc-200/90">
           {reviews.length > 0
             ? t("reviewCount", { count: reviews.length }) || `${reviews.length} review(s)`
             : t("noReviewsYet") || "No reviews yet"}
@@ -157,7 +157,7 @@ function GPTCard({ gpt, used, plan, onUsed, theme = "pink" }) {
           </button>
         </div>
 
-        <div className="text-sm mt-3 text-zinc-300">
+        <div className="text-sm mt-3 text-zinc-100/95">
           {locked
             ? `${t("locked") || "Limit reached"}`
             : plan === "free"

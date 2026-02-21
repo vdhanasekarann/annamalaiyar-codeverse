@@ -1,6 +1,6 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { LogOut, Menu, Search } from "lucide-react";
+import { LogOut, Menu, Search, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import { useSearch } from "../context/SearchContext";
@@ -23,6 +23,8 @@ export default function TopBar({ onOpenMobileMenu }) {
   const { t, i18n } = useTranslation();
   const { theme, setTheme } = useTheme();
   const inputRef = useRef(null);
+  const mobileInputRef = useRef(null);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   const logout = async () => {
     await apiFetch("/api/auth/logout", { method: "POST" });
@@ -64,7 +66,10 @@ export default function TopBar({ onOpenMobileMenu }) {
         <button
           className="md:hidden text-zinc-300 p-1.5 rounded-md border border-white/10 bg-zinc-900/70"
           aria-label="Search GPTs"
-          onClick={() => navigate(`/gpts${query ? `?q=${encodeURIComponent(query)}` : ""}`)}
+          onClick={() => {
+            setMobileSearchOpen(true);
+            setTimeout(() => mobileInputRef.current?.focus(), 0);
+          }}
         >
           <Search className="w-4 h-4" />
         </button>
@@ -103,6 +108,44 @@ export default function TopBar({ onOpenMobileMenu }) {
           <button onClick={logout} aria-label="Logout">
             <LogOut className="text-red-400 w-4 h-4 md:w-5 md:h-5" />
           </button>
+        </div>
+      )}
+
+      {mobileSearchOpen && (
+        <div className="absolute left-0 right-0 top-16 md:hidden px-3 py-2 bg-black/90 border-b border-white/10">
+          <div className="flex items-center gap-2 bg-zinc-900 border border-white/15 rounded-lg px-2 py-2">
+            <Search className="w-4 h-4 text-zinc-400" />
+            <input
+              ref={mobileInputRef}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  navigate(`/gpts${query ? `?q=${encodeURIComponent(query)}` : ""}`);
+                  setMobileSearchOpen(false);
+                }
+              }}
+              placeholder={t("searchPlaceholder") || "Search GPTs..."}
+              className="w-full bg-transparent text-sm outline-none"
+            />
+            <button
+              className="text-zinc-300"
+              onClick={() => {
+                navigate(`/gpts${query ? `?q=${encodeURIComponent(query)}` : ""}`);
+                setMobileSearchOpen(false);
+              }}
+              aria-label="Go search"
+            >
+              <Search className="w-4 h-4" />
+            </button>
+            <button
+              className="text-zinc-300"
+              onClick={() => setMobileSearchOpen(false)}
+              aria-label="Close search"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       )}
     </header>

@@ -4,6 +4,7 @@ import { useSidebar } from "../../context/SidebarContext";
 import { useAuth } from "../../context/AuthContext";
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import SidebarProfile from "../SidebarProfile";
 import {
   Bot,
   ChartColumn,
@@ -35,8 +36,8 @@ export default function DoubleSidebar({ mobile = false, onNavigate }) {
 
   if (mobile) {
     return (
-      <aside className="h-full bg-black/80 backdrop-blur-xl border-r border-white/10 px-3 py-4">
-        <nav className="space-y-1">
+      <aside className="h-full bg-black/80 backdrop-blur-xl border-r border-white/10 px-3 py-4 flex flex-col">
+        <nav className="space-y-1 flex-1">
           {items.map((i) => (
             <Link
               key={i.path}
@@ -54,6 +55,7 @@ export default function DoubleSidebar({ mobile = false, onNavigate }) {
             </Link>
           ))}
         </nav>
+        <SidebarProfile compact />
       </aside>
     );
   }

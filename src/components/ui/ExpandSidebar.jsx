@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useSidebar } from "../../context/SidebarContext";
+import SidebarProfile from "../SidebarProfile";
 
 function isRenderableIcon(icon) {
   return typeof icon === "function" || (typeof icon === "object" && icon !== null);
@@ -20,9 +21,10 @@ export default function ExpandSidebar({ items = [], mobile, onNavigate }) {
         z-30
       `}
     >
-      <div className="h-full bg-black/60 backdrop-blur-lg border-r border-white/10 px-3 py-4 space-y-1">
+      <div className="h-full bg-black/60 backdrop-blur-lg border-r border-white/10 px-3 py-4 flex flex-col">
 
-        {items.map((i) => (
+        <div className="space-y-1 flex-1">
+          {items.map((i) => (
           <Link
             key={i.path}
             to={i.path}
@@ -47,7 +49,10 @@ export default function ExpandSidebar({ items = [], mobile, onNavigate }) {
             </span>
           </Link>
 
-        ))}
+          ))}
+        </div>
+
+        <SidebarProfile />
 
       </div>
     </aside>
