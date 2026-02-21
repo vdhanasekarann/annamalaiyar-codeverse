@@ -21,7 +21,10 @@ export async function requireAuth(req, res, next) {
     [payload.email]
   );
 
-  if (!r.rows.length || r.rows[0].token_version !== payload.tv) {
+  const dbTokenVersion = Number(r.rows[0]?.token_version ?? 0);
+  const tokenVersion = Number(payload.tv ?? 0);
+
+  if (!r.rows.length || !Number.isFinite(tokenVersion) || dbTokenVersion !== tokenVersion) {
     return res.status(401).json({ error: "Session expired" });
   }
 

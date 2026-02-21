@@ -57,6 +57,27 @@ app.use(express.json());
 app.use(helmet());
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+const IS_PROD = process.env.NODE_ENV === "production";
+const AUTH_COOKIE_DOMAIN = process.env.COOKIE_DOMAIN || (IS_PROD ? ".aicodeverse.com" : undefined);
+
+function authCookieOptions() {
+  return {
+    httpOnly: true,
+    sameSite: IS_PROD ? "none" : "lax",
+    secure: IS_PROD,
+    path: "/",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    ...(AUTH_COOKIE_DOMAIN ? { domain: AUTH_COOKIE_DOMAIN } : {}),
+  };
+}
+
+function setAuthCookie(res, token) {
+  res.cookie("auth", token, authCookieOptions());
+}
+
+function clearAuthCookie(res) {
+  res.clearCookie("auth", authCookieOptions());
+}
 
 const csrfProtection = csrf({ cookie: true });
 
@@ -203,22 +224,13 @@ app.post("/api/auth/login", async (req, res) => {
     { expiresIn: "7d" }
   );
 
-  const isProd = process.env.NODE_ENV === "production";
-
-  res.cookie("auth", token, {
-  httpOnly: true,
-  sameSite: "none",
-  secure: true,
-  domain: ".aicodeverse.com",
-  path: "/",
-  maxAge: 7 * 24 * 60 * 60 * 1000,
-});
+  setAuthCookie(res, token);
 
   res.json({ ok: true });
 });
 
 app.post("/api/auth/logout", (_, res) => {
-  res.clearCookie("auth");
+  clearAuthCookie(res);
   res.json({ ok: true });
 });
 
@@ -263,15 +275,7 @@ app.post("/api/auth/google", async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    const isProd = process.env.NODE_ENV === "production";
-
-    res.cookie("auth", token, {
-      httpOnly: true,
-      sameSite: isProd ? "none" : "lax",
-      secure: isProd,
-      domain: ".aicodeverse.com",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    setAuthCookie(res, token);
 
     res.json({ ok: true });
   } catch (err) {
@@ -441,15 +445,7 @@ app.get("/api/auth/magic-verify", async (req, res) => {
     { expiresIn: "7d" }
   );
 
-  const isProd = process.env.NODE_ENV === "production";
-
-  res.cookie("auth", jwtToken, {
-    httpOnly: true,
-    sameSite: isProd ? "none" : "lax",
-    secure: isProd,
-    domain: ".aicodeverse.com",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
+  setAuthCookie(res, jwtToken);
 
   res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
 });
@@ -637,13 +633,7 @@ const newToken = jwt.sign(
   { expiresIn: "7d" }
 );
 
-res.cookie("auth", newToken, {
-  httpOnly: true,
-  sameSite: "none",
-  secure: true,
-  domain: ".aicodeverse.com",
-  maxAge: 7 * 24 * 60 * 60 * 1000,
-});
+setAuthCookie(res, newToken);
 
 await generateInvoice({
   paymentId: payment_id,
@@ -776,6 +766,14 @@ app.post("/api/inbound-email", express.json(), async (req,res)=>{
   res.status(200).send("ok");
 });
 
-app.listen(3000, () =>
-  console.log("✅ API running at http://localhost:3000")
-);
+app.use((err, req, res, next) => {
+  if (err?.code === "EBADCSRFTOKEN") {
+    return res.status(403).json({ error: "Invalid CSRF token" });
+  }
+  return next(err);
+});
+
+app.listen(3000, () => {
+  console.log("✅ API running at http://localhost:3000");
+});
+

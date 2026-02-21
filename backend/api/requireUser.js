@@ -5,23 +5,50 @@ import { PLAN_LIMITS } from "../../config/limits.js";
 import crypto from "crypto";
 
 export async function requireUser(req, res, next) {
-  const token = req.cookies?.auth;
+  const token =
+    req.cookies?.auth ||
+    req.headers.authorization?.replace("Bearer ", "");
+
   if (!token) return res.status(401).json({ error: "Unauthenticated" });
 
   let user;
   try {
     user = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = user;
   } catch {
     return res.status(401).json({ error: "Invalid token" });
   }
 
-  const deviceId = req.headers["x-device-id"];
-  if (!deviceId) {
-    return res.status(400).json({ error: "Device ID missing" });
+  const userRowRes = await db.query(
+    "SELECT token_version, plan, blocked FROM users WHERE email=$1",
+    [user.email]
+  );
+
+  if (!userRowRes.rows.length) {
+    return res.status(401).json({ error: "User not found" });
   }
 
-  const limits = PLAN_LIMITS[user.plan] || PLAN_LIMITS.free;
+  const userRow = userRowRes.rows[0];
+  const dbTokenVersion = Number(userRow.token_version ?? 0);
+  const tokenVersion = Number(user.tv ?? 0);
+  if (!Number.isFinite(tokenVersion) || dbTokenVersion !== tokenVersion) {
+    return res.status(401).json({ error: "Session expired" });
+  }
+
+  if (userRow.blocked) {
+    return res.status(403).json({ error: "Account blocked" });
+  }
+
+  const effectivePlan = userRow.plan || user.plan || "free";
+  req.user = { ...user, plan: effectivePlan };
+
+  const fallbackDeviceId = crypto
+    .createHash("sha256")
+    .update(`${req.ip || ""}|${req.headers["user-agent"] || ""}`)
+    .digest("hex")
+    .slice(0, 24);
+  const deviceId = req.headers["x-device-id"] || `fallback-${fallbackDeviceId}`;
+
+  const limits = PLAN_LIMITS[effectivePlan] || PLAN_LIMITS.free;
 
   const ipHash = crypto
     .createHash("sha256")
@@ -48,13 +75,13 @@ export async function requireUser(req, res, next) {
   if (deviceCount > limits.devices) {
   const exists = await db.query(
     `SELECT 1 FROM user_devices WHERE email=$1 AND device_id=$2`,
-    [user.email, deviceId]
+    [req.user.email, deviceId]
   );
 
   if (!exists.rows.length) {
     return res.status(403).json({
       error: "Device limit exceeded",
-      plan: user.plan,
+      plan: effectivePlan,
       allowed: limits.devices,
     });
   }

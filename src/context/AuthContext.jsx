@@ -9,7 +9,7 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const path = window.location.pathname;
-    if (path === "/login" || path === "/magic-login") {
+    if (path === "/login" || path === "/magic-login" || path === "/prompt-assistant") {
       setLoading(false);
       return;
     }

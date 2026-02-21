@@ -75,9 +75,11 @@ export default function Login() {
       if (meRes.ok) {
         const me = await meRes.json();
         setUser(me);
+        navigate("/dashboard");
+        return;
       }
 
-      navigate("/dashboard");
+      alert(t("errorTryAgain") || "Login session was not created. Please try again.");
     } finally {
       setSigningIn(false);
     }

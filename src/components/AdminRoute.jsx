@@ -1,23 +1,12 @@
-import { useEffect, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
-import { apiFetch } from "../lib/apiFetch";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function AdminRoute({ children }) {
-  const [status, setStatus] = useState("loading");
+  const { user, loading } = useAuth();
 
-  useEffect(() => {
-    apiFetch("/api/auth/me", { credentials: "include" })
-      .then((res) => (res.ok ? res.json() : Promise.reject()))
-      .then((user) => {
-        if (user.role === "admin") setStatus("ok");
-        else setStatus("forbidden");
-      })
-      .catch(() => setStatus("unauthenticated"));
-  }, []);
-
-  if (status === "loading") return null;
-  if (status === "unauthenticated") return <Navigate to="/login" />;
-  if (status === "forbidden") return <Navigate to="/dashboard" />;
+  if (loading) return null;
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role !== "admin") return <Navigate to="/dashboard" replace />;
 
   return children;
 }
