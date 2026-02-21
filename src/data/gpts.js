@@ -489,15 +489,5 @@ export const GPTS = [
     freeLimit: "3",
     unit: "images/day",
     link: "https://chatgpt.com/g/g-693c056af9708191836406249295e559-animeverse-ai-generator-all-in-one"
-},
-{
-    id: "ff-tips",
-    title: "Free Fire Tips + Anime Image Generator GPT",
-    logo: "/logos/ff.png",
-    description: "Generate anime/cartoon Free-Fire-style characters + get pro Free Fire tips for rank push, sensitivity, HUD, weapons & Clash Squad strategy. Free Fire tips, Anime generator, FF sensitivity guide, Clash Squad meta, Rank push helper, Guild logo maker, FF wallpapers, Battle royale art",
-    category: "DALL.E",
-    freeLimit: "3",
-    unit: "messages/day",
-    link: "https://chatgpt.com/g/g-69312e839fec8191a10ad3f6b28b3fd1-free-fire-tips-anime-image-generator-gpt"
-} 
+}
 ];
