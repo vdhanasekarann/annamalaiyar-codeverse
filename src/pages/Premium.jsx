@@ -9,7 +9,7 @@ import { useTheme } from "../context/ThemeContext";
 const PLANS = [
   {
     title: "Starter",
-    price: "₹199 / month",
+    price: "₹1 / month",
     key: "starter",
     subtitle: "Great for individual creators",
   },
