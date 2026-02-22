@@ -14,6 +14,7 @@ import { requireAdmin } from "./api/requireAdmin.js";
 import { razorpayWebhook } from "./api/razorpay-webhook.js";
 import { isExpectedPlanAmount, isValidPlan, planAmountPaise } from "./src/payments/plans.js";
 import { ensureInvoiceAndEmail } from "./src/payments/invoiceEmail.js";
+import { ensureInvoicePdf } from "./src/utils/invoice.js";
 import { isPlanConstraintError, runWithPlanSchemaSync } from "./src/payments/planSchemaSync.js";
 import { savePaidPayment } from "./src/payments/paymentWrite.js";
 import csrf from "csurf";
@@ -21,6 +22,7 @@ import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import { Resend } from "resend";
 import fs from "fs";
+import os from "os";
 import path from "path";
 import nodemailer from "nodemailer";
 import { Buffer } from "node:buffer";
@@ -732,13 +734,13 @@ app.post("/api/razorpay/verify", csrfProtection, paymentRateLimiter, requireUser
     }
 
     try {
-      await ensureInvoiceAndEmail({
+      const invoiceResult = await ensureInvoiceAndEmail({
         paymentId: payment_id,
         email,
         amount: order.amount / 100,
         plan,
       });
-      persistence.invoiceEmailed = true;
+      persistence.invoiceEmailed = Boolean(invoiceResult?.emailed);
     } catch (invoiceErr) {
       console.error("Invoice/email failed after payment verify", {
         paymentId: payment_id,
@@ -837,13 +839,20 @@ app.get("/api/invoice/:id", requireUser, async (req, res) => {
   if (!r.rows.length) return res.status(404).send("Not found");
 
   const invoice = r.rows[0];
-  const pdfPath = path.join("/tmp", `${invoice.invoice_number}.pdf`);
-
+  let pdfPath = path.join(os.tmpdir(), `${invoice.invoice_number}.pdf`);
   if (!fs.existsSync(pdfPath)) {
-    // If PDF not present, try regenerating (if generateInvoice supports it),
-    // otherwise return 404 so client knows it's missing.
-    console.warn("Invoice PDF missing for", invoice.invoice_number);
-    return res.status(404).send("PDF not found");
+    try {
+      pdfPath = await ensureInvoicePdf({
+        invoiceNo: invoice.invoice_number,
+        paymentId: invoice.payment_id,
+        email: invoice.email || req.user.email,
+        amount: invoice.amount,
+        plan: invoice.plan,
+      });
+    } catch (pdfErr) {
+      console.warn("Invoice PDF regeneration failed for", invoice.invoice_number, pdfErr);
+      return res.status(404).send("PDF not found");
+    }
   }
 
   res.setHeader("Content-Type", "application/pdf");

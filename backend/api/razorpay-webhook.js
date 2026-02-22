@@ -117,13 +117,13 @@ export async function razorpayWebhook(req, res) {
     }
 
     try {
-      await ensureInvoiceAndEmail({
+      const invoiceResult = await ensureInvoiceAndEmail({
         paymentId: payment.id,
         email,
         plan,
         amount: payment.amount / 100,
       });
-      persistence.invoiceEmailed = true;
+      persistence.invoiceEmailed = Boolean(invoiceResult?.emailed);
     } catch (invoiceErr) {
       console.error("Webhook invoice/email failed", {
         paymentId: payment.id,

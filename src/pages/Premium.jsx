@@ -147,6 +147,7 @@ function PlanCard({
             const traceSuffix = err?.traceId ? ` (trace: ${err.traceId})` : "";
             throw new Error((err.error || `HTTP ${verifyRes.status}`) + traceSuffix);
           }
+          const verifyData = await verifyRes.json().catch(() => ({}));
 
           const meRes = await apiFetch("/api/auth/me");
           if (meRes.ok) {
@@ -154,7 +155,11 @@ function PlanCard({
             setUser?.(freshUser);
           }
 
-          alert("Payment successful! Plan upgraded.");
+          const invoiceSuffix =
+            verifyData?.invoiceEmailed === false
+              ? " Plan upgraded. Invoice email is pending; please check again shortly."
+              : " Plan upgraded.";
+          alert(`Payment successful!${invoiceSuffix}`);
           navigate("/dashboard");
         } catch (err) {
           alert("Payment verification failed: " + (err?.message || "Unknown error"));
