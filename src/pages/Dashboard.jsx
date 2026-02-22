@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
 import AppGrid from "../components/AppGrid";
 import UpgradeBanner from "../components/UpgradeBanner";
+import GlassCard from "../components/GlassCard";
 import { parseLimit } from "../config/limits";
 import { GPTS } from "../data/gpts";
 import { getDeviceId } from "../utils/device";
@@ -11,6 +12,7 @@ import { useAuth } from "../context/AuthContext";
 import { useTranslation } from "react-i18next";
 import AnimatedStats from "../components/AnimatedStats";
 import { clearBackground, saveBackground } from "../utils/backgroundStorage";
+import { useTheme } from "../context/ThemeContext";
 
 const EXTERNAL_TOOLS = [
   ["ChatGPT", "https://chat.openai.com"],
@@ -19,11 +21,11 @@ const EXTERNAL_TOOLS = [
   ["Copilot", "https://copilot.microsoft.com"],
   ["Sarvam AI", "https://sarvam.ai"],
   ["Grok", "https://grok.com"],
+  ["CooklyHub", "https://cooklyhub.com"],
   ["Perplexity AI", "https://www.perplexity.ai"],
   ["Meta AI", "https://www.meta.ai"],
   ["CrewAI", "https://www.crewai.com"],
   ["Jasper AI", "https://www.jasper.ai"],
-  ["CooklyHub", "https://cooklyhub.com"],
   ["CA-sentinel", "https://ca.kannizconites.com"],
 ];
 
@@ -84,8 +86,16 @@ function buildInsights(usage) {
   };
 }
 
+function formatLastSeen(value, fallback) {
+  if (!value) return fallback;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return fallback;
+  return d.toLocaleString();
+}
+
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
+  const { theme } = useTheme();
   const [loading, setLoading] = useState(true);
   const [devices, setDevices] = useState([]);
   const [open, setOpen] = useState(false);
@@ -106,6 +116,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     let mounted = true;
+
     async function loadDevices() {
       if (!user) {
         if (mounted) setLoading(false);
@@ -226,7 +237,7 @@ export default function DashboardPage() {
             }}
             className="px-4 py-2 bg-zinc-800 rounded-lg text-sm hover:bg-zinc-700 shadow z-40"
           >
-            {(t("aiTools") || "AI Tools") + " ▾"}
+            {(t("aiTools") || "AI Tools") + " v"}
           </button>
           {open && (
             <div
@@ -249,7 +260,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="glass-gold p-6 mb-6">
+      <GlassCard theme={theme} className="glass-card-float p-6 mb-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
             <h1 className="text-lg md:text-3xl font-bold mb-1 break-words">
@@ -261,22 +272,24 @@ export default function DashboardPage() {
             </p>
           </div>
         </div>
-      </div>
+      </GlassCard>
 
       <h2 className="text-lg font-semibold mt-2 mb-4">{t("activeDevices") || "Active Devices"}</h2>
 
       <div className="grid gap-4">
         {devices.length > 0 ? (
-          devices.map((d) => (
-            <div
+          devices.map((d, index) => (
+            <GlassCard
               key={d.device_id}
-              className="glass-gold p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+              theme={theme}
+              className="glass-card-float p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+              style={{ "--float-delay": `${index * 140}ms` }}
             >
               <div>
                 <div className="font-semibold">{d.device_name || "Unknown Device"}</div>
                 <div className="text-xs opacity-60">
                   {(t("lastActive") || "Last active") + ": "}
-                  {d.last_seen || (t("recently") || "Recently")}
+                  {formatLastSeen(d.last_seen, t("recently") || "Recently")}
                 </div>
               </div>
               <button
@@ -285,10 +298,12 @@ export default function DashboardPage() {
               >
                 {t("revoke") || "Revoke"}
               </button>
-            </div>
+            </GlassCard>
           ))
         ) : (
-          <div className="text-sm opacity-60">{t("noActiveDevices") || "No active devices found."}</div>
+          <GlassCard theme={theme} className="glass-card-float p-4 text-sm opacity-70">
+            {t("noActiveDevices") || "No active devices found."}
+          </GlassCard>
         )}
       </div>
 
@@ -306,7 +321,7 @@ export default function DashboardPage() {
       <h2 className="text-lg font-semibold mt-12 mb-6">{t("gptApps") || "All GPT Apps"}</h2>
       <AppGrid plan={user.plan} usage={usage} onUsed={refresh} />
 
-      <div className="glass-panel mt-10 p-6 border border-white/10">
+      <GlassCard theme={theme} className="glass-card-float mt-10 p-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h3 className="font-bold text-lg mb-1">{t("aiInsight") || "AI Insight"}</h3>
@@ -329,11 +344,11 @@ export default function DashboardPage() {
         <ul className="mt-4 space-y-2 text-sm text-zinc-200">
           {insight.lines.map((line) => (
             <li key={line} className="leading-relaxed">
-              • {line}
+              - {line}
             </li>
           ))}
         </ul>
-      </div>
+      </GlassCard>
     </div>
   );
 }

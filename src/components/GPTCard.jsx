@@ -15,6 +15,11 @@ function GPTCard({ gpt, used, plan, onUsed, theme = "pink" }) {
 
   const [reviews, setReviews] = React.useState([]);
   const [imgLoaded, setImgLoaded] = React.useState(false);
+  const floatDelay = React.useMemo(() => {
+    return (String(gpt.id || "")
+      .split("")
+      .reduce((sum, ch) => sum + ch.charCodeAt(0), 0) % 7) * 160;
+  }, [gpt.id]);
 
   const avg = React.useMemo(() => {
     if (!reviews || reviews.length === 0) return null;
@@ -67,7 +72,8 @@ function GPTCard({ gpt, used, plan, onUsed, theme = "pink" }) {
   return (
     <GlassCard
       theme={theme}
-      className="magnetic gpu p-6 h-full min-h-[560px] flex flex-col relative"
+      className="glass-card-float magnetic gpu p-6 h-full min-h-[560px] flex flex-col relative"
+      style={{ "--float-delay": `${floatDelay}ms` }}
       onClick={(e) => {
         if (e.target.closest("a,button")) return;
         click();

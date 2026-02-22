@@ -171,6 +171,16 @@ export const GPTS = [
     link: "https://chatgpt.com/g/g-695542b568288191bc8ad35effaf2ac8-smart-factory-business-operations-planner-ai"
 },
 {
+    id: "Digital-Marketing-Strategy-Coach",
+    title: "Marketing Mastermind AI - Digital, Affiliate Coach",
+    logo: "/logos/Digital-Marketing.png",
+    description: "Master modern marketing 🚀 Get expert guidance on digital, affiliate, content, and influencer marketing with strategies, growth plans, monetization tactics, and brand-building frameworks. Designed for creators, businesses, and marketers to grow smarter—not harder.",
+    category: "Productivity",
+    freeLimit: "3",
+    unit: "messages/day",
+    link: "https://chatgpt.com/g/g-6999fbc868788191b93f82e5b6920e23-marketing-mastermind-ai-digital-affiliate-coach"
+},
+{
     id: "GST-Business-Invoice",
     title: "GST & Business Invoice Generator AI (India)",
     logo: "/logos/GST-Business-Invoice.jpg",

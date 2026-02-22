@@ -3,30 +3,32 @@ import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../lib/apiFetch";
 import { useAuth } from "../context/AuthContext";
 import { PLAN_LIMITS } from "../config/limits";
+import GlassCard from "../components/GlassCard";
+import { useTheme } from "../context/ThemeContext";
 
 const PLANS = [
   {
     title: "Starter",
-    price: "\u20B9199 / month",
+    price: "₹199 / month",
     key: "starter",
     subtitle: "Great for individual creators",
   },
   {
     title: "Pro",
-    price: "\u20B9399 / month",
+    price: "₹399 / month",
     key: "pro",
     subtitle: "Best for power users",
     highlight: true,
   },
   {
     title: "Yearly",
-    price: "\u20B91999 / year",
+    price: "₹1999 / year",
     key: "yearly",
     subtitle: "Lower annual cost",
   },
   {
     title: "Lifetime",
-    price: "\u20B96999 / lifetime",
+    price: "₹6999 / lifetime",
     key: "lifetime",
     subtitle: "One-time purchase",
   },
@@ -38,6 +40,7 @@ function toLimitText(value) {
 
 export default function PremiumPage() {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -47,17 +50,17 @@ export default function PremiumPage() {
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_45%)]" />
 
       <div className="relative max-w-6xl mx-auto px-3 sm:px-6 py-10 sm:py-16">
-        <section className="glass-panel border border-white/10 rounded-3xl p-6 sm:p-10 mb-8 text-center">
+        <GlassCard theme={theme} className="glass-card-float p-6 sm:p-10 mb-8 text-center rounded-3xl">
           <h1 className="text-3xl md:text-5xl font-bold mb-3">
             {t("upgradeTitle") || "Upgrade to CodeVerse PRO"}
           </h1>
           <p className="text-zinc-300">
-            {t("upgradeSubtitle") || "Unlimited GPT access \u2022 Faster responses \u2022 Priority features"}
+            {t("upgradeSubtitle") || "Unlimited GPT access • Faster responses • Priority features"}
           </p>
-        </section>
+        </GlassCard>
 
         <section className="grid gap-4 sm:gap-6 md:grid-cols-2 xl:grid-cols-4">
-          {PLANS.map((plan) => (
+          {PLANS.map((plan, index) => (
             <PlanCard
               key={plan.key}
               title={plan.title}
@@ -67,6 +70,8 @@ export default function PremiumPage() {
               highlight={plan.highlight}
               user={user}
               navigate={navigate}
+              theme={theme}
+              delay={index * 140}
             />
           ))}
         </section>
@@ -75,7 +80,17 @@ export default function PremiumPage() {
   );
 }
 
-function PlanCard({ title, price, planKey, subtitle, highlight, user, navigate }) {
+function PlanCard({
+  title,
+  price,
+  planKey,
+  subtitle,
+  highlight,
+  user,
+  navigate,
+  theme,
+  delay = 0,
+}) {
   const { t } = useTranslation();
   const accent = "var(--accent, #4f46e5)";
   const limits = PLAN_LIMITS[planKey] || { daily: 0, devices: 1 };
@@ -83,6 +98,11 @@ function PlanCard({ title, price, planKey, subtitle, highlight, user, navigate }
   const upgrade = async () => {
     if (!user) {
       navigate("/login");
+      return;
+    }
+
+    if (typeof window === "undefined" || !window.Razorpay) {
+      alert("Razorpay checkout is not available right now.");
       return;
     }
 
@@ -106,21 +126,30 @@ function PlanCard({ title, price, planKey, subtitle, highlight, user, navigate }
       name: "Annamalaiyar CodeVerse AI",
       description: `${title} Plan`,
       order_id: order.id,
+      prefill: {
+        email: user.email,
+      },
       handler: async function (response) {
         try {
-          await apiFetch("/api/razorpay/verify", {
+          const verifyRes = await apiFetch("/api/razorpay/verify", {
             method: "POST",
             body: JSON.stringify({
               payment_id: response.razorpay_payment_id,
               order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
             }),
           });
+
+          if (!verifyRes.ok) {
+            const err = await verifyRes.json().catch(() => ({}));
+            throw new Error(err.error || `HTTP ${verifyRes.status}`);
+          }
 
           await apiFetch("/api/auth/me");
           alert("Payment successful! Plan upgraded.");
           window.location.reload();
-        } catch {
-          alert("Payment verification failed");
+        } catch (err) {
+          alert("Payment verification failed: " + (err?.message || "Unknown error"));
         }
       },
       theme: { color: accent },
@@ -128,11 +157,13 @@ function PlanCard({ title, price, planKey, subtitle, highlight, user, navigate }
   };
 
   return (
-    <article
-      className={`glass-card glass-card--dark relative rounded-2xl p-5 sm:p-6 flex flex-col min-h-[350px] ${
+    <GlassCard
+      theme={theme}
+      className={`glass-card-float relative rounded-2xl p-5 sm:p-6 flex flex-col min-h-[350px] ${
         highlight ? "ring-2 ring-white/25 shadow-2xl" : ""
       }`}
       style={{
+        "--float-delay": `${delay}ms`,
         borderColor: highlight ? `${accent}55` : undefined,
         boxShadow: highlight ? `0 0 24px ${accent}55` : undefined,
       }}
@@ -166,6 +197,6 @@ function PlanCard({ title, price, planKey, subtitle, highlight, user, navigate }
       >
         {t("upgrade") || "Upgrade"}
       </button>
-    </article>
+    </GlassCard>
   );
 }

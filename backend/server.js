@@ -14,6 +14,7 @@ import { requireAdmin } from "./api/requireAdmin.js";
 import { razorpayWebhook } from "./api/razorpay-webhook.js";
 import { generateInvoice } from "./src/utils/invoice.js";
 import { sendInvoiceEmail } from "./src/utils/mailer.js";
+import { isExpectedPlanAmount, isValidPlan, planAmountPaise } from "./src/payments/plans.js";
 import csrf from "csurf";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
@@ -21,7 +22,7 @@ import { Resend } from "resend";
 import fs from "fs";
 import path from "path";
 import nodemailer from "nodemailer";
-import os from "os";
+import { Buffer } from "node:buffer";
 
 async function logAudit(actor, action, target) {
   await db.query(
@@ -31,6 +32,22 @@ async function logAudit(actor, action, target) {
     `,
     [uuid(), actor, action, target]
   );
+}
+
+function timingSafeEqualHex(a, b) {
+  if (typeof a !== "string" || typeof b !== "string") return false;
+
+  let aBuf;
+  let bBuf;
+  try {
+    aBuf = Buffer.from(a, "hex");
+    bBuf = Buffer.from(b, "hex");
+  } catch {
+    return false;
+  }
+
+  if (!aBuf.length || aBuf.length !== bBuf.length) return false;
+  return crypto.timingSafeEqual(aBuf, bBuf);
 }
 
 const app = express();
@@ -53,7 +70,6 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.json());
 app.use(helmet());
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -100,6 +116,13 @@ app.use(
   })
 );
 
+const paymentRateLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Auth check only (NO device)
 app.get("/api/auth/me", requireAuth, (req, res) => {
   res.json(req.user);
@@ -110,6 +133,7 @@ app.post(
   express.raw({ type: "application/json" }),
   razorpayWebhook
 );
+app.use(express.json());
 
 /* ---------- RAZORPAY ---------- */
 const razorpay = new Razorpay({
@@ -150,34 +174,28 @@ app.post("/api/account/devices/register", requireUser, async (req, res) => {
   res.json({ ok: true });
 });
 
-app.post("/api/create-order", requireUser, async (req, res) => {
+app.post("/api/create-order", csrfProtection, paymentRateLimiter, requireUser, async (req, res) => {
   try {
-    console.log("create-order called, req.user:", req.user);
-    console.log("create-order headers x-device-id:", req.headers["x-device-id"]);
-    console.log("create-order body:", req.body);
-
-    const { plan } = req.body;
+    const { plan } = req.body || {};
     const email = req.user?.email;
 
     if (!plan || !email) {
-      console.warn("create-order missing plan or email", { plan, email });
       return res.status(400).json({ error: "Missing plan or email" });
     }
 
-    const amountMap = {
-      starter: 1 * 100,
-      pro: 3 * 100,
-      yearly: 1999 * 100,
-      lifetime: 6999 * 100,
-    };
-
-    if (!amountMap[plan]) {
+    if (!isValidPlan(plan)) {
       return res.status(400).json({ error: "Invalid plan" });
     }
 
+    const amount = planAmountPaise(plan);
+    if (!amount) {
+      return res.status(400).json({ error: "Invalid plan amount" });
+    }
+
     const order = await razorpay.orders.create({
-      amount: amountMap[plan],
+      amount,
       currency: "INR",
+      receipt: `cv_${Date.now()}_${Math.floor(Math.random() * 1e6)}`,
       notes: {
         plan,
         email,
@@ -461,7 +479,7 @@ app.get("/api/admin/revenue", requireAdmin, async (req, res) => {
           WHEN plan = 'starter' THEN 199
           WHEN plan = 'pro' THEN 399
           WHEN plan = 'yearly' THEN 1999
-          WHEN plan = 'lifetime' THEN 9999
+          WHEN plan = 'lifetime' THEN 6999
           ELSE 0
         END
       )::int AS revenue
@@ -599,54 +617,115 @@ app.get("/api/admin/payments", requireAdmin, async (req, res) => {
   res.json(r.rows);
 });
 
-app.post("/api/razorpay/verify", requireUser, async (req, res) => {
-  const { payment_id, order_id } = req.body;
+app.post("/api/razorpay/verify", csrfProtection, paymentRateLimiter, requireUser, async (req, res) => {
+  try {
+    const { payment_id, order_id, razorpay_signature } = req.body || {};
 
-  const order = await razorpay.orders.fetch(order_id);
+    if (!payment_id || !order_id || !razorpay_signature) {
+      return res.status(400).json({ error: "Missing payment verification fields" });
+    }
 
-  const { email, plan } = order.notes;
+    if (!process.env.RAZORPAY_KEY_SECRET) {
+      return res.status(500).json({ error: "Razorpay secret is not configured" });
+    }
 
-  await db.query(
-    `UPDATE users SET plan=$2 WHERE email=$1`,
-    [email, plan]
-  );
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(`${order_id}|${payment_id}`)
+      .digest("hex");
 
-  await db.query(
-  `INSERT INTO payments (payment_id,email,amount,plan,status)
-   VALUES ($1,$2,$3,$4,'paid')`,
-  [payment_id, email, order.amount / 100, plan]
-);
+    if (!timingSafeEqualHex(razorpay_signature, expectedSignature)) {
+      return res.status(401).json({ error: "Invalid payment signature" });
+    }
 
-  const user = await db.query(
-  "SELECT email, role, plan, token_version FROM users WHERE email=$1",
-  [email]
-);
+    const [order, payment] = await Promise.all([
+      razorpay.orders.fetch(order_id),
+      razorpay.payments.fetch(payment_id),
+    ]);
 
-const newToken = jwt.sign(
-  {
-    email: user.rows[0].email,
-    role: user.rows[0].role,
-    plan: user.rows[0].plan,
-    tv: user.rows[0].token_version,
-  },
-  process.env.JWT_SECRET,
-  { expiresIn: "7d" }
-);
+    if (!order || !payment) {
+      return res.status(400).json({ error: "Payment lookup failed" });
+    }
 
-setAuthCookie(res, newToken);
+    if (payment.order_id !== order_id) {
+      return res.status(400).json({ error: "Order and payment mismatch" });
+    }
 
-await generateInvoice({
-  paymentId: payment_id,
-  email,
-  amount: order.amount / 100,
-  plan
+    if (payment.status !== "captured") {
+      return res.status(400).json({ error: "Payment not captured" });
+    }
+
+    const { email, plan } = order.notes || {};
+    if (!email || !isValidPlan(plan)) {
+      return res.status(400).json({ error: "Invalid order notes" });
+    }
+
+    if (email !== req.user.email) {
+      return res.status(403).json({ error: "Order does not belong to current user" });
+    }
+
+    if (!isExpectedPlanAmount(plan, order.amount)) {
+      return res.status(400).json({ error: "Order amount does not match plan" });
+    }
+
+    if (Number(payment.amount) !== Number(order.amount)) {
+      return res.status(400).json({ error: "Payment amount mismatch" });
+    }
+
+    const saved = await db.query(
+      `INSERT INTO payments (payment_id,email,amount,plan,status)
+       VALUES ($1,$2,$3,$4,'paid')
+       ON CONFLICT (payment_id) DO NOTHING
+       RETURNING payment_id`,
+      [payment_id, email, order.amount / 100, plan]
+    );
+
+    await db.query(`UPDATE users SET plan=$2 WHERE email=$1`, [email, plan]);
+
+    if (saved.rowCount > 0) {
+      try {
+        const invoice = await generateInvoice({
+          paymentId: payment_id,
+          email,
+          amount: order.amount / 100,
+          plan,
+        });
+        await sendInvoiceEmail(email, invoice.pdfPath);
+      } catch (invoiceErr) {
+        console.error("Invoice/email failed after payment verify", {
+          paymentId: payment_id,
+          error: invoiceErr?.message || String(invoiceErr),
+        });
+      }
+    }
+
+    const user = await db.query(
+      "SELECT email, role, plan, token_version FROM users WHERE email=$1",
+      [email]
+    );
+
+    if (!user.rows.length) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const newToken = jwt.sign(
+      {
+        email: user.rows[0].email,
+        role: user.rows[0].role,
+        plan: user.rows[0].plan,
+        tv: user.rows[0].token_version,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    setAuthCookie(res, newToken);
+    return res.json({ ok: true, plan });
+  } catch (err) {
+    console.error("Razorpay verify failed:", err);
+    return res.status(500).json({ error: "Payment verification failed" });
+  }
 });
-
-await sendInvoiceEmail(email, payment_id);
-
-return res.json({ ok: true });
-
-  });
 
 app.post("/api/admin/refund", requireAdmin, async (req, res) => {
   const { paymentId, amount } = req.body;

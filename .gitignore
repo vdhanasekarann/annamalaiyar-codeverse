@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 .vercel
+
+# Standalone website repo (kept separate from app repo)
+aicodeverse-website/
