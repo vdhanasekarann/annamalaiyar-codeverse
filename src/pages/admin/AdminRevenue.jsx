@@ -366,7 +366,7 @@ export default function AdminRevenue() {
   );
 
   return (
-    <div className="min-h-screen p-3 sm:p-6 text-white space-y-5">
+    <div className="min-h-screen p-2 sm:p-4 lg:p-6 pb-24 sm:pb-8 text-white space-y-5 overflow-x-hidden">
       <h1 className="text-2xl sm:text-3xl font-bold">{t("adminRevenue") || "Admin Revenue"}</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
@@ -624,10 +624,10 @@ export default function AdminRevenue() {
 
 function SummaryCard({ label, value, sub }) {
   return (
-    <div className="glass-panel border border-white/10 rounded-xl p-4">
-      <div className="opacity-75 text-sm">{label}</div>
-      <div className="text-3xl font-bold mt-1">{value}</div>
-      <div className="text-xs text-zinc-300 mt-1">{sub}</div>
+    <div className="glass-panel border border-white/10 rounded-xl p-4 min-w-0 overflow-hidden">
+      <div className="opacity-75 text-sm break-words">{label}</div>
+      <div className="text-2xl sm:text-3xl font-bold mt-1 leading-tight break-words">{value}</div>
+      <div className="text-xs text-zinc-300 mt-1 break-words">{sub}</div>
     </div>
   );
 }

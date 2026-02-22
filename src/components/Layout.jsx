@@ -8,6 +8,21 @@ import DoubleSidebar from "./ui/DoubleSidebar";
 import { useSidebar } from "../context/SidebarContext";
 import { getBackgroundObjectUrl } from "../utils/backgroundStorage";
 
+function sanitizeBackgroundSource(value) {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (
+    trimmed.startsWith("blob:") ||
+    trimmed.startsWith("data:") ||
+    trimmed.startsWith("/") ||
+    trimmed.startsWith("https://")
+  ) {
+    return trimmed;
+  }
+  return null;
+}
+
 export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user } = useAuth();
@@ -48,7 +63,12 @@ export default function Layout() {
         // Fallback to localStorage only if IndexedDB path is unavailable.
       }
 
-      setBg(localStorage.getItem(key));
+      const legacyBg = localStorage.getItem(key);
+      const safeLegacyBg = sanitizeBackgroundSource(legacyBg);
+      if (!safeLegacyBg && legacyBg) {
+        localStorage.removeItem(key);
+      }
+      setBg(safeLegacyBg);
     };
 
     syncBg();
@@ -95,14 +115,14 @@ export default function Layout() {
         />
 
         <main className="flex-1 overflow-y-auto">
-          <div className="max-w-7xl mx-auto px-4 pt-20 pb-6">
+          <div className="max-w-7xl mx-auto px-4 pt-20 pb-24 sm:pb-8">
             <div className="page-container p-6 rounded-3xl min-h-screen">
               <Outlet />
             </div>
 
             <Link
               to="/prompt-assistant"
-              className="fixed bottom-6 right-6 z-50 bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-xl"
+              className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-xl"
               aria-label="Open Prompt Assistant"
             >
               <Bot className="w-5 h-5" />

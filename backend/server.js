@@ -12,9 +12,9 @@ import { requireAuth } from "./api/requireAuth.js";
 import { requireUser } from "./api/requireUser.js";
 import { requireAdmin } from "./api/requireAdmin.js";
 import { razorpayWebhook } from "./api/razorpay-webhook.js";
-import { generateInvoice } from "./src/utils/invoice.js";
-import { sendInvoiceEmail } from "./src/utils/mailer.js";
 import { isExpectedPlanAmount, isValidPlan, planAmountPaise } from "./src/payments/plans.js";
+import { ensureInvoiceAndEmail } from "./src/payments/invoiceEmail.js";
+import { isPlanConstraintError, runWithPlanSchemaSync } from "./src/payments/planSchemaSync.js";
 import csrf from "csurf";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
@@ -471,21 +471,14 @@ app.get("/api/auth/magic-verify", async (req, res) => {
 /* ---------- ADMIN: REVENUE (AUTO CALCULATED) ---------- */
 app.get("/api/admin/revenue", requireAdmin, async (req, res) => {
   const r = await db.query(`
-    SELECT 
+    SELECT
       plan,
-      COUNT(*)::int AS users,
-      SUM(
-        CASE 
-          WHEN plan = 'starter' THEN 199
-          WHEN plan = 'pro' THEN 399
-          WHEN plan = 'yearly' THEN 1999
-          WHEN plan = 'lifetime' THEN 6999
-          ELSE 0
-        END
-      )::int AS revenue
-    FROM users
-    WHERE blocked = FALSE
+      COUNT(DISTINCT email)::int AS users,
+      COALESCE(SUM(amount), 0)::numeric AS revenue
+    FROM payments
+    WHERE status='paid'
     GROUP BY plan
+    ORDER BY revenue DESC
   `);
 
   res.json({ plans: r.rows });
@@ -672,31 +665,29 @@ app.post("/api/razorpay/verify", csrfProtection, paymentRateLimiter, requireUser
       return res.status(400).json({ error: "Payment amount mismatch" });
     }
 
-    const saved = await db.query(
-      `INSERT INTO payments (payment_id,email,amount,plan,status)
-       VALUES ($1,$2,$3,$4,'paid')
-       ON CONFLICT (payment_id) DO NOTHING
-       RETURNING payment_id`,
-      [payment_id, email, order.amount / 100, plan]
-    );
+    await runWithPlanSchemaSync(plan, async () => {
+      await db.query(
+        `INSERT INTO payments (payment_id,email,amount,plan,status)
+         VALUES ($1,$2,$3,$4,'paid')
+         ON CONFLICT (payment_id) DO NOTHING`,
+        [payment_id, email, order.amount / 100, plan]
+      );
 
-    await db.query(`UPDATE users SET plan=$2 WHERE email=$1`, [email, plan]);
+      await db.query(`UPDATE users SET plan=$2 WHERE email=$1`, [email, plan]);
+    });
 
-    if (saved.rowCount > 0) {
-      try {
-        const invoice = await generateInvoice({
-          paymentId: payment_id,
-          email,
-          amount: order.amount / 100,
-          plan,
-        });
-        await sendInvoiceEmail(email, invoice.pdfPath);
-      } catch (invoiceErr) {
-        console.error("Invoice/email failed after payment verify", {
-          paymentId: payment_id,
-          error: invoiceErr?.message || String(invoiceErr),
-        });
-      }
+    try {
+      await ensureInvoiceAndEmail({
+        paymentId: payment_id,
+        email,
+        amount: order.amount / 100,
+        plan,
+      });
+    } catch (invoiceErr) {
+      console.error("Invoice/email failed after payment verify", {
+        paymentId: payment_id,
+        error: invoiceErr?.message || String(invoiceErr),
+      });
     }
 
     const user = await db.query(
@@ -722,6 +713,12 @@ app.post("/api/razorpay/verify", csrfProtection, paymentRateLimiter, requireUser
     setAuthCookie(res, newToken);
     return res.json({ ok: true, plan });
   } catch (err) {
+    if (isPlanConstraintError(err)) {
+      console.error("Razorpay verify plan schema mismatch:", err);
+      return res.status(409).json({
+        error: "Database plan schema does not allow this plan yet. Add plan value and retry verification.",
+      });
+    }
     console.error("Razorpay verify failed:", err);
     return res.status(500).json({ error: "Payment verification failed" });
   }

@@ -39,7 +39,7 @@ function toLimitText(value) {
 }
 
 export default function PremiumPage() {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const { theme } = useTheme();
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -69,6 +69,7 @@ export default function PremiumPage() {
               subtitle={plan.subtitle}
               highlight={plan.highlight}
               user={user}
+              setUser={setUser}
               navigate={navigate}
               theme={theme}
               delay={index * 140}
@@ -87,6 +88,7 @@ function PlanCard({
   subtitle,
   highlight,
   user,
+  setUser,
   navigate,
   theme,
   delay = 0,
@@ -145,9 +147,14 @@ function PlanCard({
             throw new Error(err.error || `HTTP ${verifyRes.status}`);
           }
 
-          await apiFetch("/api/auth/me");
+          const meRes = await apiFetch("/api/auth/me");
+          if (meRes.ok) {
+            const freshUser = await meRes.json();
+            setUser?.(freshUser);
+          }
+
           alert("Payment successful! Plan upgraded.");
-          window.location.reload();
+          navigate("/dashboard");
         } catch (err) {
           alert("Payment verification failed: " + (err?.message || "Unknown error"));
         }
