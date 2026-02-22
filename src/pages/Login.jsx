@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../lib/apiFetch";
 import { useTranslation } from "react-i18next";
@@ -10,7 +10,19 @@ export default function Login() {
   const [signingIn, setSigningIn] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { setUser } = useAuth();
+  const { user, refreshUser } = useAuth();
+
+  const hydrateSessionAndRedirect = useCallback(async () => {
+    const me = await refreshUser({
+      retries: 6,
+      retryDelayMs: 250,
+    });
+
+    if (!me) return false;
+
+    navigate("/dashboard", { replace: true });
+    return true;
+  }, [navigate, refreshUser]);
 
   const focusEmailInput = () => {
     const input = document.getElementById("email-input");
@@ -71,13 +83,7 @@ export default function Login() {
         return;
       }
 
-      const meRes = await apiFetch("/api/auth/me", { credentials: "include" });
-      if (meRes.ok) {
-        const me = await meRes.json();
-        setUser(me);
-        navigate("/dashboard");
-        return;
-      }
+      if (await hydrateSessionAndRedirect()) return;
 
       alert(t("errorTryAgain") || "Login session was not created. Please try again.");
     } finally {
@@ -86,20 +92,35 @@ export default function Login() {
   };
 
   useEffect(() => {
+    if (!user) return;
+    navigate("/dashboard", { replace: true });
+  }, [navigate, user]);
+
+  useEffect(() => {
     if (!window.google || !import.meta.env.VITE_GOOGLE_CLIENT_ID) return;
 
     window.google.accounts.id.initialize({
       client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
       callback: async (res) => {
-        const r = await apiFetch("/api/auth/google", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ credential: res.credential }),
-        });
+        try {
+          const r = await apiFetch("/api/auth/google", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ credential: res.credential }),
+          });
 
-        if (r.ok) navigate("/dashboard");
-        else alert(t("googleLoginFailed") || "Google login failed");
+          if (!r.ok) {
+            alert(t("googleLoginFailed") || "Google login failed");
+            return;
+          }
+
+          if (await hydrateSessionAndRedirect()) return;
+
+          alert(t("errorTryAgain") || "Login session was not created. Please try again.");
+        } catch {
+          alert(t("googleLoginFailed") || "Google login failed");
+        }
       },
     });
 
@@ -108,7 +129,7 @@ export default function Login() {
       size: "large",
       width: 320,
     });
-  }, [navigate, t]);
+  }, [hydrateSessionAndRedirect, t]);
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">

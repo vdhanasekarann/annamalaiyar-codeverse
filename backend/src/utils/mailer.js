@@ -3,20 +3,36 @@ import path from "path";
 import nodemailer from "nodemailer";
 import { Resend } from "resend";
 
+const RESEND_DEFAULT_FROM = "CodeVerse <onboarding@resend.dev>";
+
 function smtpConfigured() {
-  return Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+  return Boolean(process.env.SMTP_USER && process.env.SMTP_PASS);
 }
 
 function createSmtpTransport() {
+  const port = Number(process.env.SMTP_PORT || "587");
+  const hasSecureOverride = typeof process.env.SMTP_SECURE === "string";
+
   return nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT || "587"),
-    secure: String(process.env.SMTP_SECURE || "false").toLowerCase() === "true",
+    host: process.env.SMTP_HOST || "smtp.gmail.com",
+    port,
+    secure: hasSecureOverride
+      ? String(process.env.SMTP_SECURE).toLowerCase() === "true"
+      : port === 465,
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
   });
+}
+
+function resolveResendFrom() {
+  const configured = String(process.env.RESEND_FROM || "").trim();
+  return configured || RESEND_DEFAULT_FROM;
+}
+
+function resolveReplyTo() {
+  return process.env.FROM_EMAIL || process.env.SMTP_USER || undefined;
 }
 
 async function sendViaResend({ toEmail, subject, html, base64Pdf, filename }) {
@@ -25,16 +41,13 @@ async function sendViaResend({ toEmail, subject, html, base64Pdf, filename }) {
   }
 
   const resend = new Resend(process.env.RESEND_API_KEY);
-  const from =
-    process.env.RESEND_FROM ||
-    process.env.FROM_EMAIL ||
-    "CodeVerse <hello@aicodeverse.com>";
 
   const resp = await resend.emails.send({
-    from,
+    from: resolveResendFrom(),
     to: toEmail,
     subject,
     html,
+    ...(resolveReplyTo() ? { reply_to: resolveReplyTo() } : {}),
     attachments: [
       {
         filename,
@@ -60,7 +73,7 @@ async function sendViaSmtp({ toEmail, subject, html, fileBuffer, filename }) {
   }
 
   const transporter = createSmtpTransport();
-  const from = process.env.FROM_EMAIL || process.env.SMTP_USER;
+  const from = process.env.FROM_EMAIL || process.env.SMTP_USER || RESEND_DEFAULT_FROM;
 
   const info = await transporter.sendMail({
     from,
@@ -93,7 +106,7 @@ export async function sendInvoiceEmail(toEmail, pdfFilePath) {
   const subject = "Your Invoice - Annamalaiyar CodeVerse AI OS";
   const html = "<p>Thank you for your purchase. Your invoice is attached.</p>";
 
-  let lastError = null;
+  const providerErrors = [];
 
   try {
     return await sendViaResend({
@@ -104,7 +117,7 @@ export async function sendInvoiceEmail(toEmail, pdfFilePath) {
       filename,
     });
   } catch (err) {
-    lastError = err;
+    providerErrors.push(`resend: ${err?.message || String(err)}`);
     console.warn("Invoice email via Resend failed:", err?.message || String(err));
   }
 
@@ -117,9 +130,13 @@ export async function sendInvoiceEmail(toEmail, pdfFilePath) {
       filename,
     });
   } catch (err) {
-    lastError = err;
+    providerErrors.push(`smtp: ${err?.message || String(err)}`);
     console.warn("Invoice email via SMTP failed:", err?.message || String(err));
   }
 
-  throw lastError || new Error("No email provider is configured");
+  throw new Error(
+    providerErrors.length
+      ? `Invoice email send failed (${providerErrors.join(" | ")})`
+      : "No email provider is configured"
+  );
 }

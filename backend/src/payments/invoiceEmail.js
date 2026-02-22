@@ -36,7 +36,7 @@ async function isInvoiceAlreadySent(paymentId) {
 
 async function markInvoiceSent(paymentId, invoiceNo) {
   try {
-    await db.query(
+    const updated = await db.query(
       `
         UPDATE payments
         SET invoice_sent=TRUE,
@@ -45,8 +45,11 @@ async function markInvoiceSent(paymentId, invoiceNo) {
       `,
       [paymentId, invoiceNo]
     );
+
+    return updated.rowCount;
   } catch (err) {
     console.warn("Could not mark invoice_sent on payments:", err?.message || String(err));
+    return 0;
   }
 }
 
@@ -99,7 +102,43 @@ export async function ensureInvoiceAndEmail({ paymentId, email, amount, plan }) 
   }
 
   const sendResult = await sendInvoiceEmail(invoiceEmail, pdfPath);
-  await markInvoiceSent(paymentId, invoiceNo);
+
+  const updated = await markInvoiceSent(paymentId, invoiceNo);
+
+  if (updated === 0) {
+    try {
+      await db.query(
+        `
+          WITH latest AS (
+            SELECT ctid
+            FROM payments
+            WHERE email=$1
+              AND status='paid'
+              AND ($2::text IS NULL OR plan=$2)
+              AND ($3::numeric IS NULL OR amount=$3)
+            ORDER BY created_at DESC NULLS LAST
+            LIMIT 1
+          )
+          UPDATE payments p
+          SET invoice_sent=TRUE,
+              invoice_id=COALESCE(p.invoice_id, $4)
+          FROM latest
+          WHERE p.ctid = latest.ctid
+        `,
+        [
+          invoiceEmail,
+          invoicePlan || null,
+          Number.isFinite(renderAmount) ? renderAmount : null,
+          invoiceNo,
+        ]
+      );
+    } catch (fallbackErr) {
+      console.warn(
+        "Could not mark invoice_sent with fallback match:",
+        fallbackErr?.message || String(fallbackErr)
+      );
+    }
+  }
 
   return {
     created,

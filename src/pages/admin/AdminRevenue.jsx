@@ -398,49 +398,47 @@ export default function AdminRevenue() {
         <div className="grid gap-3">
           {competitors.map((row) => (
             <div key={row.id} className="rounded-xl border border-white/10 bg-black/25 p-3">
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-center">
                 <input
                   value={row.name}
                   onChange={(e) => updateCompetitor(row.id, "name", e.target.value)}
-                  className="md:col-span-2 bg-zinc-900/80 border border-white/15 rounded px-2 py-2 text-sm"
+                  className="md:col-span-2 min-w-0 bg-zinc-900/80 border border-white/15 rounded px-2 py-2 text-sm"
                   placeholder="Competitor name"
                 />
                 <input
                   value={row.monthlyRevenue}
                   onChange={(e) => updateCompetitor(row.id, "monthlyRevenue", e.target.value)}
-                  className="md:col-span-2 bg-zinc-900/80 border border-white/15 rounded px-2 py-2 text-sm"
+                  className="md:col-span-2 min-w-0 bg-zinc-900/80 border border-white/15 rounded px-2 py-2 text-sm"
                   placeholder="Monthly revenue"
                   inputMode="decimal"
                 />
                 <input
                   value={row.activeUsers}
                   onChange={(e) => updateCompetitor(row.id, "activeUsers", e.target.value)}
-                  className="md:col-span-2 bg-zinc-900/80 border border-white/15 rounded px-2 py-2 text-sm"
+                  className="md:col-span-2 min-w-0 bg-zinc-900/80 border border-white/15 rounded px-2 py-2 text-sm"
                   placeholder="Active users"
                   inputMode="numeric"
                 />
                 <input
                   value={row.growthPct}
                   onChange={(e) => updateCompetitor(row.id, "growthPct", e.target.value)}
-                  className="md:col-span-2 bg-zinc-900/80 border border-white/15 rounded px-2 py-2 text-sm"
+                  className="md:col-span-2 min-w-0 bg-zinc-900/80 border border-white/15 rounded px-2 py-2 text-sm"
                   placeholder="Growth %"
                   inputMode="decimal"
                 />
-                <div className="md:col-span-4 flex flex-col sm:flex-row gap-2">
-                  <input
-                    value={row.avgPrice}
-                    onChange={(e) => updateCompetitor(row.id, "avgPrice", e.target.value)}
-                    className="min-w-0 flex-1 bg-zinc-900/80 border border-white/15 rounded px-2 py-2 text-sm"
-                    placeholder="Avg price"
-                    inputMode="decimal"
-                  />
-                  <button
-                    onClick={() => removeCompetitor(row.id)}
-                    className="shrink-0 px-3 py-2 rounded border border-red-500/30 text-red-300 text-xs"
-                  >
-                    Remove
-                  </button>
-                </div>
+                <input
+                  value={row.avgPrice}
+                  onChange={(e) => updateCompetitor(row.id, "avgPrice", e.target.value)}
+                  className="md:col-span-2 min-w-0 bg-zinc-900/80 border border-white/15 rounded px-2 py-2 text-sm"
+                  placeholder="Avg price"
+                  inputMode="decimal"
+                />
+                <button
+                  onClick={() => removeCompetitor(row.id)}
+                  className="md:col-span-2 md:justify-self-end w-full md:w-auto px-3 py-2 rounded border border-red-500/30 text-red-300 text-xs"
+                >
+                  Remove
+                </button>
               </div>
             </div>
           ))}

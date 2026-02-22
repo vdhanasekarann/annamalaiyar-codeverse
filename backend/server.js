@@ -699,6 +699,7 @@ app.post("/api/razorpay/verify", csrfProtection, paymentRateLimiter, requireUser
       paymentRecorded: false,
       userPlanStored: false,
       invoiceEmailed: false,
+      invoiceEmailError: null,
     };
 
     try {
@@ -740,12 +741,16 @@ app.post("/api/razorpay/verify", csrfProtection, paymentRateLimiter, requireUser
         amount: order.amount / 100,
         plan,
       });
-      persistence.invoiceEmailed = Boolean(invoiceResult?.emailed);
+      persistence.invoiceEmailed = Boolean(
+        invoiceResult?.emailed || invoiceResult?.skipped === "already_sent"
+      );
     } catch (invoiceErr) {
+      const invoiceErrMsg = invoiceErr?.message || String(invoiceErr);
       console.error("Invoice/email failed after payment verify", {
         paymentId: payment_id,
-        error: invoiceErr?.message || String(invoiceErr),
+        error: invoiceErrMsg,
       });
+      persistence.invoiceEmailError = "delivery_pending";
     }
 
     const newToken = jwt.sign(

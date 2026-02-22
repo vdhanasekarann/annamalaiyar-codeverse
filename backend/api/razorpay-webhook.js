@@ -82,6 +82,7 @@ export async function razorpayWebhook(req, res) {
       paymentRecorded: false,
       userPlanStored: false,
       invoiceEmailed: false,
+      invoiceEmailError: null,
     };
 
     try {
@@ -123,12 +124,16 @@ export async function razorpayWebhook(req, res) {
         plan,
         amount: payment.amount / 100,
       });
-      persistence.invoiceEmailed = Boolean(invoiceResult?.emailed);
+      persistence.invoiceEmailed = Boolean(
+        invoiceResult?.emailed || invoiceResult?.skipped === "already_sent"
+      );
     } catch (invoiceErr) {
+      const invoiceErrMsg = invoiceErr?.message || String(invoiceErr);
       console.error("Webhook invoice/email failed", {
         paymentId: payment.id,
-        error: invoiceErr?.message || String(invoiceErr),
+        error: invoiceErrMsg,
       });
+      persistence.invoiceEmailError = "delivery_pending";
     }
 
     return res.json({ ok: true, traceId, ...persistence });
