@@ -9,13 +9,13 @@ import { useTheme } from "../context/ThemeContext";
 const PLANS = [
   {
     title: "Starter",
-    price: "₹1 / month",
+    price: "₹199 / month",
     key: "starter",
     subtitle: "Great for individual creators",
   },
   {
     title: "Pro",
-    price: "₹399 / month",
+    price: "₹3 / month",
     key: "pro",
     subtitle: "Best for power users",
     highlight: true,
