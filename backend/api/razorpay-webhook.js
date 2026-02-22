@@ -78,18 +78,43 @@ export async function razorpayWebhook(req, res) {
       return res.json({ ok: true });
     }
 
-    let insertedPayment = false;
-    await runWithPlanSchemaSync(plan, async () => {
-      const saved = await savePaidPayment({
-        paymentId: payment.id,
-        email,
-        amount: payment.amount / 100,
-        plan,
-      });
-      insertedPayment = Boolean(saved.inserted);
+    const persistence = {
+      paymentRecorded: false,
+      userPlanStored: false,
+      invoiceEmailed: false,
+    };
 
-      await db.query(`UPDATE users SET plan=$2 WHERE email=$1`, [email, plan]);
-    });
+    try {
+      await runWithPlanSchemaSync(plan, async () => {
+        const saved = await savePaidPayment({
+          paymentId: payment.id,
+          email,
+          amount: payment.amount / 100,
+          plan,
+        });
+        persistence.paymentRecorded = Boolean(saved.inserted);
+      });
+    } catch (paymentErr) {
+      console.warn(`[webhook:${traceId}] payment persistence failed`, {
+        paymentId: payment.id,
+        code: paymentErr?.code,
+        error: paymentErr?.message || String(paymentErr),
+      });
+    }
+
+    try {
+      await runWithPlanSchemaSync(plan, async () => {
+        await db.query(`UPDATE users SET plan=$2 WHERE email=$1`, [email, plan]);
+      });
+      persistence.userPlanStored = true;
+    } catch (userPlanErr) {
+      console.warn(`[webhook:${traceId}] user plan update failed`, {
+        email,
+        plan,
+        code: userPlanErr?.code,
+        error: userPlanErr?.message || String(userPlanErr),
+      });
+    }
 
     try {
       await ensureInvoiceAndEmail({
@@ -98,6 +123,7 @@ export async function razorpayWebhook(req, res) {
         plan,
         amount: payment.amount / 100,
       });
+      persistence.invoiceEmailed = true;
     } catch (invoiceErr) {
       console.error("Webhook invoice/email failed", {
         paymentId: payment.id,
@@ -105,7 +131,7 @@ export async function razorpayWebhook(req, res) {
       });
     }
 
-    return res.json({ ok: true, paymentRecorded: insertedPayment });
+    return res.json({ ok: true, traceId, ...persistence });
   } catch (err) {
     if (isPlanConstraintError(err)) {
       console.error(`[webhook:${traceId}] plan schema mismatch:`, err);

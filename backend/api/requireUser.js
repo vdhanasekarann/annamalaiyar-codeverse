@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { db } from "./_db.js";
 import { PLAN_LIMITS } from "../../config/limits.js";
 import crypto from "crypto";
+import { isValidPlan } from "../src/payments/plans.js";
 
 export async function requireUser(req, res, next) {
   const token =
@@ -38,7 +39,28 @@ export async function requireUser(req, res, next) {
     return res.status(403).json({ error: "Account blocked" });
   }
 
-  const effectivePlan = userRow.plan || user.plan || "free";
+  let paidPlan = null;
+  try {
+    const paidRes = await db.query(
+      `
+      SELECT plan
+      FROM payments
+      WHERE email=$1 AND status='paid'
+      ORDER BY created_at DESC NULLS LAST
+      LIMIT 1
+      `,
+      [user.email]
+    );
+    paidPlan = paidRes.rows[0]?.plan || null;
+  } catch {
+    // Non-fatal fallback when payments schema differs.
+  }
+
+  const effectivePlan =
+    (isValidPlan(paidPlan) && paidPlan) ||
+    (isValidPlan(user.plan) && user.plan) ||
+    (isValidPlan(userRow.plan) && userRow.plan) ||
+    "free";
   req.user = { ...user, plan: effectivePlan };
 
   const fallbackDeviceId = crypto

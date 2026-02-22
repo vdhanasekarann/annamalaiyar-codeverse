@@ -51,6 +51,29 @@ function timingSafeEqualHex(a, b) {
   return crypto.timingSafeEqual(aBuf, bBuf);
 }
 
+async function resolveUserPlanForToken(email, fallbackPlan = "free") {
+  try {
+    const paid = await db.query(
+      `
+      SELECT plan
+      FROM payments
+      WHERE email=$1 AND status='paid'
+      ORDER BY created_at DESC NULLS LAST
+      LIMIT 1
+      `,
+      [email]
+    );
+    const paidPlan = paid.rows[0]?.plan;
+    if (isValidPlan(paidPlan)) {
+      return paidPlan;
+    }
+  } catch {
+    // Non-fatal: older DBs may have partial schema differences.
+  }
+
+  return isValidPlan(fallbackPlan) ? fallbackPlan : "free";
+}
+
 const app = express();
 app.set("trust proxy", "loopback");
 app.use(cookieParser());
@@ -231,12 +254,13 @@ app.post("/api/auth/login", async (req, res) => {
   );
 
   const user = r.rows[0];
+  const tokenPlan = await resolveUserPlanForToken(user.email, user.plan);
 
   const token = jwt.sign(
     {
       email: user.email,
       role: user.role,
-      plan: user.plan,
+      plan: tokenPlan,
       tv: user.token_version,
     },
     process.env.JWT_SECRET,
@@ -282,12 +306,13 @@ app.post("/api/auth/google", async (req, res) => {
     );
 
     const user = r.rows[0];
+    const tokenPlan = await resolveUserPlanForToken(user.email, user.plan);
 
     const token = jwt.sign(
       {
         email: user.email,
         role: user.role,
-        plan: user.plan,
+        plan: tokenPlan,
         tv: user.token_version,
       },
       process.env.JWT_SECRET,
@@ -452,12 +477,13 @@ app.get("/api/auth/magic-verify", async (req, res) => {
   );
 
   const user = u.rows[0];
+  const tokenPlan = await resolveUserPlanForToken(user.email, user.plan);
 
   const jwtToken = jwt.sign(
     {
       email: user.email,
       role: user.role,
-      plan: user.plan,
+      plan: tokenPlan,
       tv: user.token_version,
     },
     process.env.JWT_SECRET,
@@ -667,18 +693,43 @@ app.post("/api/razorpay/verify", csrfProtection, paymentRateLimiter, requireUser
       return res.status(400).json({ error: "Payment amount mismatch" });
     }
 
-    let insertedPayment = false;
-    await runWithPlanSchemaSync(plan, async () => {
-      const saved = await savePaidPayment({
-        paymentId: payment_id,
-        email,
-        amount: order.amount / 100,
-        plan,
-      });
-      insertedPayment = Boolean(saved.inserted);
+    const persistence = {
+      paymentRecorded: false,
+      userPlanStored: false,
+      invoiceEmailed: false,
+    };
 
-      await db.query(`UPDATE users SET plan=$2 WHERE email=$1`, [email, plan]);
-    });
+    try {
+      await runWithPlanSchemaSync(plan, async () => {
+        const saved = await savePaidPayment({
+          paymentId: payment_id,
+          email,
+          amount: order.amount / 100,
+          plan,
+        });
+        persistence.paymentRecorded = Boolean(saved.inserted);
+      });
+    } catch (paymentErr) {
+      console.warn(`[verify:${traceId}] payment persistence failed`, {
+        paymentId: payment_id,
+        code: paymentErr?.code,
+        error: paymentErr?.message || String(paymentErr),
+      });
+    }
+
+    try {
+      await runWithPlanSchemaSync(plan, async () => {
+        await db.query(`UPDATE users SET plan=$2 WHERE email=$1`, [email, plan]);
+      });
+      persistence.userPlanStored = true;
+    } catch (userPlanErr) {
+      console.warn(`[verify:${traceId}] user plan update failed`, {
+        email,
+        plan,
+        code: userPlanErr?.code,
+        error: userPlanErr?.message || String(userPlanErr),
+      });
+    }
 
     try {
       await ensureInvoiceAndEmail({
@@ -687,6 +738,7 @@ app.post("/api/razorpay/verify", csrfProtection, paymentRateLimiter, requireUser
         amount: order.amount / 100,
         plan,
       });
+      persistence.invoiceEmailed = true;
     } catch (invoiceErr) {
       console.error("Invoice/email failed after payment verify", {
         paymentId: payment_id,
@@ -694,28 +746,19 @@ app.post("/api/razorpay/verify", csrfProtection, paymentRateLimiter, requireUser
       });
     }
 
-    const user = await db.query(
-      "SELECT email, role, plan, token_version FROM users WHERE email=$1",
-      [email]
-    );
-
-    if (!user.rows.length) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
     const newToken = jwt.sign(
       {
-        email: user.rows[0].email,
-        role: user.rows[0].role,
-        plan: user.rows[0].plan,
-        tv: user.rows[0].token_version,
+        email,
+        role: req.user.role || "user",
+        plan,
+        tv: Number(req.user.tv ?? 0),
       },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
     setAuthCookie(res, newToken);
-    return res.json({ ok: true, plan, paymentRecorded: insertedPayment });
+    return res.json({ ok: true, plan, traceId, ...persistence });
   } catch (err) {
     if (isPlanConstraintError(err)) {
       console.error(`[verify:${traceId}] Razorpay verify plan schema mismatch:`, err);

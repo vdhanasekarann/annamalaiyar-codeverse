@@ -366,7 +366,7 @@ export default function AdminRevenue() {
   );
 
   return (
-    <div className="min-h-screen p-2 sm:p-4 lg:p-6 pb-24 sm:pb-8 text-white space-y-5 overflow-x-hidden">
+    <div className="min-h-screen p-2 sm:p-4 lg:p-6 pb-24 sm:pb-8 text-white space-y-5">
       <h1 className="text-2xl sm:text-3xl font-bold">{t("adminRevenue") || "Admin Revenue"}</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
@@ -446,7 +446,30 @@ export default function AdminRevenue() {
           ))}
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="md:hidden space-y-3">
+          {competitorAnalysis.length === 0 ? (
+            <div className="text-sm text-zinc-300">Enter competitor values to start analysis.</div>
+          ) : (
+            competitorAnalysis.map((c) => (
+              <div key={c.id} className="rounded-xl border border-white/10 bg-black/30 p-3 space-y-1">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="font-semibold">{c.name || "Competitor"}</div>
+                  <div className={`text-xs font-semibold ${statusTone(c.status)}`}>{c.status}</div>
+                </div>
+                <div className="text-sm">{`Market Score: ${c.marketScore}`}</div>
+                <div className={`text-sm ${c.revenueGap >= 0 ? "text-emerald-300" : "text-red-300"}`}>
+                  {`Revenue Gap: Rs ${Math.round(c.revenueGap)}`}
+                </div>
+                <div className={`text-sm ${c.usersGap >= 0 ? "text-emerald-300" : "text-red-300"}`}>
+                  {`Users Gap: ${Math.round(c.usersGap)}`}
+                </div>
+                <div className="text-xs text-zinc-300">{c.recommendation}</div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm min-w-[760px]">
             <thead className="border-b border-white/10 text-left">
               <tr>
