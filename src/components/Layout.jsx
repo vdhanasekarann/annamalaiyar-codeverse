@@ -29,6 +29,7 @@ export default function Layout() {
   const [bg, setBg] = useState(null);
   const { collapsed, setCollapsed } = useSidebar();
   const location = useLocation();
+  const showPromptAssistant = !location.pathname.startsWith("/admin/");
 
   if (location.pathname === "/login") return null;
 
@@ -120,13 +121,15 @@ export default function Layout() {
               <Outlet />
             </div>
 
-            <Link
-              to="/prompt-assistant"
-              className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-xl"
-              aria-label="Open Prompt Assistant"
-            >
-              <Bot className="w-5 h-5" />
-            </Link>
+            {showPromptAssistant && (
+              <Link
+                to="/prompt-assistant"
+                className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-xl"
+                aria-label="Open Prompt Assistant"
+              >
+                <Bot className="w-5 h-5" />
+              </Link>
+            )}
           </div>
         </main>
       </div>

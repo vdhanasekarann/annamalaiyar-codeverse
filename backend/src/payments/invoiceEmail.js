@@ -4,7 +4,7 @@ import { sendInvoiceEmail } from "../utils/mailer.js";
 
 export async function ensureInvoiceAndEmail({ paymentId, email, amount, plan }) {
   const existing = await db.query(
-    `SELECT id FROM invoices WHERE payment_id=$1 LIMIT 1`,
+    `SELECT 1 FROM invoices WHERE payment_id=$1 LIMIT 1`,
     [paymentId]
   );
 

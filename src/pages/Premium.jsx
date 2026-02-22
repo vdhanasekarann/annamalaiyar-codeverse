@@ -144,7 +144,8 @@ function PlanCard({
 
           if (!verifyRes.ok) {
             const err = await verifyRes.json().catch(() => ({}));
-            throw new Error(err.error || `HTTP ${verifyRes.status}`);
+            const traceSuffix = err?.traceId ? ` (trace: ${err.traceId})` : "";
+            throw new Error((err.error || `HTTP ${verifyRes.status}`) + traceSuffix);
           }
 
           const meRes = await apiFetch("/api/auth/me");

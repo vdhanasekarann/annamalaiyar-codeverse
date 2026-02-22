@@ -4,6 +4,7 @@ import { db } from "./_db.js";
 import { isExpectedPlanAmount, isValidPlan } from "../src/payments/plans.js";
 import { ensureInvoiceAndEmail } from "../src/payments/invoiceEmail.js";
 import { isPlanConstraintError, runWithPlanSchemaSync } from "../src/payments/planSchemaSync.js";
+import { savePaidPayment } from "../src/payments/paymentWrite.js";
 
 function timingSafeEqualHex(a, b) {
   if (typeof a !== "string" || typeof b !== "string") return false;
@@ -22,6 +23,7 @@ function timingSafeEqualHex(a, b) {
 }
 
 export async function razorpayWebhook(req, res) {
+  const traceId = crypto.randomUUID();
   try {
     const signature = req.headers["x-razorpay-signature"];
     const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
@@ -76,13 +78,15 @@ export async function razorpayWebhook(req, res) {
       return res.json({ ok: true });
     }
 
+    let insertedPayment = false;
     await runWithPlanSchemaSync(plan, async () => {
-      await db.query(
-        `INSERT INTO payments (payment_id,email,amount,plan,status)
-         VALUES ($1,$2,$3,$4,'paid')
-         ON CONFLICT (payment_id) DO NOTHING`,
-        [payment.id, email, payment.amount / 100, plan]
-      );
+      const saved = await savePaidPayment({
+        paymentId: payment.id,
+        email,
+        amount: payment.amount / 100,
+        plan,
+      });
+      insertedPayment = Boolean(saved.inserted);
 
       await db.query(`UPDATE users SET plan=$2 WHERE email=$1`, [email, plan]);
     });
@@ -101,13 +105,13 @@ export async function razorpayWebhook(req, res) {
       });
     }
 
-    return res.json({ ok: true });
+    return res.json({ ok: true, paymentRecorded: insertedPayment });
   } catch (err) {
     if (isPlanConstraintError(err)) {
-      console.error("Webhook plan schema mismatch:", err);
+      console.error(`[webhook:${traceId}] plan schema mismatch:`, err);
       return res.status(409).json({ error: "Plan schema mismatch" });
     }
-    console.error("Webhook processing failed:", err);
-    return res.status(500).json({ error: "Webhook processing failed" });
+    console.error(`[webhook:${traceId}] processing failed:`, err);
+    return res.status(500).json({ error: "Webhook processing failed", traceId });
   }
 }

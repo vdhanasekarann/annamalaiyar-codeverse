@@ -15,6 +15,7 @@ import { razorpayWebhook } from "./api/razorpay-webhook.js";
 import { isExpectedPlanAmount, isValidPlan, planAmountPaise } from "./src/payments/plans.js";
 import { ensureInvoiceAndEmail } from "./src/payments/invoiceEmail.js";
 import { isPlanConstraintError, runWithPlanSchemaSync } from "./src/payments/planSchemaSync.js";
+import { savePaidPayment } from "./src/payments/paymentWrite.js";
 import csrf from "csurf";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
@@ -611,6 +612,7 @@ app.get("/api/admin/payments", requireAdmin, async (req, res) => {
 });
 
 app.post("/api/razorpay/verify", csrfProtection, paymentRateLimiter, requireUser, async (req, res) => {
+  const traceId = crypto.randomUUID();
   try {
     const { payment_id, order_id, razorpay_signature } = req.body || {};
 
@@ -665,13 +667,15 @@ app.post("/api/razorpay/verify", csrfProtection, paymentRateLimiter, requireUser
       return res.status(400).json({ error: "Payment amount mismatch" });
     }
 
+    let insertedPayment = false;
     await runWithPlanSchemaSync(plan, async () => {
-      await db.query(
-        `INSERT INTO payments (payment_id,email,amount,plan,status)
-         VALUES ($1,$2,$3,$4,'paid')
-         ON CONFLICT (payment_id) DO NOTHING`,
-        [payment_id, email, order.amount / 100, plan]
-      );
+      const saved = await savePaidPayment({
+        paymentId: payment_id,
+        email,
+        amount: order.amount / 100,
+        plan,
+      });
+      insertedPayment = Boolean(saved.inserted);
 
       await db.query(`UPDATE users SET plan=$2 WHERE email=$1`, [email, plan]);
     });
@@ -711,16 +715,17 @@ app.post("/api/razorpay/verify", csrfProtection, paymentRateLimiter, requireUser
     );
 
     setAuthCookie(res, newToken);
-    return res.json({ ok: true, plan });
+    return res.json({ ok: true, plan, paymentRecorded: insertedPayment });
   } catch (err) {
     if (isPlanConstraintError(err)) {
-      console.error("Razorpay verify plan schema mismatch:", err);
+      console.error(`[verify:${traceId}] Razorpay verify plan schema mismatch:`, err);
       return res.status(409).json({
         error: "Database plan schema does not allow this plan yet. Add plan value and retry verification.",
+        traceId,
       });
     }
-    console.error("Razorpay verify failed:", err);
-    return res.status(500).json({ error: "Payment verification failed" });
+    console.error(`[verify:${traceId}] Razorpay verify failed:`, err);
+    return res.status(500).json({ error: "Payment verification failed", traceId });
   }
 });
 
