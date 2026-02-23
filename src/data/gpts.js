@@ -499,5 +499,15 @@ export const GPTS = [
     freeLimit: "3",
     unit: "images/day",
     link: "https://chatgpt.com/g/g-693c056af9708191836406249295e559-animeverse-ai-generator-all-in-one"
+},
+{
+    id: "AI-ML-Data-Science-Mastermind",
+    title: "AI, ML, Data Science Mastermind GPT + Ethical Scan",
+    logo: "/logos/AI-ML-GPT.png",
+    description: "Master AI, Machine Learning & Data Science 🚀 Get step-by-step guidance, coding help, model building strategies, analytics insights, ethical AI frameworks, and camera-based data extraction. Built for students, professionals, and businesses to innovate responsibly and scale intelligently.",
+    category: "Research & Analysis",
+    freeLimit: "3",
+    unit: "images/day",
+    link: "https://chatgpt.com/g/g-699c75bd16008191bf67fe4065fbd054-ai-ml-data-science-mastermind-gpt-ethical-scan"
 }
 ];

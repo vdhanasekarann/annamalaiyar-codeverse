@@ -1,6 +1,6 @@
 export const RAZORPAY_PLAN_PRICES = Object.freeze({
   starter: 199,
-  pro: 3,
+  pro: 399,
   yearly: 1999,
   lifetime: 6999,
 });

@@ -20,7 +20,7 @@ const openai = new OpenAI({
 });
 
 /* notifyEnquiry: save enquiry and optionally notify */
-exports.notifyEnquiry = functions.https.onCall(async (data, context) => {
+exports.notifyEnquiry = functions.https.onCall(async (data, _context) => {
   try {
     await db.collection("enquiries").add({
       ...data,
@@ -34,7 +34,7 @@ exports.notifyEnquiry = functions.https.onCall(async (data, context) => {
 });
 
 /* chatWithAssistant: website AI chatbot */
-exports.chatWithAssistant = functions.https.onCall(async (data, context) => {
+exports.chatWithAssistant = functions.https.onCall(async (data, _context) => {
   try {
     const history = Array.isArray(data.history) ? data.history : [];
     const trimmed = history.slice(-12);

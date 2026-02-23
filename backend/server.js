@@ -118,7 +118,28 @@ function setAuthCookie(res, token) {
 }
 
 function clearAuthCookie(res) {
-  res.clearCookie("auth", authCookieOptions());
+  const baseOptions = {
+    httpOnly: true,
+    sameSite: IS_PROD ? "none" : "lax",
+    secure: IS_PROD,
+    path: "/",
+  };
+
+  // Clear host-only cookie variant
+  res.clearCookie("auth", baseOptions);
+
+  // Clear domain cookie variant (if configured)
+  if (AUTH_COOKIE_DOMAIN) {
+    res.clearCookie("auth", { ...baseOptions, domain: AUTH_COOKIE_DOMAIN });
+
+    // Also clear non-dotted domain variant to handle older deployments.
+    if (AUTH_COOKIE_DOMAIN.startsWith(".")) {
+      res.clearCookie("auth", {
+        ...baseOptions,
+        domain: AUTH_COOKIE_DOMAIN.slice(1),
+      });
+    }
+  }
 }
 
 const csrfProtection = csrf({ cookie: true });

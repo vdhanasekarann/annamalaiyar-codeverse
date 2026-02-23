@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "../../lib/apiFetch";
 
@@ -6,15 +6,15 @@ export default function AdminUsers() {
   const { t } = useTranslation();
   const [users, setUsers] = useState([]);
 
-  useEffect(() => {
-    load();
-  }, []);
-
-  async function load() {
+  const load = useCallback(async () => {
     const res = await apiFetch("/api/admin/users", { credentials: "include" });
     const data = res.ok ? await res.json() : [];
     setUsers(Array.isArray(data) ? data : []);
-  }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   async function action(email, actionType, value) {
     await apiFetch("/api/admin/users/action", {

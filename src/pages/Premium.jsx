@@ -15,7 +15,7 @@ const PLANS = [
   },
   {
     title: "Pro",
-    price: "₹3 / month",
+    price: "₹399 / month",
     key: "pro",
     subtitle: "Best for power users",
     highlight: true,

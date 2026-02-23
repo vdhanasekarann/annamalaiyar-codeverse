@@ -18,7 +18,7 @@ const LANGUAGE_OPTIONS = [
 
 export default function TopBar({ onOpenMobileMenu }) {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, setUser, refreshUser } = useAuth();
   const { query, setQuery } = useSearch();
   const { t, i18n } = useTranslation();
   const { theme, setTheme } = useTheme();
@@ -27,8 +27,13 @@ export default function TopBar({ onOpenMobileMenu }) {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   const logout = async () => {
-    await apiFetch("/api/auth/logout", { method: "POST" });
-    navigate("/login");
+    try {
+      await apiFetch("/api/auth/logout", { method: "POST" });
+    } finally {
+      setUser(null);
+      await refreshUser({ silent: true, retries: 1, retryDelayMs: 100 });
+      navigate("/login", { replace: true });
+    }
   };
 
   return (
@@ -45,9 +50,16 @@ export default function TopBar({ onOpenMobileMenu }) {
 
       <Link
         to="/"
-        className="font-semibold tracking-wide text-sm md:text-base truncate max-w-[140px] md:max-w-none"
+        className="flex items-center gap-2 shrink-0 min-w-0"
       >
-        CodeVerse AI OS
+        <img
+          src="/logo.svg"
+          alt="CodeVerse AI OS"
+          className="w-7 h-7 rounded-md object-contain"
+        />
+        <span className="hidden md:inline font-semibold tracking-wide text-sm md:text-base whitespace-nowrap">
+          CodeVerse AI OS
+        </span>
       </Link>
 
       <div className="flex-1 flex justify-center px-2 md:px-4">

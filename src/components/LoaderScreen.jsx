@@ -1,7 +1,3 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
-import { apiFetch } from "../lib/apiFetch";
-
 export default function LoaderScreen(){
  return(
   <div className="fixed inset-0 bg-black flex flex-col items-center justify-center">

@@ -31,8 +31,6 @@ export default function Layout() {
   const location = useLocation();
   const showPromptAssistant = !location.pathname.startsWith("/admin/");
 
-  if (location.pathname === "/login") return null;
-
   useEffect(() => {
     if (!user) {
       setBg(null);

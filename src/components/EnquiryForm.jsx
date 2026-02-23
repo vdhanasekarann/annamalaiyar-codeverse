@@ -1,11 +1,11 @@
 // src/components/EnquiryForm.jsx
 import { useState } from "react";
 import { useTranslation } from 'react-i18next';
-import { Navigate, Link } from "react-router-dom";
 import { apiFetch } from "../lib/apiFetch";
 
 export default function EnquiryForm() {
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
 
   async function handleSubmit(e) {
     e.preventDefault();
