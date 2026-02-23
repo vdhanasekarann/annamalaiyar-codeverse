@@ -70,7 +70,7 @@ export default function TopBar({ onOpenMobileMenu }) {
         className="flex items-center gap-2 shrink-0 min-w-0"
       >
         <img
-          src="/logo.svg"
+          src="/AICodeverse.png"
           alt="CodeVerse AI OS"
           className="w-7 h-7 rounded-md object-contain"
         />

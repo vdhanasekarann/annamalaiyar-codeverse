@@ -3,7 +3,7 @@ export default function LoaderScreen(){
   <div className="fixed inset-0 bg-black flex flex-col items-center justify-center">
 
     <img
-      src="/logo.svg"
+      src="/AICodeverse.png"
       className="w-20 animate-[pulse_2s_ease-in-out_infinite]"
     />
 

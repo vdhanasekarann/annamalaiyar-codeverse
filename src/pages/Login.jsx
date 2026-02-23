@@ -8,6 +8,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [sendingMagic, setSendingMagic] = useState(false);
   const [signingIn, setSigningIn] = useState(false);
+  const [googleUnavailable, setGoogleUnavailable] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { user, refreshUser } = useAuth();
@@ -15,6 +16,14 @@ export default function Login() {
     () => new URLSearchParams(window.location.search).get("logged_out") === "1",
     []
   );
+  const isNativeApp = useMemo(() => {
+    const cap = window?.Capacitor;
+    return Boolean(
+      cap?.isNativePlatform?.() ||
+      cap?.getPlatform?.() === "android" ||
+      cap?.getPlatform?.() === "ios"
+    );
+  }, []);
 
   const hydrateSessionAndRedirect = useCallback(async () => {
     const me = await refreshUser({
@@ -32,6 +41,26 @@ export default function Login() {
     const input = document.getElementById("email-input");
     if (input) input.focus();
   };
+
+  const readApiError = useCallback(async (res, fallback) => {
+    const data = await res.clone().json().catch(() => null);
+    if (data?.error) return data.error;
+
+    const rawText = await res.text().catch(() => "");
+    const text = (rawText || "").trim();
+    if (text && text.length <= 160) return `${fallback} (${res.status}): ${text}`;
+    return `${fallback} (${res.status})`;
+  }, []);
+
+  const openGoogleBrowserLogin = useCallback(() => {
+    const loginUrl = "https://app.aicodeverse.com/login";
+    try {
+      // In native webviews, this moves user to secure hosted login where GIS is fully supported.
+      window.location.assign(loginUrl);
+    } catch {
+      window.location.href = loginUrl;
+    }
+  }, []);
 
   const sendMagicLink = async () => {
     if (!email) {
@@ -51,7 +80,9 @@ export default function Login() {
 
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        alert(data.error || t("errorTryAgain") || "Something went wrong");
+        const fallback = t("errorTryAgain") || "Something went wrong";
+        const message = data.error || (await readApiError(res, fallback));
+        alert(message);
         return;
       }
 
@@ -60,6 +91,8 @@ export default function Login() {
       } else {
         alert(t("magicLinkSent") || "Magic link sent to your email");
       }
+    } catch {
+      alert("Unable to reach server. Check internet/API and try again.");
     } finally {
       setSendingMagic(false);
     }
@@ -82,14 +115,18 @@ export default function Login() {
       });
 
       if (!loginRes.ok) {
+        const fallback = t("errorTryAgain") || "Unable to login";
         const err = await loginRes.json().catch(() => ({}));
-        alert(err.error || t("errorTryAgain") || "Unable to login");
+        const message = err.error || (await readApiError(loginRes, fallback));
+        alert(message);
         return;
       }
 
       if (await hydrateSessionAndRedirect()) return;
 
       alert(t("errorTryAgain") || "Login session was not created. Please try again.");
+    } catch {
+      alert("Unable to reach server. Check internet/API and try again.");
     } finally {
       setSigningIn(false);
     }
@@ -101,49 +138,91 @@ export default function Login() {
   }, [navigate, user]);
 
   useEffect(() => {
-    if (!window.google || !import.meta.env.VITE_GOOGLE_CLIENT_ID) return;
+    let disposed = false;
+    const target = document.getElementById("googleBtn");
+    if (!target) return;
+    target.innerHTML = "";
+    setGoogleUnavailable(false);
 
-    if (loggedOutFlow) {
+    const setupGoogleButton = () => {
+      if (disposed) return true;
+      if (!window.google || !import.meta.env.VITE_GOOGLE_CLIENT_ID) return false;
+
       try {
-        window.google.accounts.id.disableAutoSelect();
-        window.google.accounts.id.cancel();
+        if (loggedOutFlow) {
+          window.google.accounts.id.disableAutoSelect();
+          window.google.accounts.id.cancel();
+        }
+
+        window.google.accounts.id.initialize({
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+          auto_select: !loggedOutFlow,
+          callback: async (res) => {
+            try {
+              const r = await apiFetch("/api/auth/google", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ credential: res.credential }),
+              });
+
+              if (!r.ok) {
+                const msg = await readApiError(r, t("googleLoginFailed") || "Google login failed");
+                alert(msg);
+                return;
+              }
+
+              if (await hydrateSessionAndRedirect()) return;
+              alert(t("errorTryAgain") || "Login session was not created. Please try again.");
+            } catch {
+              alert(t("googleLoginFailed") || "Google login failed");
+            }
+          },
+        });
+
+        window.google.accounts.id.renderButton(target, {
+          theme: "outline",
+          size: "large",
+          width: 320,
+        });
+
+        window.setTimeout(() => {
+          if (disposed) return;
+          if (target.childElementCount === 0) {
+            setGoogleUnavailable(true);
+          }
+        }, 700);
+
+        return true;
       } catch {
-        // no-op
+        setGoogleUnavailable(true);
+        return true;
       }
+    };
+
+    if (setupGoogleButton()) {
+      return () => {
+        disposed = true;
+      };
     }
 
-    window.google.accounts.id.initialize({
-      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-      auto_select: !loggedOutFlow,
-      callback: async (res) => {
-        try {
-          const r = await apiFetch("/api/auth/google", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ credential: res.credential }),
-          });
+    const poll = window.setInterval(() => {
+      if (setupGoogleButton()) {
+        window.clearInterval(poll);
+      }
+    }, 250);
 
-          if (!r.ok) {
-            alert(t("googleLoginFailed") || "Google login failed");
-            return;
-          }
+    const timeout = window.setTimeout(() => {
+      window.clearInterval(poll);
+      if (!disposed) setGoogleUnavailable(true);
+    }, 5000);
 
-          if (await hydrateSessionAndRedirect()) return;
-
-          alert(t("errorTryAgain") || "Login session was not created. Please try again.");
-        } catch {
-          alert(t("googleLoginFailed") || "Google login failed");
-        }
-      },
-    });
-
-    window.google.accounts.id.renderButton(document.getElementById("googleBtn"), {
-      theme: "outline",
-      size: "large",
-      width: 320,
-    });
-  }, [hydrateSessionAndRedirect, loggedOutFlow, t]);
+    return () => {
+      disposed = true;
+      window.clearInterval(poll);
+      window.clearTimeout(timeout);
+    };
+  }, [hydrateSessionAndRedirect, loggedOutFlow, readApiError, t]);
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
@@ -179,7 +258,15 @@ export default function Login() {
             {t("signInContinue") || "Sign in to continue your AI journey"}
           </p>
 
-          <div id="googleBtn" className="mb-4 flex justify-center" />
+          <div id="googleBtn" className="mb-4 flex justify-center min-h-[44px]" />
+          {(googleUnavailable || isNativeApp) && (
+            <button
+              onClick={openGoogleBrowserLogin}
+              className="w-full border border-zinc-300 rounded p-3 mb-4 font-semibold"
+            >
+              Continue with Google
+            </button>
+          )}
           <div className="text-center text-sm opacity-50 mb-4">{t("or") || "OR"}</div>
 
           <input
