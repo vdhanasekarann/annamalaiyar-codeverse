@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../lib/apiFetch";
 import { useTranslation } from "react-i18next";
@@ -11,6 +11,10 @@ export default function Login() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { user, refreshUser } = useAuth();
+  const loggedOutFlow = useMemo(
+    () => new URLSearchParams(window.location.search).get("logged_out") === "1",
+    []
+  );
 
   const hydrateSessionAndRedirect = useCallback(async () => {
     const me = await refreshUser({
@@ -99,8 +103,18 @@ export default function Login() {
   useEffect(() => {
     if (!window.google || !import.meta.env.VITE_GOOGLE_CLIENT_ID) return;
 
+    if (loggedOutFlow) {
+      try {
+        window.google.accounts.id.disableAutoSelect();
+        window.google.accounts.id.cancel();
+      } catch {
+        // no-op
+      }
+    }
+
     window.google.accounts.id.initialize({
       client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+      auto_select: !loggedOutFlow,
       callback: async (res) => {
         try {
           const r = await apiFetch("/api/auth/google", {
@@ -129,7 +143,7 @@ export default function Login() {
       size: "large",
       width: 320,
     });
-  }, [hydrateSessionAndRedirect, t]);
+  }, [hydrateSessionAndRedirect, loggedOutFlow, t]);
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">

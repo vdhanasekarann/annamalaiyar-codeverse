@@ -18,7 +18,7 @@ const LANGUAGE_OPTIONS = [
 
 export default function TopBar({ onOpenMobileMenu }) {
   const navigate = useNavigate();
-  const { user, setUser, refreshUser } = useAuth();
+  const { user, setUser } = useAuth();
   const { query, setQuery } = useSearch();
   const { t, i18n } = useTranslation();
   const { theme, setTheme } = useTheme();
@@ -27,13 +27,30 @@ export default function TopBar({ onOpenMobileMenu }) {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   const logout = async () => {
+    let logoutOk = false;
     try {
-      await apiFetch("/api/auth/logout", { method: "POST" });
-    } finally {
-      setUser(null);
-      await refreshUser({ silent: true, retries: 1, retryDelayMs: 100 });
-      navigate("/login", { replace: true });
+      const res = await apiFetch("/api/auth/logout", { method: "POST" });
+      logoutOk = res.ok;
+    } catch {
+      logoutOk = false;
     }
+
+    // Prevent Google One Tap auto sign-in right after logging out.
+    try {
+      window.google?.accounts?.id?.disableAutoSelect?.();
+      window.google?.accounts?.id?.cancel?.();
+    } catch {
+      // no-op
+    }
+
+    setUser(null);
+
+    if (!logoutOk) {
+      alert(t("logoutFailed") || "Logout failed. Please try again.");
+      return;
+    }
+
+    navigate("/login?logged_out=1", { replace: true });
   };
 
   return (

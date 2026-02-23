@@ -80,8 +80,25 @@ const app = express();
 app.set("trust proxy", "loopback");
 app.use(cookieParser());
 
+const allowedOrigins = new Set([
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost",
+  "https://localhost",
+  "capacitor://localhost",
+  "ionic://localhost",
+  "https://app.aicodeverse.com",
+  "https://aicodeverse.com",
+  "https://www.aicodeverse.com",
+]);
+
 app.use(cors({
-  origin: ["http://localhost:5173", "http://localhost:5174", "https://app.aicodeverse.com"],
+  origin(origin, callback) {
+    // Native mobile apps / tooling may send no Origin header.
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.has(origin)) return callback(null, true);
+    return callback(null, false);
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: [
