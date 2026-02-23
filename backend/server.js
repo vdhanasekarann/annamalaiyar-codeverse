@@ -403,7 +403,7 @@ app.post("/api/auth/magic-link", async (req, res) => {
         subject: "Your secure login link – CodeVerse AI OS",
         html: `<div style="font-family:Arial;max-width:600px;margin:auto;border:1px solid #e5e7eb;border-radius:12px;padding:20px">
   <div style="text-align:center">
-    <img src="https://app.aicodeverse.com/logo.png" style="width:120px;margin-bottom:20px" />
+    <img src="https://app.aicodeverse.com/AICodeverse.png" style="width:120px;margin-bottom:20px" />
     <h2>Secure Login – CodeVerse AI OS</h2>
   </div>
 

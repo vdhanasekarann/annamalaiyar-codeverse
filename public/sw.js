@@ -1,5 +1,5 @@
-const SW_VERSION = "cv-sw-v1";
-const APP_SHELL = ["/", "/dashboard", "/manifest.webmanifest", "/logo.png"];
+const SW_VERSION = "cv-sw-v2";
+const APP_SHELL = ["/", "/dashboard", "/manifest.webmanifest", "/AICodeverse.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

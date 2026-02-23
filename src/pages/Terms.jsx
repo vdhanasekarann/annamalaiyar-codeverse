@@ -155,7 +155,7 @@ export default function TermsPage() {
       <div className="max-w-5xl mx-auto space-y-5">
         <section className="glass-panel border border-white/10 p-6 sm:p-8 rounded-2xl">
           <div className="text-center">
-            <img src="/logo.png" alt="CodeVerse Logo" className="h-14 sm:h-16 mx-auto mb-4" />
+            <img src="/AICodeverse.png" alt="CodeVerse Logo" className="h-14 sm:h-16 mx-auto mb-4" />
             <h1 className="text-3xl sm:text-4xl font-bold">{t("terms") || "Terms"} & Conditions</h1>
             <p className="text-zinc-300 mt-2">
               Annamalaiyar CodeVerse -{" "}
