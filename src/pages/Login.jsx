@@ -12,7 +12,7 @@ export default function Login() {
   const [googleUnavailable, setGoogleUnavailable] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { user, refreshUser } = useAuth();
+  const { user, setUser, refreshUser } = useAuth();
   const loggedOutFlow = useMemo(
     () => new URLSearchParams(window.location.search).get("logged_out") === "1",
     []
@@ -54,6 +54,41 @@ export default function Login() {
       setAuthToken(payload.token);
     }
   }, []);
+
+  const applyLoginPayload = useCallback(
+    async (payload, fallbackEmail = "") => {
+      persistSessionFromResponse(payload);
+
+      const payloadUser = payload?.user;
+      if (payloadUser?.email) {
+        setUser(payloadUser);
+        navigate("/dashboard", { replace: true });
+        return true;
+      }
+
+      if (payload?.token) {
+        try {
+          const body = JSON.parse(atob(payload.token.split(".")[1] || ""));
+          const decodedUser = {
+            email: body?.email || fallbackEmail,
+            role: body?.role || "user",
+            plan: body?.plan || "free",
+            tv: Number(body?.tv ?? 0),
+          };
+          if (decodedUser.email) {
+            setUser(decodedUser);
+            navigate("/dashboard", { replace: true });
+            return true;
+          }
+        } catch {
+          // fallback to /auth/me path below
+        }
+      }
+
+      return hydrateSessionAndRedirect();
+    },
+    [hydrateSessionAndRedirect, navigate, persistSessionFromResponse, setUser]
+  );
 
   const openGoogleBrowserLogin = useCallback(() => {
     const loginUrl = "https://app.aicodeverse.com/login";
@@ -140,9 +175,7 @@ export default function Login() {
         return;
       }
 
-      persistSessionFromResponse(payload);
-
-      if (await hydrateSessionAndRedirect()) return;
+      if (await applyLoginPayload(payload, normalizedEmail)) return;
 
       alert(t("errorTryAgain") || "Login session was not created. Please try again.");
     } catch {
@@ -196,9 +229,7 @@ export default function Login() {
                 return;
               }
 
-              persistSessionFromResponse(payload);
-
-              if (await hydrateSessionAndRedirect()) return;
+              if (await applyLoginPayload(payload)) return;
               alert(t("errorTryAgain") || "Login session was not created. Please try again.");
             } catch {
               alert(t("googleLoginFailed") || "Google login failed");
@@ -248,7 +279,7 @@ export default function Login() {
       window.clearInterval(poll);
       window.clearTimeout(timeout);
     };
-  }, [hydrateSessionAndRedirect, loggedOutFlow, persistSessionFromResponse, readApiError, t]);
+  }, [applyLoginPayload, loggedOutFlow, readApiError, t]);
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
@@ -319,7 +350,7 @@ export default function Login() {
 
           <button
             onClick={continueWithEmail}
-            disabled={sendingMagic || signingIn || !email.trim()}
+            disabled={signingIn || !email.trim()}
             className="w-full mt-2 bg-yellow-500 text-black p-3 rounded font-semibold disabled:opacity-60"
           >
             {signingIn ? t("sending") || "Signing in..." : t("continue") || "Continue"}
