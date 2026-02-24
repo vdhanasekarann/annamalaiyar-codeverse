@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../lib/apiFetch";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
+import { setAuthToken } from "../lib/authToken";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -16,15 +17,6 @@ export default function Login() {
     () => new URLSearchParams(window.location.search).get("logged_out") === "1",
     []
   );
-  const isNativeApp = useMemo(() => {
-    const cap = window?.Capacitor;
-    return Boolean(
-      cap?.isNativePlatform?.() ||
-      cap?.getPlatform?.() === "android" ||
-      cap?.getPlatform?.() === "ios"
-    );
-  }, []);
-
   const hydrateSessionAndRedirect = useCallback(async () => {
     const me = await refreshUser({
       retries: 6,
@@ -52,18 +44,36 @@ export default function Login() {
     return `${fallback} (${res.status})`;
   }, []);
 
+  const persistSessionFromResponse = useCallback((payload) => {
+    if (payload?.token) {
+      setAuthToken(payload.token);
+    }
+  }, []);
+
   const openGoogleBrowserLogin = useCallback(() => {
     const loginUrl = "https://app.aicodeverse.com/login";
+    const cap = window?.Capacitor;
+    const isNative = Boolean(
+      cap?.isNativePlatform?.() ||
+      cap?.getPlatform?.() === "android" ||
+      cap?.getPlatform?.() === "ios"
+    );
+
     try {
-      // In native webviews, this moves user to secure hosted login where GIS is fully supported.
-      window.location.assign(loginUrl);
+      if (isNative) {
+        window.open(loginUrl, "_blank", "noopener,noreferrer");
+      } else {
+        window.location.assign(loginUrl);
+      }
     } catch {
       window.location.href = loginUrl;
     }
   }, []);
 
   const sendMagicLink = async () => {
-    if (!email) {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!normalizedEmail) {
       alert(t("emailRequired") || "Email required");
       focusEmailInput();
       return;
@@ -75,7 +85,7 @@ export default function Login() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: normalizedEmail }),
       });
 
       const data = await res.json().catch(() => ({}));
@@ -99,7 +109,9 @@ export default function Login() {
   };
 
   const continueWithEmail = async () => {
-    if (!email) {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!normalizedEmail) {
       alert(t("emailRequired") || "Email required");
       focusEmailInput();
       return;
@@ -111,16 +123,19 @@ export default function Login() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: normalizedEmail }),
       });
+
+      const payload = await loginRes.json().catch(() => ({}));
 
       if (!loginRes.ok) {
         const fallback = t("errorTryAgain") || "Unable to login";
-        const err = await loginRes.json().catch(() => ({}));
-        const message = err.error || (await readApiError(loginRes, fallback));
+        const message = payload.error || (await readApiError(loginRes, fallback));
         alert(message);
         return;
       }
+
+      persistSessionFromResponse(payload);
 
       if (await hydrateSessionAndRedirect()) return;
 
@@ -166,11 +181,17 @@ export default function Login() {
                 body: JSON.stringify({ credential: res.credential }),
               });
 
+              const payload = await r.json().catch(() => ({}));
+
               if (!r.ok) {
-                const msg = await readApiError(r, t("googleLoginFailed") || "Google login failed");
+                const msg =
+                  payload.error ||
+                  (await readApiError(r, t("googleLoginFailed") || "Google login failed"));
                 alert(msg);
                 return;
               }
+
+              persistSessionFromResponse(payload);
 
               if (await hydrateSessionAndRedirect()) return;
               alert(t("errorTryAgain") || "Login session was not created. Please try again.");
@@ -222,7 +243,21 @@ export default function Login() {
       window.clearInterval(poll);
       window.clearTimeout(timeout);
     };
-  }, [hydrateSessionAndRedirect, loggedOutFlow, readApiError, t]);
+  }, [hydrateSessionAndRedirect, loggedOutFlow, persistSessionFromResponse, readApiError, t]);
+
+  useEffect(() => {
+    const recheckSession = () => {
+      hydrateSessionAndRedirect();
+    };
+
+    window.addEventListener("focus", recheckSession);
+    document.addEventListener("visibilitychange", recheckSession);
+
+    return () => {
+      window.removeEventListener("focus", recheckSession);
+      document.removeEventListener("visibilitychange", recheckSession);
+    };
+  }, [hydrateSessionAndRedirect]);
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
@@ -259,12 +294,12 @@ export default function Login() {
           </p>
 
           <div id="googleBtn" className="mb-4 flex justify-center min-h-[44px]" />
-          {(googleUnavailable || isNativeApp) && (
+          {googleUnavailable && (
             <button
               onClick={openGoogleBrowserLogin}
               className="w-full border border-zinc-300 rounded p-3 mb-4 font-semibold"
             >
-              Continue with Google
+              Continue with Google (Browser)
             </button>
           )}
           <div className="text-center text-sm opacity-50 mb-4">{t("or") || "OR"}</div>
@@ -293,17 +328,18 @@ export default function Login() {
 
           <button
             onClick={continueWithEmail}
-            disabled={sendingMagic || signingIn}
+            disabled={sendingMagic || signingIn || !email.trim()}
             className="w-full mt-2 bg-yellow-500 text-black p-3 rounded font-semibold disabled:opacity-60"
           >
             {signingIn ? t("sending") || "Signing in..." : t("continue") || "Continue"}
           </button>
 
           <p className="text-xs opacity-50 text-center mt-6">
-            {t("secureLoginLine") || "Secure login • No password required"}
+            {t("secureLoginLine") || "Secure login - No password required"}
           </p>
         </div>
       </div>
     </div>
   );
 }
+

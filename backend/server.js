@@ -159,6 +159,34 @@ function clearAuthCookie(res) {
   }
 }
 
+function normalizeEmail(rawEmail) {
+  return String(rawEmail || "").trim().toLowerCase();
+}
+
+async function upsertUserByEmail(email) {
+  await db.query(
+    `
+    INSERT INTO users (email, role, plan, token_version, blocked)
+    VALUES ($1, 'user', 'free', 0, FALSE)
+    ON CONFLICT (email) DO NOTHING
+    `,
+    [email]
+  );
+}
+
+function buildAuthToken({ email, role, plan, tokenVersion }) {
+  return jwt.sign(
+    {
+      email,
+      role,
+      plan,
+      tv: tokenVersion,
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
+}
+
 const csrfProtection = csrf({ cookie: true });
 
 // NOTE: make sure you don't register the razorpay webhook twice.
@@ -276,40 +304,47 @@ app.post("/api/create-order", csrfProtection, paymentRateLimiter, requireUser, a
 
 /* ---------- AUTH ---------- */
 app.post("/api/auth/login", async (req, res) => {
-  const { email } = req.body;
-  if (!email) return res.status(400).json({ error: "Email required" });
+  try {
+    const email = normalizeEmail(req.body?.email);
+    if (!email) return res.status(400).json({ error: "Email required" });
 
-  await logAudit(email, "LOGIN", "self");
+    await logAudit(email, "LOGIN", "self");
+    await upsertUserByEmail(email);
 
-  await db.query(
-    `INSERT INTO users (email)
-     VALUES ($1)
-     ON CONFLICT (email) DO NOTHING`,
-    [email]
-  );
+    const r = await db.query(
+      "SELECT email, role, plan, token_version FROM users WHERE email=$1",
+      [email]
+    );
 
-  const r = await db.query(
-    "SELECT email, role, plan, token_version FROM users WHERE email=$1",
-    [email]
-  );
+    if (!r.rows.length) {
+      return res.status(404).json({ error: "User record not found" });
+    }
 
-  const user = r.rows[0];
-  const tokenPlan = await resolveUserPlanForToken(user.email, user.plan);
+    const user = r.rows[0];
+    const tokenPlan = await resolveUserPlanForToken(user.email, user.plan);
 
-  const token = jwt.sign(
-    {
+    const token = buildAuthToken({
       email: user.email,
-      role: user.role,
+      role: user.role || "user",
       plan: tokenPlan,
-      tv: user.token_version,
-    },
-    process.env.JWT_SECRET,
-    { expiresIn: "7d" }
-  );
+      tokenVersion: Number(user.token_version ?? 0),
+    });
 
-  setAuthCookie(res, token);
+    setAuthCookie(res, token);
 
-  res.json({ ok: true });
+    res.json({
+      ok: true,
+      token,
+      user: {
+        email: user.email,
+        role: user.role || "user",
+        plan: tokenPlan,
+      },
+    });
+  } catch (err) {
+    console.error("Email login failed:", err);
+    return res.status(500).json({ error: "Unable to login right now. Please try again." });
+  }
 });
 
 app.post("/api/auth/logout", (_, res) => {
@@ -331,37 +366,44 @@ app.post("/api/auth/google", async (req, res) => {
       audience: process.env.GOOGLE_CLIENT_ID,
     });
 
-    const { email } = ticket.getPayload();
+    const payload = ticket.getPayload() || {};
+    const email = normalizeEmail(payload.email);
+    if (!email) {
+      return res.status(400).json({ error: "Google account email not available" });
+    }
 
-    await db.query(
-      `INSERT INTO users (email)
-       VALUES ($1)
-       ON CONFLICT (email) DO NOTHING`,
-      [email]
-    );
+    await upsertUserByEmail(email);
 
     const r = await db.query(
       "SELECT email, role, plan, token_version FROM users WHERE email=$1",
       [email]
     );
 
+    if (!r.rows.length) {
+      return res.status(404).json({ error: "User record not found" });
+    }
+
     const user = r.rows[0];
     const tokenPlan = await resolveUserPlanForToken(user.email, user.plan);
 
-    const token = jwt.sign(
-      {
-        email: user.email,
-        role: user.role,
-        plan: tokenPlan,
-        tv: user.token_version,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    const token = buildAuthToken({
+      email: user.email,
+      role: user.role || "user",
+      plan: tokenPlan,
+      tokenVersion: Number(user.token_version ?? 0),
+    });
 
     setAuthCookie(res, token);
 
-    res.json({ ok: true });
+    res.json({
+      ok: true,
+      token,
+      user: {
+        email: user.email,
+        role: user.role || "user",
+        plan: tokenPlan,
+      },
+    });
   } catch (err) {
     console.error("Google OAuth error:", err);
     res.status(401).json({ error: "Google authentication failed" });
@@ -379,7 +421,7 @@ const smtpTransporter = nodemailer.createTransport({
 });
 
 app.post("/api/auth/magic-link", async (req, res) => {
-  const { email } = req.body;
+  const email = normalizeEmail(req.body?.email);
   if (!email) return res.status(400).json({ error: "Email required" });
 
   try {
@@ -502,14 +544,13 @@ app.get("/api/auth/magic-verify", async (req, res) => {
     return res.status(401).send("Link expired or invalid");
   }
 
-  const { email, id } = r.rows[0];
+  const { email: rawEmail, id } = r.rows[0];
+  const email = normalizeEmail(rawEmail);
+  if (!email) return res.status(400).send("Invalid email");
 
   await db.query(`UPDATE magic_links SET used=TRUE WHERE id=$1`, [id]);
 
-  await db.query(
-    `INSERT INTO users (email) VALUES ($1) ON CONFLICT (email) DO NOTHING`,
-    [email]
-  );
+  await upsertUserByEmail(email);
 
   const u = await db.query(
     "SELECT email, role, plan, token_version FROM users WHERE email=$1",
@@ -519,18 +560,26 @@ app.get("/api/auth/magic-verify", async (req, res) => {
   const user = u.rows[0];
   const tokenPlan = await resolveUserPlanForToken(user.email, user.plan);
 
-  const jwtToken = jwt.sign(
-    {
-      email: user.email,
-      role: user.role,
-      plan: tokenPlan,
-      tv: user.token_version,
-    },
-    process.env.JWT_SECRET,
-    { expiresIn: "7d" }
-  );
+  const jwtToken = buildAuthToken({
+    email: user.email,
+    role: user.role || "user",
+    plan: tokenPlan,
+    tokenVersion: Number(user.token_version ?? 0),
+  });
 
   setAuthCookie(res, jwtToken);
+
+  if (req.query?.format === "json") {
+    return res.json({
+      ok: true,
+      token: jwtToken,
+      user: {
+        email: user.email,
+        role: user.role || "user",
+        plan: tokenPlan,
+      },
+    });
+  }
 
   res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
 });

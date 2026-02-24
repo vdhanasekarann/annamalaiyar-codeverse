@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import { useSearch } from "../context/SearchContext";
 import { apiFetch } from "../lib/apiFetch";
+import { clearAuthToken } from "../lib/authToken";
 import { useTheme } from "../context/ThemeContext";
 
 const LANGUAGE_OPTIONS = [
@@ -44,6 +45,7 @@ export default function TopBar({ onOpenMobileMenu }) {
     }
 
     setUser(null);
+    clearAuthToken();
 
     if (!logoutOk) {
       alert(t("logoutFailed") || "Logout failed. Please try again.");

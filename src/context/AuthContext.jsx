@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { apiFetch } from "../lib/apiFetch";
+import { clearAuthToken } from "../lib/authToken";
 
 const AuthContext = createContext();
 
@@ -9,6 +10,8 @@ export function AuthProvider({ children }) {
 
   const refreshUser = useCallback(
     async ({ silent = false, retries = 0, retryDelayMs = 150 } = {}) => {
+      let lastStatus = null;
+
       if (!silent) {
         setLoading(true);
       }
@@ -22,6 +25,8 @@ export function AuthProvider({ children }) {
             return data;
           }
 
+          lastStatus = res.status;
+
           if (attempt < retries) {
             await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
           }
@@ -32,6 +37,10 @@ export function AuthProvider({ children }) {
         if (!silent) {
           setLoading(false);
         }
+      }
+
+      if (lastStatus === 401 || lastStatus === 403) {
+        clearAuthToken();
       }
 
       setUser(null);
