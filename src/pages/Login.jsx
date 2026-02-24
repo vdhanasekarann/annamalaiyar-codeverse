@@ -35,7 +35,12 @@ export default function Login() {
   };
 
   const readApiError = useCallback(async (res, fallback) => {
-    const data = await res.clone().json().catch(() => null);
+    let data = null;
+    try {
+      data = await res.clone().json();
+    } catch {
+      data = null;
+    }
     if (data?.error) return data.error;
 
     const rawText = await res.text().catch(() => "");
@@ -244,20 +249,6 @@ export default function Login() {
       window.clearTimeout(timeout);
     };
   }, [hydrateSessionAndRedirect, loggedOutFlow, persistSessionFromResponse, readApiError, t]);
-
-  useEffect(() => {
-    const recheckSession = () => {
-      hydrateSessionAndRedirect();
-    };
-
-    window.addEventListener("focus", recheckSession);
-    document.addEventListener("visibilitychange", recheckSession);
-
-    return () => {
-      window.removeEventListener("focus", recheckSession);
-      document.removeEventListener("visibilitychange", recheckSession);
-    };
-  }, [hydrateSessionAndRedirect]);
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">

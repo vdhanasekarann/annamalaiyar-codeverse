@@ -198,15 +198,12 @@ app.use("/api/account", (req, res, next) => {
   csrfProtection(req, res, next);
 });
 
-app.use(
-  "/api/auth",
-  rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 50,
-    standardHeaders: true,
-    legacyHeaders: false,
-  })
-);
+const authRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 50,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 const paymentRateLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
@@ -303,7 +300,7 @@ app.post("/api/create-order", csrfProtection, paymentRateLimiter, requireUser, a
 });
 
 /* ---------- AUTH ---------- */
-app.post("/api/auth/login", async (req, res) => {
+app.post("/api/auth/login", authRateLimiter, async (req, res) => {
   try {
     const email = normalizeEmail(req.body?.email);
     if (!email) return res.status(400).json({ error: "Email required" });
@@ -354,7 +351,7 @@ app.post("/api/auth/logout", (_, res) => {
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-app.post("/api/auth/google", async (req, res) => {
+app.post("/api/auth/google", authRateLimiter, async (req, res) => {
   try {
     const { credential } = req.body;
     if (!credential) {
@@ -420,7 +417,7 @@ const smtpTransporter = nodemailer.createTransport({
   },
 });
 
-app.post("/api/auth/magic-link", async (req, res) => {
+app.post("/api/auth/magic-link", authRateLimiter, async (req, res) => {
   const email = normalizeEmail(req.body?.email);
   if (!email) return res.status(400).json({ error: "Email required" });
 
