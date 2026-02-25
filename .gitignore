@@ -27,3 +27,16 @@ dist-ssr
 
 # Standalone website repo (kept separate from app repo)
 aicodeverse-website/
+/android/keystore.properties
+
+# Environment variables - SECURITY CRITICAL
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+backend/.env
+backend/.env.local
+backend/.env.development.local
+backend/.env.test.local
+backend/.env.production.local

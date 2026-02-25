@@ -7,6 +7,7 @@ import { useSearch } from "../context/SearchContext";
 import { apiFetch } from "../lib/apiFetch";
 import { clearAuthToken } from "../lib/authToken";
 import { useTheme } from "../context/ThemeContext";
+import { useSafeArea } from "../hooks/useSafeArea";
 
 const LANGUAGE_OPTIONS = [
   { value: "en", label: "English" },
@@ -23,6 +24,7 @@ export default function TopBar({ onOpenMobileMenu }) {
   const { query, setQuery } = useSearch();
   const { t, i18n } = useTranslation();
   const { theme, setTheme } = useTheme();
+  const { headerHeight, shouldUseSafeArea } = useSafeArea();
   const inputRef = useRef(null);
   const mobileInputRef = useRef(null);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -56,7 +58,15 @@ export default function TopBar({ onOpenMobileMenu }) {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-16 backdrop-blur-xl bg-black/70 border-b border-white/10 flex items-center px-3 md:px-4 z-50">
+    <header 
+      className={`fixed top-0 left-0 right-0 backdrop-blur-xl bg-black/70 border-b border-white/10 flex items-center px-3 md:px-4 z-50 ${
+        shouldUseSafeArea ? 'safe-top-padding' : 'h-16'
+      }`}
+      style={{
+        paddingTop: shouldUseSafeArea ? 0 : undefined,
+        height: shouldUseSafeArea ? `${headerHeight}px` : undefined
+      }}
+    >
       <div className="flex gap-2 mr-3">
         <span className="w-3 h-3 bg-red-500 rounded-full" />
         <span className="w-3 h-3 bg-yellow-400 rounded-full" />
@@ -143,7 +153,10 @@ export default function TopBar({ onOpenMobileMenu }) {
       )}
 
       {mobileSearchOpen && (
-        <div className="absolute left-0 right-0 top-16 md:hidden px-3 py-2 bg-black/90 border-b border-white/10">
+        <div 
+          className="absolute left-0 right-0 md:hidden px-3 py-2 bg-black/90 border-b border-white/10"
+          style={{ top: `${headerHeight}px` }}
+        >
           <div className="flex items-center gap-2 bg-zinc-900 border border-white/15 rounded-lg px-2 py-2">
             <Search className="w-4 h-4 text-zinc-400" />
             <input

@@ -7,6 +7,7 @@ import MobileDrawer from "./MobileDrawer";
 import DoubleSidebar from "./ui/DoubleSidebar";
 import { useSidebar } from "../context/SidebarContext";
 import { getBackgroundObjectUrl } from "../utils/backgroundStorage";
+import { useSafeArea } from "../hooks/useSafeArea";
 
 function sanitizeBackgroundSource(value) {
   if (typeof value !== "string") return null;
@@ -28,6 +29,7 @@ export default function Layout() {
   const { user } = useAuth();
   const [bg, setBg] = useState(null);
   const { collapsed, setCollapsed } = useSidebar();
+  const { headerHeight, shouldUseSafeArea } = useSafeArea();
   const location = useLocation();
   const showPromptAssistant = !location.pathname.startsWith("/admin/");
 
@@ -114,7 +116,10 @@ export default function Layout() {
         />
 
         <main className="flex-1 overflow-y-auto">
-          <div className="max-w-7xl mx-auto px-4 pt-20 pb-24 sm:pb-8">
+          <div 
+            className="max-w-7xl mx-auto px-4 pb-24 sm:pb-8"
+            style={{ paddingTop: `${headerHeight + 16}px` }}
+          >
             <div className="page-container p-3 sm:p-6 rounded-3xl min-h-screen">
               <Outlet />
             </div>

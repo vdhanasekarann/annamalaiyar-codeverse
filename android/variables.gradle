@@ -14,3 +14,9 @@ ext {
     androidxEspressoCoreVersion = '3.6.1'
     cordovaAndroidVersion = '10.1.1'
 }
+ext {
+    compileOptions = [
+        sourceCompatibility: JavaVersion.VERSION_17,
+        targetCompatibility: JavaVersion.VERSION_17
+    ]
+}
