@@ -1,5 +1,5 @@
 {
-  "name": "Annamalaiyar-CodeVerse",
+  "name": "annamalaiyar-codeverse",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -17,9 +17,9 @@
     "mobile:build:android:release": "npm run build && npx cap sync android && cd android && gradlew.bat bundleRelease"
   },
   "dependencies": {
-    "@capacitor/android": "^7.5.0",
-    "@capacitor/core": "^7.5.0",
-    "@capacitor/ios": "^7.5.0",
+    "@capacitor/android": "^8.1.0",
+    "@capacitor/core": "^8.1.0",
+    "@capacitor/ios": "^8.1.0",
     "@capacitor/status-bar": "^8.0.1",
     "@google/generative-ai": "^0.24.1",
     "bcryptjs": "^3.0.3",
@@ -51,7 +51,7 @@
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
-    "@capacitor/cli": "^7.5.0",
+    "@capacitor/cli": "^8.1.0",
     "@eslint/js": "^9.39.1",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/react": "^19.2.5",
