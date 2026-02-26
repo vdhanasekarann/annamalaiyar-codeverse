@@ -370,7 +370,7 @@ export default function Login() {
               onClick={openGoogleBrowserLogin}
               className="w-full border border-zinc-300 rounded p-3 mb-4 font-semibold"
             >
-              Continue with Google (Browser)
+              Continue with Google
             </button>
           )}
           <div className="text-center text-sm opacity-50 mb-4">{t("or") || "OR"}</div>
