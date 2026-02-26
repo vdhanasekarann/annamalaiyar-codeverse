@@ -187,6 +187,50 @@ export default function Login() {
     }
   };
 
+  // Mobile OAuth URL callback handler
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+
+    const handleAppUrlOpen = (event) => {
+      const url = event.url;
+      if (url && url.includes('/auth/callback')) {
+        // Extract OAuth credential from URL
+        const urlParams = new URLSearchParams(url.split('?')[1]);
+        const credential = urlParams.get('credential');
+        
+        if (credential) {
+          // Process the OAuth credential
+          apiFetch("/api/auth/google", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ credential }),
+          })
+          .then(async (r) => {
+            const payload = await r.json().catch(() => ({}));
+            if (r.ok) {
+              setUser(payload.user);
+              setAuthToken(payload.token);
+              navigate("/dashboard", { replace: true });
+            } else {
+              alert(payload.error || "Login failed");
+            }
+          })
+          .catch((err) => {
+            console.error("OAuth callback error:", err);
+            alert("Login failed");
+          });
+        }
+      }
+    };
+
+    const listener = App.addListener('appUrlOpen', handleAppUrlOpen);
+    
+    return () => {
+      listener.then(remover => remover.remove());
+    };
+  }, [navigate, setUser]);
+
   useEffect(() => {
     if (!user) return;
     navigate("/dashboard", { replace: true });
@@ -212,8 +256,9 @@ export default function Login() {
         window.google.accounts.id.initialize({
           client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
           auto_select: !loggedOutFlow,
-          // Mobile-specific configuration - use popup for better in-app experience
-          ux_mode: 'popup',
+          // Use redirect mode for mobile, but handle it in-app
+          ux_mode: Capacitor.isNativePlatform() ? 'redirect' : 'popup',
+          login_uri: Capacitor.isNativePlatform() ? 'https://app.aicodeverse.com/auth/callback' : undefined,
           callback: async (res) => {
             try {
               const r = await apiFetch("/api/auth/google", {

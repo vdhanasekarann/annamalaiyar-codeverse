@@ -84,7 +84,7 @@ export default function TopBar({ onOpenMobileMenu }) {
           <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center font-bold text-sm">
             AI
           </div>
-          <span className="hidden sm:block font-semibold text-sm">CodeVerse</span>
+          <span className="hidden sm:block font-semibold text-sm">CodeVerse AI OS</span>
         </Link>
       </div>
 
@@ -128,13 +128,15 @@ export default function TopBar({ onOpenMobileMenu }) {
             ))}
           </select>
 
-          <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="p-1.5 text-white hover:bg-white/10 rounded-lg transition-colors text-sm"
-            aria-label="Toggle theme"
+          <select
+            value={theme}
+            onChange={(e) => setTheme(e.target.value)}
+            className="px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-xs focus:outline-none focus:border-white/40 transition-all"
           >
-            {theme === "dark" ? "🌞" : "🌙"}
-          </button>
+            <option value="gold" className="bg-gray-800 text-yellow-400">Gold</option>
+            <option value="pink" className="bg-gray-800 text-pink-400">Pink</option>
+            <option value="blue" className="bg-gray-800 text-blue-400">Blue</option>
+          </select>
 
           {user && (
             <button
@@ -161,13 +163,15 @@ export default function TopBar({ onOpenMobileMenu }) {
             ))}
           </select>
 
-          <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
-            aria-label="Toggle theme"
+          <select
+            value={theme}
+            onChange={(e) => setTheme(e.target.value)}
+            className="px-3 py-1.5 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:border-white/40 transition-all"
           >
-            {theme === "dark" ? "🌞" : "🌙"}
-          </button>
+            <option value="gold" className="bg-gray-800 text-yellow-400">Gold</option>
+            <option value="pink" className="bg-gray-800 text-pink-400">Pink</option>
+            <option value="blue" className="bg-gray-800 text-blue-400">Blue</option>
+          </select>
 
           {user && (
             <button
