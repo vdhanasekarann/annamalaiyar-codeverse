@@ -5,7 +5,8 @@ const config: CapacitorConfig = {
   appName: "CodeVerse AI OS",
   webDir: "dist",
   server: {
-    androidScheme: "https"
+    androidScheme: "https",
+    allowNavigation: ["https://accounts.google.com", "https://app.aicodeverse.com"]
   },
   plugins: {
     SplashScreen: {
@@ -28,7 +29,7 @@ const config: CapacitorConfig = {
       backgroundColor: '#000000'
     },
     App: {
-      appendUserAgent: "CodeVerseAI/1.0"
+      disableBackButtonHandler: false
     }
   }
 };
