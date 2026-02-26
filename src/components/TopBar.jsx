@@ -110,6 +110,39 @@ export default function TopBar({ onOpenMobileMenu }) {
           <Search className="w-5 h-5" />
         </button>
 
+        {/* Mobile Language & Theme */}
+        <div className="md:hidden flex items-center gap-1">
+          <select
+            value={i18n.language}
+            onChange={(e) => i18n.changeLanguage(e.target.value)}
+            className="px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-xs focus:outline-none focus:border-white/40 transition-all"
+          >
+            {LANGUAGE_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value} className="bg-gray-800">
+                {opt.value.toUpperCase()}
+              </option>
+            ))}
+          </select>
+
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="p-1.5 text-white hover:bg-white/10 rounded-lg transition-colors text-sm"
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? "🌞" : "🌙"}
+          </button>
+
+          {user && (
+            <button
+              onClick={logout}
+              className="p-1.5 text-white hover:bg-white/10 rounded-lg transition-colors text-sm"
+              aria-label="Logout"
+            >
+              <LogOut className="w-3 h-3" />
+            </button>
+          )}
+        </div>
+
         {/* Desktop Actions */}
         <div className="hidden md:flex items-center gap-2">
           <select

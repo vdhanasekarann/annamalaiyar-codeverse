@@ -1,0 +1,31 @@
+services:
+  # Web Service
+  - type: web
+    name: annamalaiyar-codeverse
+    env: node
+    plan: free
+    buildCommand: "npm install && npm run build"
+    startCommand: "npm start"
+    envVars:
+      - key: NODE_VERSION
+        value: 22.22.0
+      - key: NPM_VERSION
+        value: 10.9.2
+    buildFilter:
+      paths:
+        - package.json
+        - package-lock.json
+        - src/**
+        - public/**
+        - index.html
+        - vite.config.js
+        - tailwind.config.js
+        - postcss.config.js
+        - eslint.config.js
+
+databases:
+  # PostgreSQL Database
+  - name: annamalaiyar-db
+    databaseName: annamalaiyar_db
+    user: annamalaiyar_user
+    plan: free
