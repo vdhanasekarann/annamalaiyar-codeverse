@@ -118,7 +118,7 @@ export default function Layout() {
         <main className="flex-1 overflow-y-auto">
           <div 
             className="max-w-7xl mx-auto px-4 pb-24 sm:pb-8"
-            style={{ paddingTop: `${headerHeight + 16}px` }}
+            style={{ paddingTop: `${headerHeight + 12}px` }}
           >
             <div className="page-container p-3 sm:p-6 rounded-3xl min-h-screen">
               <Outlet />

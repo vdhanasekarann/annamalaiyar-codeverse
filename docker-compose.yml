@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  frontend:
+    image: node:22-alpine
+    container_name: annamalaiyar-frontend
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - VITE_API_BASE=http://localhost:3000
+    command: sh -c "npm install --legacy-peer-deps && npm run dev"
+    stdin_open: true
+    tty: true
+
+  backend:
+    image: node:22-alpine
+    container_name: annamalaiyar-backend
+    working_dir: /app/backend
+    volumes:
+      - ./backend:/app/backend
+      - /app/backend/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://neondb_owner:npg_pVN1KsJCfyE8@ep-cool-rain-a1s77t8n-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+      - JWT_SECRET=4aa88b98ef9bc4959cbf93bd47fe9e513db18d1c2d59a303474ad247e81c4d4d
+      - GEMINI_API_KEY=AIzaSyBfuOAuaDZRy3j9ORg8UKaoXVPC8x3xibM
+    command: sh -c "npm install && npm run dev"
+    stdin_open: true
+    tty: true
+
+volumes:
+  node_modules_frontend:
+  node_modules_backend:

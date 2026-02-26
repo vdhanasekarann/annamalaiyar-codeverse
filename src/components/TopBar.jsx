@@ -60,98 +60,91 @@ export default function TopBar({ onOpenMobileMenu }) {
   return (
     <header 
       className={`fixed top-0 left-0 right-0 backdrop-blur-xl bg-black/70 border-b border-white/10 flex items-center px-3 md:px-4 z-50 ${
-        shouldUseSafeArea ? 'safe-top-padding' : 'h-16'
+        shouldUseSafeArea ? 'safe-top-padding' : 'h-14'
       }`}
       style={{
         paddingTop: shouldUseSafeArea ? 0 : undefined,
         height: shouldUseSafeArea ? `${headerHeight}px` : undefined
       }}
     >
-      <div className="flex gap-2 mr-3">
-        <span className="w-3 h-3 bg-red-500 rounded-full" />
-        <span className="w-3 h-3 bg-yellow-400 rounded-full" />
-        <span className="w-3 h-3 bg-green-500 rounded-full" />
+      {/* Left Section - Menu & Logo */}
+      <div className="flex items-center gap-3 flex-shrink-0">
+        <button onClick={onOpenMobileMenu} className="md:hidden text-white hover:bg-white/10 p-2 rounded-lg transition-colors" aria-label="Open menu">
+          <Menu className="w-5 h-5" />
+        </button>
+        
+        <Link
+          to="/dashboard"
+          className="flex items-center gap-2 text-white hover:opacity-80 transition-opacity"
+        >
+          <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center font-bold text-sm">
+            AI
+          </div>
+          <span className="hidden sm:block font-semibold text-sm">CodeVerse</span>
+        </Link>
       </div>
 
-      <button onClick={onOpenMobileMenu} className="md:hidden mr-2 text-white" aria-label="Open menu">
-        <Menu className="w-5 h-5" />
-      </button>
-
-      <Link
-        to="/"
-        className="flex items-center gap-2 shrink-0 min-w-0"
-      >
-        <img
-          src="/AICodeverse.png"
-          alt="CodeVerse AI OS"
-          className="w-7 h-7 rounded-md object-contain"
-        />
-        <span className="hidden md:inline font-semibold tracking-wide text-sm md:text-base whitespace-nowrap">
-          CodeVerse AI OS
-        </span>
-      </Link>
-
-      <div className="flex-1 flex justify-center px-2 md:px-4">
-        <div className="hidden md:flex w-full max-w-md items-center bg-zinc-900 border border-white/10 rounded-full px-3 py-1">
-          <Search className="w-4 h-4 text-zinc-400 mr-2" />
+      {/* Center Section - Search (Desktop) */}
+      <div className="hidden md:flex flex-1 max-w-2xl mx-4">
+        <div className="relative w-full">
           <input
             ref={inputRef}
+            type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && navigate(`/gpts?q=${query}`)}
-            placeholder={t("searchPlaceholder") || "Search GPTs..."}
-            className="w-full bg-transparent text-sm outline-none"
+            placeholder={t("searchPlaceholder") || "Search AI tools..."}
+            className="w-full px-4 py-2 pl-10 bg-white/10 border border-white/20 rounded-full text-white placeholder-white/60 focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all"
           />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
         </div>
-
-        <button
-          className="md:hidden text-zinc-300 p-1.5 rounded-md border border-white/10 bg-zinc-900/70"
-          aria-label="Search GPTs"
-          onClick={() => {
-            setMobileSearchOpen(true);
-            setTimeout(() => mobileInputRef.current?.focus(), 0);
-          }}
-        >
-          <Search className="w-4 h-4" />
-        </button>
       </div>
 
-      {user && (
-        <div className="flex items-center gap-2 text-xs md:text-sm shrink-0">
-          <span className="hidden sm:inline px-2 py-1 rounded bg-zinc-800 text-xs">{user.plan}</span>
+      {/* Right Section - Actions */}
+      <div className="flex items-center gap-2 flex-shrink-0">
+        {/* Mobile Search */}
+        <button
+          onClick={() => setMobileSearchOpen(true)}
+          className="md:hidden text-white hover:bg-white/10 p-2 rounded-lg transition-colors"
+          aria-label="Search"
+        >
+          <Search className="w-5 h-5" />
+        </button>
 
+        {/* Desktop Actions */}
+        <div className="hidden md:flex items-center gap-2">
           <select
             value={i18n.language}
-            onChange={(e) => {
-              const lang = e.target.value;
-              localStorage.setItem("cv_lang", lang);
-              i18n.changeLanguage(lang);
-            }}
-            className="bg-zinc-800 px-2 py-1 rounded text-xs max-w-[88px]"
+            onChange={(e) => i18n.changeLanguage(e.target.value)}
+            className="px-3 py-1.5 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:border-white/40 transition-all"
           >
-            {LANGUAGE_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
+            {LANGUAGE_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value} className="bg-gray-800">
+                {opt.label}
               </option>
             ))}
           </select>
 
-          <select
-            value={theme}
-            onChange={(e) => setTheme(e.target.value)}
-            className="bg-zinc-800 px-2 py-1 rounded text-xs"
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
+            aria-label="Toggle theme"
           >
-            <option value="gold">Gold</option>
-            <option value="pink">Pink</option>
-            <option value="blue">Blue</option>
-          </select>
-
-          <button onClick={logout} aria-label="Logout">
-            <LogOut className="text-red-400 w-4 h-4 md:w-5 md:h-5" />
+            {theme === "dark" ? "🌞" : "🌙"}
           </button>
-        </div>
-      )}
 
+          {user && (
+            <button
+              onClick={logout}
+              className="p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
+              aria-label="Logout"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile Search Overlay */}
       {mobileSearchOpen && (
         <div 
           className="absolute left-0 right-0 md:hidden px-3 py-2 bg-black/90 border-b border-white/10"
@@ -173,18 +166,8 @@ export default function TopBar({ onOpenMobileMenu }) {
               className="w-full bg-transparent text-sm outline-none"
             />
             <button
-              className="text-zinc-300"
-              onClick={() => {
-                navigate(`/gpts${query ? `?q=${encodeURIComponent(query)}` : ""}`);
-                setMobileSearchOpen(false);
-              }}
-              aria-label="Go search"
-            >
-              <Search className="w-4 h-4" />
-            </button>
-            <button
-              className="text-zinc-300"
               onClick={() => setMobileSearchOpen(false)}
+              className="text-zinc-400 hover:text-white"
               aria-label="Close search"
             >
               <X className="w-4 h-4" />
