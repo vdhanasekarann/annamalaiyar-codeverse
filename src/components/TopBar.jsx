@@ -60,7 +60,7 @@ export default function TopBar({ onOpenMobileMenu }) {
   return (
     <header 
       className={`fixed top-0 left-0 right-0 backdrop-blur-xl bg-black/70 border-b border-white/10 flex items-center px-2 md:px-4 z-50 ${
-        shouldUseSafeArea ? 'safe-top-padding' : 'h-12'
+        shouldUseSafeArea ? 'safe-top-padding' : 'h-14'
       }`}
       style={{
         paddingTop: shouldUseSafeArea ? 0 : undefined,
@@ -81,8 +81,8 @@ export default function TopBar({ onOpenMobileMenu }) {
           to="/dashboard"
           className="flex items-center gap-2 text-white hover:opacity-80 transition-opacity"
         >
-          <div className="w-6 h-6 bg-gradient-to-br from-red-500 to-red-600 rounded-sm flex items-center justify-center font-bold text-xs">
-            CV
+          <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center font-bold text-sm">
+            AI
           </div>
           <span className="hidden sm:block font-semibold text-sm">CodeVerse</span>
         </Link>
@@ -119,18 +119,18 @@ export default function TopBar({ onOpenMobileMenu }) {
           <select
             value={i18n.language}
             onChange={(e) => i18n.changeLanguage(e.target.value)}
-            className="px-1.5 py-0.5 bg-white/10 border border-white/20 rounded text-white text-xs focus:outline-none focus:border-white/40 transition-all"
+            className="px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-xs focus:outline-none focus:border-white/40 transition-all"
           >
             {LANGUAGE_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value} className="bg-gray-800">
-                {opt.value.toUpperCase()}
+                {opt.label}
               </option>
             ))}
           </select>
 
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="p-1 text-white hover:bg-white/10 rounded transition-colors text-xs"
+            className="p-1.5 text-white hover:bg-white/10 rounded-lg transition-colors text-sm"
             aria-label="Toggle theme"
           >
             {theme === "dark" ? "🌞" : "🌙"}
@@ -139,7 +139,7 @@ export default function TopBar({ onOpenMobileMenu }) {
           {user && (
             <button
               onClick={logout}
-              className="p-1 text-white hover:bg-white/10 rounded transition-colors text-xs"
+              className="p-1.5 text-white hover:bg-white/10 rounded-lg transition-colors text-sm"
               aria-label="Logout"
             >
               <LogOut className="w-3 h-3" />
