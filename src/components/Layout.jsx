@@ -89,7 +89,8 @@ export default function Layout() {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <div className="hidden md:block">
+      {/* Desktop Sidebar - Fixed position below TopBar */}
+      <div className="hidden md:block fixed top-0 left-0 z-40" style={{ paddingTop: '56px' }}>
         <DoubleSidebar />
       </div>
 
@@ -103,9 +104,10 @@ export default function Layout() {
         <DoubleSidebar mobile onNavigate={() => setMobileOpen(false)} />
       </MobileDrawer>
 
+      {/* Main Content Area */}
       <div
         className={`flex-1 flex flex-col transition-all duration-300 ${
-          collapsed ? "md:pl-[72px]" : "md:pl-[240px]"
+          collapsed ? "md:ml-[72px]" : "md:ml-[240px]"
         }`}
       >
         <TopBar

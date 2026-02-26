@@ -59,8 +59,8 @@ export default function TopBar({ onOpenMobileMenu }) {
 
   return (
     <header 
-      className={`fixed top-0 left-0 right-0 backdrop-blur-xl bg-black/70 border-b border-white/10 flex items-center px-2 md:px-4 z-50 ${
-        shouldUseSafeArea ? 'safe-top-padding' : 'h-14'
+      className={`fixed top-0 left-0 right-0 backdrop-blur-xl bg-black/70 border-b border-white/10 flex items-center px-2 md:px-2 z-50 ${
+        shouldUseSafeArea ? 'safe-top-padding' : 'h-10'
       }`}
       style={{
         paddingTop: shouldUseSafeArea ? 0 : undefined,
@@ -70,10 +70,10 @@ export default function TopBar({ onOpenMobileMenu }) {
       {/* Left Section - Mac Menu & Logo */}
       <div className="flex items-center gap-2 flex-shrink-0">
         <button onClick={onOpenMobileMenu} className="md:hidden text-white hover:bg-white/10 p-2 rounded-lg transition-colors" aria-label="Open menu">
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-            <line x1="9" y1="9" x2="15" y2="9"/>
-            <line x1="9" y1="15" x2="15" y2="15"/>
+            <line x1="10" y1="10" x2="15" y2="10"/>
+            <line x1="10" y1="15" x2="15" y2="15"/>
           </svg>
         </button>
         
@@ -81,9 +81,11 @@ export default function TopBar({ onOpenMobileMenu }) {
           to="/dashboard"
           className="flex items-center gap-2 text-white hover:opacity-80 transition-opacity"
         >
-          <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center font-bold text-sm">
-            AI
-          </div>
+          <img 
+            src="/logo.svg" 
+            alt="CodeVerse AI OS" 
+            className="w-8 h-8 rounded-lg"
+          />
           <span className="hidden sm:block font-semibold text-sm">CodeVerse AI OS</span>
         </Link>
       </div>
@@ -144,7 +146,7 @@ export default function TopBar({ onOpenMobileMenu }) {
               className="p-1.5 text-white hover:bg-white/10 rounded-lg transition-colors text-sm"
               aria-label="Logout"
             >
-              <LogOut className="w-3 h-3" />
+              <LogOut className="w-5 h-5" />
             </button>
           )}
         </div>

@@ -150,6 +150,40 @@ export default function Login() {
     }
   };
 
+  // Custom in-app Google login for mobile
+  const handleGoogleLoginInApp = async () => {
+    if (!Capacitor.isNativePlatform()) {
+      // For web, use the normal Google button
+      return;
+    }
+
+    setSigningIn(true);
+    
+    try {
+      // Create a custom Google OAuth flow in-app
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+        `client_id=${import.meta.env.VITE_GOOGLE_CLIENT_ID}&` +
+        `redirect_uri=${encodeURIComponent('https://app.aicodeverse.com/auth/callback')}&` +
+        `response_type=code&` +
+        `scope=email profile&` +
+        `access_type=offline`;
+
+      // Open in-app browser
+      const { Browser } = await import('@capacitor/browser');
+      
+      await Browser.open({
+        url: authUrl,
+        presentationStyle: 'popover'
+      });
+
+      // The callback will be handled by the appUrlOpen listener
+    } catch (error) {
+      console.error('Google login error:', error);
+      alert('Google login failed. Please try again.');
+      setSigningIn(false);
+    }
+  };
+
   const continueWithEmail = async () => {
     const normalizedEmail = email.trim().toLowerCase();
 
@@ -256,9 +290,8 @@ export default function Login() {
         window.google.accounts.id.initialize({
           client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
           auto_select: !loggedOutFlow,
-          // Use redirect mode for mobile, but handle it in-app
-          ux_mode: Capacitor.isNativePlatform() ? 'redirect' : 'popup',
-          login_uri: Capacitor.isNativePlatform() ? 'https://app.aicodeverse.com/auth/callback' : undefined,
+          // Use popup mode for both, but handle mobile differently
+          ux_mode: 'popup',
           callback: async (res) => {
             try {
               const r = await apiFetch("/api/auth/google", {
@@ -367,7 +400,7 @@ export default function Login() {
           <div id="googleBtn" className="mb-4 flex justify-center min-h-[44px]" />
           {googleUnavailable && (
             <button
-              onClick={openGoogleBrowserLogin}
+              onClick={Capacitor.isNativePlatform() ? handleGoogleLoginInApp : openGoogleBrowserLogin}
               className="w-full border border-zinc-300 rounded p-3 mb-4 font-semibold"
             >
               Continue with Google
