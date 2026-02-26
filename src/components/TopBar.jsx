@@ -82,7 +82,7 @@ export default function TopBar({ onOpenMobileMenu }) {
           className="flex items-center gap-2 text-white hover:opacity-80 transition-opacity"
         >
           <img 
-            src="/logo.svg" 
+            src="/logo.webp" 
             alt="CodeVerse AI OS" 
             className="w-8 h-8 rounded-lg"
           />
@@ -117,7 +117,7 @@ export default function TopBar({ onOpenMobileMenu }) {
         </button>
 
         {/* Mobile Language & Theme */}
-        <div className="md:hidden flex items-center gap-1">
+        <div className="md:hidden flex items-center gap-1 ml-auto">
           <select
             value={i18n.language}
             onChange={(e) => i18n.changeLanguage(e.target.value)}
@@ -152,7 +152,7 @@ export default function TopBar({ onOpenMobileMenu }) {
         </div>
 
         {/* Desktop Actions */}
-        <div className="hidden md:flex items-center gap-2">
+        <div className="hidden md:flex items-center gap-2 ml-auto">
           <select
             value={i18n.language}
             onChange={(e) => i18n.changeLanguage(e.target.value)}

@@ -2,7 +2,7 @@ export default function MobileDrawer({ open, onClose, children }) {
   return (
     <div
       className={`
-      fixed inset-0 z-50 transition-all md:hidden
+      fixed inset-0 z-60 transition-all md:hidden
       ${open ? "opacity-100 visible" : "opacity-0 invisible"}
     `}
     >

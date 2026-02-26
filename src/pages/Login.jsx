@@ -398,9 +398,18 @@ export default function Login() {
           </p>
 
           <div id="googleBtn" className="mb-4 flex justify-center min-h-[44px]" />
-          {googleUnavailable && (
+          {/* Always show custom Google login button on mobile */}
+          {Capacitor.isNativePlatform() ? (
             <button
-              onClick={Capacitor.isNativePlatform() ? handleGoogleLoginInApp : openGoogleBrowserLogin}
+              onClick={handleGoogleLoginInApp}
+              disabled={signingIn}
+              className="w-full border border-zinc-300 rounded p-3 mb-4 font-semibold disabled:opacity-60"
+            >
+              {signingIn ? "Signing in..." : "Continue with Google"}
+            </button>
+          ) : googleUnavailable && (
+            <button
+              onClick={openGoogleBrowserLogin}
               className="w-full border border-zinc-300 rounded p-3 mb-4 font-semibold"
             >
               Continue with Google
