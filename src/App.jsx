@@ -7,6 +7,7 @@ import AdminRevenue from "./pages/admin/AdminRevenue";
 import AdminUsers from "./pages/admin/Users";
 import AdminRoute from "./components/AdminRoute";
 import MagicLogin from "./pages/MagicLogin";
+import AuthCallback from "./pages/AuthCallback";
 import AuthGate from "./components/AuthGate";
 import PromptAssistant from "./pages/PromptAssistant";
 import React, { Suspense } from "react";
@@ -26,6 +27,7 @@ export default function App() {
         {/* PUBLIC ROUTES */}
         <Route path="/login" element={<Login />} />
         <Route path="/magic-login" element={<MagicLogin />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
 
         {/* PROTECTED APP ROUTES */}
         <Route

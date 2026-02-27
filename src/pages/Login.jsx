@@ -78,7 +78,23 @@ export default function Login() {
           if (deepLinkEmail) {
             params.set("email", deepLinkEmail);
           }
-          window.location.replace(`com.aicodeverse.app://auth/callback?${params.toString()}`);
+          const query = params.toString();
+          const schemeUrl = `com.aicodeverse.app://auth/callback?${query}`;
+          const intentUrl = `intent://auth/callback?${query}#Intent;scheme=com.aicodeverse.app;package=com.aicodeverse.app;end`;
+          const httpsUrl = `${window.location.origin}/auth/callback?${query}`;
+
+          // Android Chrome Custom Tabs is more reliable with intent:// links.
+          const isAndroid = /android/i.test(navigator.userAgent || "");
+          window.location.replace(isAndroid ? intentUrl : schemeUrl);
+
+          // Fallbacks in case first handoff is blocked by browser policy.
+          window.setTimeout(() => {
+            window.location.replace(schemeUrl);
+          }, 350);
+
+          window.setTimeout(() => {
+            window.location.replace(httpsUrl);
+          }, 1200);
           return true;
         }
       }

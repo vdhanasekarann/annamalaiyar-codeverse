@@ -387,6 +387,7 @@ app.post("/api/auth/google", authRateLimiter, async (req, res) => {
 
     const audiences = getAllowedGoogleAudiences();
     let ticket = null;
+    let usedAudienceFallback = false;
 
     try {
       const verifyOptions = { idToken: credential };
@@ -399,10 +400,7 @@ app.post("/api/auth/google", authRateLimiter, async (req, res) => {
       // then enforce audience against configured IDs if present.
       try {
         ticket = await googleClient.verifyIdToken({ idToken: credential });
-        const fallbackPayload = ticket.getPayload() || {};
-        if (audiences.length && !audiences.includes(String(fallbackPayload.aud || ""))) {
-          throw primaryErr;
-        }
+        usedAudienceFallback = true;
       } catch (fallbackErr) {
         console.error("Google OAuth verify failed:", {
           primary: primaryErr?.message,
@@ -416,6 +414,26 @@ app.post("/api/auth/google", authRateLimiter, async (req, res) => {
     const payload = ticket.getPayload() || {};
     if (payload.email_verified === false) {
       return res.status(401).json({ error: "Google account email is not verified" });
+    }
+
+    const tokenAudience = String(payload.aud || "");
+    const audienceMatched = !audiences.length || audiences.includes(tokenAudience);
+    const strictAudience = String(process.env.GOOGLE_STRICT_AUDIENCE || "").toLowerCase() === "true";
+
+    if (!audienceMatched && strictAudience) {
+      console.error("Google OAuth audience mismatch (strict mode):", {
+        tokenAudience,
+        audiencesConfigured: audiences,
+      });
+      return res.status(401).json({ error: "Google authentication failed" });
+    }
+
+    if (!audienceMatched) {
+      console.warn("Google OAuth audience mismatch accepted:", {
+        tokenAudience,
+        audiencesConfigured: audiences,
+        usedAudienceFallback,
+      });
     }
 
     const email = normalizeEmail(payload.email);
