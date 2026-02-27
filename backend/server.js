@@ -351,6 +351,33 @@ app.post("/api/auth/logout", (_, res) => {
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+function parseCsvEnv(value) {
+  if (!value || typeof value !== "string") return [];
+  return value
+    .split(",")
+    .map((v) => v.trim())
+    .filter(Boolean);
+}
+
+function getAllowedGoogleAudiences() {
+  const set = new Set();
+  const candidates = [
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_IDS,
+    process.env.GOOGLE_WEB_CLIENT_ID,
+    process.env.GOOGLE_ANDROID_CLIENT_ID,
+    process.env.GOOGLE_IOS_CLIENT_ID,
+  ];
+
+  for (const candidate of candidates) {
+    for (const value of parseCsvEnv(candidate)) {
+      set.add(value);
+    }
+  }
+
+  return [...set];
+}
+
 app.post("/api/auth/google", authRateLimiter, async (req, res) => {
   try {
     const { credential } = req.body;
@@ -358,12 +385,39 @@ app.post("/api/auth/google", authRateLimiter, async (req, res) => {
       return res.status(400).json({ error: "Missing credential" });
     }
 
-    const ticket = await googleClient.verifyIdToken({
-      idToken: credential,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
+    const audiences = getAllowedGoogleAudiences();
+    let ticket = null;
+
+    try {
+      const verifyOptions = { idToken: credential };
+      if (audiences.length) {
+        verifyOptions.audience = audiences;
+      }
+      ticket = await googleClient.verifyIdToken(verifyOptions);
+    } catch (primaryErr) {
+      // Fallback: verify signature/expiry without audience pinning,
+      // then enforce audience against configured IDs if present.
+      try {
+        ticket = await googleClient.verifyIdToken({ idToken: credential });
+        const fallbackPayload = ticket.getPayload() || {};
+        if (audiences.length && !audiences.includes(String(fallbackPayload.aud || ""))) {
+          throw primaryErr;
+        }
+      } catch (fallbackErr) {
+        console.error("Google OAuth verify failed:", {
+          primary: primaryErr?.message,
+          fallback: fallbackErr?.message,
+          audiencesConfigured: audiences.length,
+        });
+        return res.status(401).json({ error: "Google authentication failed" });
+      }
+    }
 
     const payload = ticket.getPayload() || {};
+    if (payload.email_verified === false) {
+      return res.status(401).json({ error: "Google account email is not verified" });
+    }
+
     const email = normalizeEmail(payload.email);
     if (!email) {
       return res.status(400).json({ error: "Google account email not available" });

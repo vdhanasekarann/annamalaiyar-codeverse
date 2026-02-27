@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { LogOut, Search, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -29,8 +29,16 @@ export default function TopBar({ onOpenMobileMenu }) {
   const inputRef = useRef(null);
   const mobileInputRef = useRef(null);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [viewportWidth, setViewportWidth] = useState(() => window.innerWidth || 390);
 
   const safeInsetTop = Math.max(0, headerHeight - 64);
+  const compactMobile = useMemo(() => viewportWidth < 390, [viewportWidth]);
+
+  useEffect(() => {
+    const onResize = () => setViewportWidth(window.innerWidth || 390);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   useEffect(() => {
     if (!mobileSearchOpen) return;
@@ -69,10 +77,10 @@ export default function TopBar({ onOpenMobileMenu }) {
 
   return (
     <header
-      className="fixed inset-x-0 top-0 z-50 px-2 sm:px-4"
+      className="fixed inset-x-0 top-0 z-50 px-1.5 sm:px-4"
       style={{ height: `${headerHeight}px`, paddingTop: `${safeInsetTop}px` }}
     >
-      <div className="mx-auto flex h-14 max-w-7xl items-center gap-2 rounded-2xl border border-white/15 bg-black/55 px-2.5 backdrop-blur-2xl shadow-[0_12px_36px_rgba(0,0,0,0.45)]">
+      <div className="mx-auto flex h-14 max-w-7xl items-center gap-1.5 rounded-2xl border border-white/15 bg-black/55 px-2 backdrop-blur-2xl shadow-[0_12px_36px_rgba(0,0,0,0.45)]">
         <button
           onClick={onOpenMobileMenu}
           className="md:hidden rounded-xl border border-white/20 bg-white/5 p-2 text-white transition hover:bg-white/10"
@@ -88,12 +96,15 @@ export default function TopBar({ onOpenMobileMenu }) {
 
         <Link
           to="/dashboard"
-          className="flex min-w-0 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-2 py-1 text-white transition hover:bg-white/10"
+          className="flex shrink-0 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-1.5 py-1 text-white transition hover:bg-white/10"
         >
           <img
             src="/AICodeverse.png"
             alt="CodeVerse AI OS"
-            className="h-8 w-8 rounded-lg border border-white/15 object-cover"
+            className="h-10 w-10 rounded-lg border border-white/15 object-cover"
+            onError={(e) => {
+              e.currentTarget.src = "/logo.webp";
+            }}
           />
           <span className="hidden truncate text-sm font-semibold md:block">CodeVerse AI OS</span>
         </Link>
@@ -117,19 +128,23 @@ export default function TopBar({ onOpenMobileMenu }) {
           </div>
         </div>
 
-        <div className="ml-auto flex items-center gap-1.5">
-          <button
-            onClick={() => setMobileSearchOpen(true)}
-            className="rounded-xl border border-white/20 bg-white/5 p-2 text-white transition hover:bg-white/10 md:hidden"
-            aria-label="Search"
-          >
-            <Search className="h-5 w-5" />
-          </button>
+        <div className="ml-auto flex min-w-0 items-center gap-1.5">
+          {!compactMobile && (
+            <button
+              onClick={() => setMobileSearchOpen(true)}
+              className="rounded-xl border border-white/20 bg-white/5 p-2 text-white transition hover:bg-white/10 md:hidden"
+              aria-label="Search"
+            >
+              <Search className="h-5 w-5" />
+            </button>
+          )}
 
           <select
             value={i18n.language}
             onChange={(e) => i18n.changeLanguage(e.target.value)}
-            className="w-[106px] rounded-lg border border-white/20 bg-white/8 px-2 py-1.5 text-xs text-white outline-none transition focus:border-white/35 md:w-[132px] md:text-sm"
+            className={`rounded-lg border border-white/20 bg-white/8 px-2 py-1.5 text-xs text-white outline-none transition focus:border-white/35 md:w-[132px] md:text-sm ${
+              compactMobile ? "w-[84px]" : "w-[96px]"
+            }`}
           >
             {LANGUAGE_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value} className="bg-zinc-900">
@@ -141,7 +156,9 @@ export default function TopBar({ onOpenMobileMenu }) {
           <select
             value={theme}
             onChange={(e) => setTheme(e.target.value)}
-            className="w-[88px] rounded-lg border border-white/20 bg-white/8 px-2 py-1.5 text-xs text-white outline-none transition focus:border-white/35 md:w-[104px] md:text-sm"
+            className={`rounded-lg border border-white/20 bg-white/8 px-2 py-1.5 text-xs text-white outline-none transition focus:border-white/35 md:w-[104px] md:text-sm ${
+              compactMobile ? "w-[70px]" : "w-[80px]"
+            }`}
           >
             <option value="gold" className="bg-zinc-900">Gold</option>
             <option value="pink" className="bg-zinc-900">Pink</option>
@@ -151,7 +168,7 @@ export default function TopBar({ onOpenMobileMenu }) {
           {user && (
             <button
               onClick={logout}
-              className="rounded-xl border border-white/20 bg-white/5 p-2 text-white transition hover:bg-white/10"
+              className="shrink-0 rounded-xl border border-white/20 bg-white/5 p-2 text-white transition hover:bg-white/10"
               aria-label="Logout"
             >
               <LogOut className="h-5 w-5" />
