@@ -22,18 +22,23 @@ export default function IconSidebar({ items = [], mobile }) {
         fixed left-0 top-16 bottom-0
         w-[72px]
         flex flex-col items-center py-4 gap-2
-        bg-black/40 backdrop-blur-xl
-        border-r border-white/10
-        z-40
+        bg-black/55 backdrop-blur-2xl
+        border-r border-white/15
+        z-[60]
         transition-transform
         will-change-transform
+        shadow-[0_18px_45px_rgba(0,0,0,0.45)]
       "
     >
       <div
         onClick={() => mobile && setCollapsed(false)}
-        className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold cursor-pointer hover:scale-105 transition"
+        className="w-12 h-12 rounded-xl border border-white/20 bg-white/10 flex items-center justify-center text-white font-bold cursor-pointer hover:scale-105 transition"
       >
-        CV
+        <img
+          src="/AICodeverse.png"
+          alt="CodeVerse AI OS"
+          className="w-9 h-9 rounded-lg object-cover"
+        />
       </div>
 
       <nav className="mt-4 flex flex-col gap-2">
@@ -45,8 +50,8 @@ export default function IconSidebar({ items = [], mobile }) {
               w-12 h-12 flex items-center justify-center rounded-lg
               transition-all duration-200
               ${location.pathname === it.path
-                ? "bg-indigo-600 text-white scale-105"
-                : "text-white/80 hover:bg-white/10"}
+                ? "bg-indigo-500/45 text-white scale-105 border border-indigo-300/50"
+                : "text-white/85 hover:bg-white/12 border border-transparent"}
             `}
           >
             {isRenderableIcon(it.icon) ? (

@@ -36,8 +36,22 @@ export default function DoubleSidebar({ mobile = false, onNavigate }) {
 
   if (mobile) {
     return (
-      <aside className="h-full bg-black/80 backdrop-blur-xl border-r border-white/10 px-3 py-4 flex flex-col">
-        <nav className="space-y-1 flex-1">
+      <aside className="h-full px-3 py-4 flex flex-col text-white">
+        <div className="mb-3 rounded-2xl border border-white/15 bg-white/5 p-3 backdrop-blur-xl">
+          <div className="flex items-center gap-2">
+            <img
+              src="/AICodeverse.png"
+              alt="CodeVerse AI OS"
+              className="h-9 w-9 rounded-xl border border-white/15 object-cover"
+            />
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.14em] text-white/60">Workspace</p>
+              <p className="text-sm font-semibold leading-tight">CodeVerse AI OS</p>
+            </div>
+          </div>
+        </div>
+
+        <nav className="space-y-1.5 flex-1 overflow-y-auto pr-1">
           {items.map((i) => (
             <Link
               key={i.path}
@@ -46,8 +60,10 @@ export default function DoubleSidebar({ mobile = false, onNavigate }) {
                 setCollapsed(true);
                 onNavigate?.();
               }}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-white ${
-                location.pathname === i.path ? "bg-indigo-600/40" : "hover:bg-white/10"
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition ${
+                location.pathname === i.path
+                  ? "border-indigo-300/50 bg-indigo-500/30 shadow-[0_0_24px_rgba(99,102,241,0.35)]"
+                  : "border-white/10 bg-white/5 hover:bg-white/12"
               }`}
             >
               <i.icon className="w-5 h-5 shrink-0" strokeWidth={2.2} />
@@ -55,7 +71,9 @@ export default function DoubleSidebar({ mobile = false, onNavigate }) {
             </Link>
           ))}
         </nav>
-        <SidebarProfile compact />
+        <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 p-2 backdrop-blur-xl">
+          <SidebarProfile compact />
+        </div>
       </aside>
     );
   }

@@ -1,6 +1,6 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { LogOut, Menu, Search, X } from "lucide-react";
+import { LogOut, Search, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import { useSearch } from "../context/SearchContext";
@@ -24,10 +24,21 @@ export default function TopBar({ onOpenMobileMenu }) {
   const { query, setQuery } = useSearch();
   const { t, i18n } = useTranslation();
   const { theme, setTheme } = useTheme();
-  const { headerHeight, shouldUseSafeArea } = useSafeArea();
+  const { headerHeight } = useSafeArea();
+
   const inputRef = useRef(null);
   const mobileInputRef = useRef(null);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+
+  const safeInsetTop = Math.max(0, headerHeight - 64);
+
+  useEffect(() => {
+    if (!mobileSearchOpen) return;
+    const id = window.setTimeout(() => {
+      mobileInputRef.current?.focus();
+    }, 50);
+    return () => window.clearTimeout(id);
+  }, [mobileSearchOpen]);
 
   const logout = async () => {
     let logoutOk = false;
@@ -38,12 +49,11 @@ export default function TopBar({ onOpenMobileMenu }) {
       logoutOk = false;
     }
 
-    // Prevent Google One Tap auto sign-in right after logging out.
     try {
       window.google?.accounts?.id?.disableAutoSelect?.();
       window.google?.accounts?.id?.cancel?.();
     } catch {
-      // no-op
+      // ignore
     }
 
     setUser(null);
@@ -58,73 +68,71 @@ export default function TopBar({ onOpenMobileMenu }) {
   };
 
   return (
-    <header 
-      className={`fixed top-0 left-0 right-0 backdrop-blur-xl bg-black/70 border-b border-white/10 flex items-center px-2 md:px-2 z-50 ${
-        shouldUseSafeArea ? 'safe-top-padding' : 'h-10'
-      }`}
-      style={{
-        paddingTop: shouldUseSafeArea ? 0 : undefined,
-        height: shouldUseSafeArea ? `${headerHeight}px` : undefined
-      }}
+    <header
+      className="fixed inset-x-0 top-0 z-50 px-2 sm:px-4"
+      style={{ height: `${headerHeight}px`, paddingTop: `${safeInsetTop}px` }}
     >
-      {/* Left Section - Mac Menu & Logo */}
-      <div className="flex items-center gap-2 flex-shrink-0">
-        <button onClick={onOpenMobileMenu} className="md:hidden text-white hover:bg-white/10 p-2 rounded-lg transition-colors" aria-label="Open menu">
-          <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-            <line x1="10" y1="10" x2="15" y2="10"/>
-            <line x1="10" y1="15" x2="15" y2="15"/>
+      <div className="mx-auto flex h-14 max-w-7xl items-center gap-2 rounded-2xl border border-white/15 bg-black/55 px-2.5 backdrop-blur-2xl shadow-[0_12px_36px_rgba(0,0,0,0.45)]">
+        <button
+          onClick={onOpenMobileMenu}
+          className="md:hidden rounded-xl border border-white/20 bg-white/5 p-2 text-white transition hover:bg-white/10"
+          aria-label="Open menu"
+        >
+          <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <line x1="9" y1="8.5" x2="15" y2="8.5" />
+            <line x1="9" y1="12" x2="15" y2="12" />
+            <line x1="9" y1="15.5" x2="15" y2="15.5" />
           </svg>
         </button>
-        
+
         <Link
           to="/dashboard"
-          className="flex items-center gap-2 text-white hover:opacity-80 transition-opacity"
+          className="flex min-w-0 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-2 py-1 text-white transition hover:bg-white/10"
         >
-          <img 
-            src="/logo.webp" 
-            alt="CodeVerse AI OS" 
-            className="w-8 h-8 rounded-lg"
+          <img
+            src="/AICodeverse.png"
+            alt="CodeVerse AI OS"
+            className="h-8 w-8 rounded-lg border border-white/15 object-cover"
           />
-          <span className="hidden sm:block font-semibold text-sm">CodeVerse AI OS</span>
+          <span className="hidden truncate text-sm font-semibold md:block">CodeVerse AI OS</span>
         </Link>
-      </div>
 
-      {/* Center Section - Search (Desktop) */}
-      <div className="hidden md:flex flex-1 max-w-xl mx-3">
-        <div className="relative w-full">
-          <input
-            ref={inputRef}
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={t("searchPlaceholder") || "Search AI tools..."}
-            className="w-full px-4 py-2 pl-10 bg-white/10 border border-white/20 rounded-full text-white placeholder-white/60 focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all"
-          />
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
+        <div className="hidden max-w-xl flex-1 md:block">
+          <div className="relative">
+            <input
+              ref={inputRef}
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  navigate(`/gpts${query ? `?q=${encodeURIComponent(query)}` : ""}`);
+                }
+              }}
+              placeholder={t("searchPlaceholder") || "Search GPTs..."}
+              className="w-full rounded-xl border border-white/15 bg-white/8 py-2 pl-10 pr-3 text-sm text-white placeholder-white/60 outline-none transition focus:border-white/35 focus:bg-white/12"
+            />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
+          </div>
         </div>
-      </div>
 
-      {/* Right Section - Actions */}
-      <div className="flex items-center gap-2 flex-shrink-0">
-        {/* Mobile Search */}
-        <button
-          onClick={() => setMobileSearchOpen(true)}
-          className="md:hidden text-white hover:bg-white/10 p-2 rounded-lg transition-colors"
-          aria-label="Search"
-        >
-          <Search className="w-5 h-5" />
-        </button>
+        <div className="ml-auto flex items-center gap-1.5">
+          <button
+            onClick={() => setMobileSearchOpen(true)}
+            className="rounded-xl border border-white/20 bg-white/5 p-2 text-white transition hover:bg-white/10 md:hidden"
+            aria-label="Search"
+          >
+            <Search className="h-5 w-5" />
+          </button>
 
-        {/* Mobile Language & Theme */}
-        <div className="md:hidden flex items-center gap-1 ml-auto">
           <select
             value={i18n.language}
             onChange={(e) => i18n.changeLanguage(e.target.value)}
-            className="px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-xs focus:outline-none focus:border-white/40 transition-all"
+            className="w-[106px] rounded-lg border border-white/20 bg-white/8 px-2 py-1.5 text-xs text-white outline-none transition focus:border-white/35 md:w-[132px] md:text-sm"
           >
             {LANGUAGE_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value} className="bg-gray-800">
+              <option key={opt.value} value={opt.value} className="bg-zinc-900">
                 {opt.label}
               </option>
             ))}
@@ -133,68 +141,29 @@ export default function TopBar({ onOpenMobileMenu }) {
           <select
             value={theme}
             onChange={(e) => setTheme(e.target.value)}
-            className="px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-xs focus:outline-none focus:border-white/40 transition-all"
+            className="w-[88px] rounded-lg border border-white/20 bg-white/8 px-2 py-1.5 text-xs text-white outline-none transition focus:border-white/35 md:w-[104px] md:text-sm"
           >
-            <option value="gold" className="bg-gray-800 text-yellow-400">Gold</option>
-            <option value="pink" className="bg-gray-800 text-pink-400">Pink</option>
-            <option value="blue" className="bg-gray-800 text-blue-400">Blue</option>
+            <option value="gold" className="bg-zinc-900">Gold</option>
+            <option value="pink" className="bg-zinc-900">Pink</option>
+            <option value="blue" className="bg-zinc-900">Blue</option>
           </select>
 
           {user && (
             <button
               onClick={logout}
-              className="p-1.5 text-white hover:bg-white/10 rounded-lg transition-colors text-sm"
+              className="rounded-xl border border-white/20 bg-white/5 p-2 text-white transition hover:bg-white/10"
               aria-label="Logout"
             >
-              <LogOut className="w-5 h-5" />
-            </button>
-          )}
-        </div>
-
-        {/* Desktop Actions */}
-        <div className="hidden md:flex items-center gap-2 ml-auto">
-          <select
-            value={i18n.language}
-            onChange={(e) => i18n.changeLanguage(e.target.value)}
-            className="px-3 py-1.5 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:border-white/40 transition-all"
-          >
-            {LANGUAGE_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value} className="bg-gray-800">
-                {opt.label}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={theme}
-            onChange={(e) => setTheme(e.target.value)}
-            className="px-3 py-1.5 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:border-white/40 transition-all"
-          >
-            <option value="gold" className="bg-gray-800 text-yellow-400">Gold</option>
-            <option value="pink" className="bg-gray-800 text-pink-400">Pink</option>
-            <option value="blue" className="bg-gray-800 text-blue-400">Blue</option>
-          </select>
-
-          {user && (
-            <button
-              onClick={logout}
-              className="p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
-              aria-label="Logout"
-            >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="h-5 w-5" />
             </button>
           )}
         </div>
       </div>
 
-      {/* Mobile Search Overlay */}
       {mobileSearchOpen && (
-        <div 
-          className="absolute left-0 right-0 md:hidden px-3 py-2 bg-black/90 border-b border-white/10"
-          style={{ top: `${headerHeight}px` }}
-        >
-          <div className="flex items-center gap-2 bg-zinc-900 border border-white/15 rounded-lg px-2 py-2">
-            <Search className="w-4 h-4 text-zinc-400" />
+        <div className="mx-auto mt-2 max-w-7xl md:hidden">
+          <div className="flex items-center gap-2 rounded-xl border border-white/15 bg-black/75 px-2.5 py-2 backdrop-blur-xl">
+            <Search className="h-4 w-4 text-zinc-300" />
             <input
               ref={mobileInputRef}
               value={query}
@@ -206,14 +175,14 @@ export default function TopBar({ onOpenMobileMenu }) {
                 }
               }}
               placeholder={t("searchPlaceholder") || "Search GPTs..."}
-              className="w-full bg-transparent text-sm outline-none"
+              className="w-full bg-transparent text-sm text-white outline-none placeholder:text-zinc-400"
             />
             <button
               onClick={() => setMobileSearchOpen(false)}
-              className="text-zinc-400 hover:text-white"
+              className="text-zinc-300 transition hover:text-white"
               aria-label="Close search"
             >
-              <X className="w-4 h-4" />
+              <X className="h-4 w-4" />
             </button>
           </div>
         </div>

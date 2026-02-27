@@ -90,12 +90,13 @@ export default function Layout() {
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Desktop Sidebar - Fixed position below TopBar */}
-      <div className="hidden md:block fixed top-0 left-0 z-60" style={{ paddingTop: '56px' }}>
+      <div className="hidden md:block fixed top-0 left-0 z-[60]" style={{ paddingTop: `${headerHeight}px` }}>
         <DoubleSidebar />
       </div>
 
       <MobileDrawer
         open={mobileOpen}
+        topOffset={headerHeight}
         onClose={() => {
           setMobileOpen(false);
           setCollapsed(true);

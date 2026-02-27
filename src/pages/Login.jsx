@@ -1,11 +1,10 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Capacitor } from "@capacitor/core";
 import { apiFetch } from "../lib/apiFetch";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import { setAuthToken } from "../lib/authToken";
-import { Capacitor } from "@capacitor/core";
-import { App } from "@capacitor/app";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -15,18 +14,32 @@ export default function Login() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { user, setUser, refreshUser } = useAuth();
+
   const loggedOutFlow = useMemo(
-    () => !user && localStorage.getItem("loggedOut") === "true",
-    [user]
+    () => new URLSearchParams(window.location.search).get("logged_out") === "1",
+    []
   );
+  const isMobileBrowserMode = useMemo(
+    () => new URLSearchParams(window.location.search).get("mobile_app") === "1",
+    []
+  );
+
+  const isNativeApp = useMemo(() => {
+    const cap = window?.Capacitor;
+    return Boolean(
+      cap?.isNativePlatform?.() ||
+      cap?.getPlatform?.() === "android" ||
+      cap?.getPlatform?.() === "ios" ||
+      Capacitor?.isNativePlatform?.()
+    );
+  }, []);
+
   const hydrateSessionAndRedirect = useCallback(async () => {
     const me = await refreshUser({
       retries: 6,
       retryDelayMs: 250,
     });
-
     if (!me) return false;
-
     navigate("/dashboard", { replace: true });
     return true;
   }, [navigate, refreshUser]);
@@ -37,14 +50,8 @@ export default function Login() {
   };
 
   const readApiError = useCallback(async (res, fallback) => {
-    let data = null;
-    try {
-      data = await res.clone().json();
-    } catch {
-      data = null;
-    }
+    const data = await res.clone().json().catch(() => null);
     if (data?.error) return data.error;
-
     const rawText = await res.text().catch(() => "");
     const text = (rawText || "").trim();
     if (text && text.length <= 160) return `${fallback} (${res.status}): ${text}`;
@@ -61,9 +68,23 @@ export default function Login() {
     async (payload, fallbackEmail = "") => {
       persistSessionFromResponse(payload);
 
-      const payloadUser = payload?.user;
-      if (payloadUser?.email) {
-        setUser(payloadUser);
+      // When login is happening in external browser for native app,
+      // return back to the app via deep link with token.
+      if (isMobileBrowserMode && !isNativeApp) {
+        const token = typeof payload?.token === "string" ? payload.token : "";
+        if (token) {
+          const params = new URLSearchParams({ token });
+          const deepLinkEmail = payload?.user?.email || fallbackEmail;
+          if (deepLinkEmail) {
+            params.set("email", deepLinkEmail);
+          }
+          window.location.replace(`com.aicodeverse.app://auth/callback?${params.toString()}`);
+          return true;
+        }
+      }
+
+      if (payload?.user?.email) {
+        setUser(payload.user);
         navigate("/dashboard", { replace: true });
         return true;
       }
@@ -83,38 +104,65 @@ export default function Login() {
             return true;
           }
         } catch {
-          // fallback to /auth/me path below
+          // Fallback below
         }
       }
 
       return hydrateSessionAndRedirect();
     },
-    [hydrateSessionAndRedirect, navigate, persistSessionFromResponse, setUser]
+    [
+      hydrateSessionAndRedirect,
+      isMobileBrowserMode,
+      isNativeApp,
+      navigate,
+      persistSessionFromResponse,
+      setUser,
+    ]
   );
 
-  const openGoogleBrowserLogin = useCallback(() => {
-    const loginUrl = "https://app.aicodeverse.com/login";
-    const cap = window?.Capacitor;
-    const isNative = Boolean(
-      cap?.isNativePlatform?.() ||
-      cap?.getPlatform?.() === "android" ||
-      cap?.getPlatform?.() === "ios"
+  const openGoogleBrowserLogin = useCallback(async () => {
+    const appOrigin = (import.meta.env.VITE_APP_URL || "https://app.aicodeverse.com").replace(
+      /\/+$/,
+      ""
     );
+    const loginUrl = `${appOrigin}/login?mobile_app=1`;
+
+    if (!isNativeApp) {
+      window.location.assign(loginUrl);
+      return;
+    }
 
     try {
-      if (isNative) {
-        window.open(loginUrl, "_blank", "noopener,noreferrer");
-      } else {
-        window.location.assign(loginUrl);
-      }
+      const { Browser } = await import("@capacitor/browser");
+      const finishListener = await Browser.addListener("browserFinished", async () => {
+        await hydrateSessionAndRedirect();
+        setSigningIn(false);
+        finishListener.remove();
+      });
+
+      setSigningIn(true);
+      await Browser.open({
+        url: loginUrl,
+        presentationStyle: "popover",
+      });
+
+      // Safety unlock in case callback is not fired.
+      window.setTimeout(() => {
+        setSigningIn(false);
+      }, 45000);
     } catch {
-      window.location.href = loginUrl;
+      setSigningIn(false);
+      window.location.assign(loginUrl);
     }
-  }, []);
+  }, [hydrateSessionAndRedirect, isNativeApp]);
+
+  const handleMobileGoogleLogin = useCallback(async () => {
+    if (signingIn) return;
+    await openGoogleBrowserLogin();
+  }, [openGoogleBrowserLogin, signingIn]);
 
   const sendMagicLink = async () => {
     const normalizedEmail = email.trim().toLowerCase();
-
     if (!normalizedEmail) {
       alert(t("emailRequired") || "Email required");
       focusEmailInput();
@@ -150,43 +198,8 @@ export default function Login() {
     }
   };
 
-  // Custom in-app Google login for mobile
-  const handleGoogleLoginInApp = async () => {
-    if (!Capacitor.isNativePlatform()) {
-      // For web, use the normal Google button
-      return;
-    }
-
-    setSigningIn(true);
-    
-    try {
-      // Create a custom Google OAuth flow in-app
-      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-        `client_id=${import.meta.env.VITE_GOOGLE_CLIENT_ID}&` +
-        `redirect_uri=${encodeURIComponent('https://app.aicodeverse.com/auth/callback')}&` +
-        `response_type=code&` +
-        `scope=email profile&` +
-        `access_type=offline`;
-
-      // Open in-app browser
-      const { Browser } = await import('@capacitor/browser');
-      
-      await Browser.open({
-        url: authUrl,
-        presentationStyle: 'popover'
-      });
-
-      // The callback will be handled by the appUrlOpen listener
-    } catch (error) {
-      console.error('Google login error:', error);
-      alert('Google login failed. Please try again.');
-      setSigningIn(false);
-    }
-  };
-
   const continueWithEmail = async () => {
     const normalizedEmail = email.trim().toLowerCase();
-
     if (!normalizedEmail) {
       alert(t("emailRequired") || "Email required");
       focusEmailInput();
@@ -203,7 +216,6 @@ export default function Login() {
       });
 
       const payload = await loginRes.json().catch(() => ({}));
-
       if (!loginRes.ok) {
         const fallback = t("errorTryAgain") || "Unable to login";
         const message = payload.error || (await readApiError(loginRes, fallback));
@@ -212,7 +224,6 @@ export default function Login() {
       }
 
       if (await applyLoginPayload(payload, normalizedEmail)) return;
-
       alert(t("errorTryAgain") || "Login session was not created. Please try again.");
     } catch {
       alert("Unable to reach server. Check internet/API and try again.");
@@ -220,50 +231,6 @@ export default function Login() {
       setSigningIn(false);
     }
   };
-
-  // Mobile OAuth URL callback handler
-  useEffect(() => {
-    if (!Capacitor.isNativePlatform()) return;
-
-    const handleAppUrlOpen = (event) => {
-      const url = event.url;
-      if (url && url.includes('/auth/callback')) {
-        // Extract OAuth credential from URL
-        const urlParams = new URLSearchParams(url.split('?')[1]);
-        const credential = urlParams.get('credential');
-        
-        if (credential) {
-          // Process the OAuth credential
-          apiFetch("/api/auth/google", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ credential }),
-          })
-          .then(async (r) => {
-            const payload = await r.json().catch(() => ({}));
-            if (r.ok) {
-              setUser(payload.user);
-              setAuthToken(payload.token);
-              navigate("/dashboard", { replace: true });
-            } else {
-              alert(payload.error || "Login failed");
-            }
-          })
-          .catch((err) => {
-            console.error("OAuth callback error:", err);
-            alert("Login failed");
-          });
-        }
-      }
-    };
-
-    const listener = App.addListener('appUrlOpen', handleAppUrlOpen);
-    
-    return () => {
-      listener.then(remover => remover.remove());
-    };
-  }, [navigate, setUser]);
 
   useEffect(() => {
     if (!user) return;
@@ -276,6 +243,10 @@ export default function Login() {
     if (!target) return;
     target.innerHTML = "";
     setGoogleUnavailable(false);
+
+    if (isNativeApp) {
+      return;
+    }
 
     const setupGoogleButton = () => {
       if (disposed) return true;
@@ -290,8 +261,6 @@ export default function Login() {
         window.google.accounts.id.initialize({
           client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
           auto_select: !loggedOutFlow,
-          // Use popup mode for both, but handle mobile differently
-          ux_mode: 'popup',
           callback: async (res) => {
             try {
               const r = await apiFetch("/api/auth/google", {
@@ -302,7 +271,6 @@ export default function Login() {
               });
 
               const payload = await r.json().catch(() => ({}));
-
               if (!r.ok) {
                 const msg =
                   payload.error ||
@@ -315,6 +283,8 @@ export default function Login() {
               alert(t("errorTryAgain") || "Login session was not created. Please try again.");
             } catch {
               alert(t("googleLoginFailed") || "Google login failed");
+            } finally {
+              setSigningIn(false);
             }
           },
         });
@@ -353,7 +323,9 @@ export default function Login() {
 
     const timeout = window.setTimeout(() => {
       window.clearInterval(poll);
-      if (!disposed) setGoogleUnavailable(true);
+      if (!disposed) {
+        setGoogleUnavailable(true);
+      }
     }, 5000);
 
     return () => {
@@ -361,7 +333,7 @@ export default function Login() {
       window.clearInterval(poll);
       window.clearTimeout(timeout);
     };
-  }, [applyLoginPayload, loggedOutFlow, readApiError, t]);
+  }, [applyLoginPayload, isNativeApp, loggedOutFlow, readApiError, t]);
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
@@ -397,24 +369,30 @@ export default function Login() {
             {t("signInContinue") || "Sign in to continue your AI journey"}
           </p>
 
-          <div id="googleBtn" className="mb-4 flex justify-center min-h-[44px]" />
-          {/* Always show custom Google login button on mobile */}
-          {Capacitor.isNativePlatform() ? (
+          <div
+            id="googleBtn"
+            className={`${isNativeApp ? "absolute -left-[9999px] top-0" : "mb-4 flex justify-center min-h-[44px]"}`}
+          />
+
+          {isNativeApp ? (
             <button
-              onClick={handleGoogleLoginInApp}
+              onClick={handleMobileGoogleLogin}
               disabled={signingIn}
               className="w-full border border-zinc-300 rounded p-3 mb-4 font-semibold disabled:opacity-60"
             >
-              {signingIn ? "Signing in..." : "Continue with Google"}
+              {signingIn ? "Signing in..." : "Continue in Browser"}
             </button>
-          ) : googleUnavailable && (
-            <button
-              onClick={openGoogleBrowserLogin}
-              className="w-full border border-zinc-300 rounded p-3 mb-4 font-semibold"
-            >
-              Continue with Google
-            </button>
+          ) : (
+            googleUnavailable && (
+              <button
+                onClick={openGoogleBrowserLogin}
+                className="w-full border border-zinc-300 rounded p-3 mb-4 font-semibold"
+              >
+                Continue with Google
+              </button>
+            )
           )}
+
           <div className="text-center text-sm opacity-50 mb-4">{t("or") || "OR"}</div>
 
           <input
@@ -455,4 +433,3 @@ export default function Login() {
     </div>
   );
 }
-
