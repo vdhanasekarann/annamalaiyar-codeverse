@@ -24,6 +24,10 @@ export default function Login() {
     () => new URLSearchParams(window.location.search).get("mobile_app") === "1",
     []
   );
+  const mobileProvider = useMemo(
+    () => new URLSearchParams(window.location.search).get("provider") || "",
+    []
+  );
 
   const isNativeApp = useMemo(() => {
     const cap = window?.Capacitor;
@@ -79,7 +83,15 @@ export default function Login() {
           if (deepLinkEmail) {
             params.set("email", deepLinkEmail);
           }
-          window.location.replace(`com.aicodeverse.app://auth/callback?${params.toString()}`);
+          const query = params.toString();
+          const schemeUrl = `com.aicodeverse.app://auth/callback?${query}`;
+          const intentUrl = `intent://auth/callback?${query}#Intent;scheme=com.aicodeverse.app;package=com.aicodeverse.app;end`;
+          const fallbackUrl = `${window.location.origin}/auth/callback?${query}`;
+          const isAndroid = /android/i.test(navigator.userAgent || "");
+
+          window.location.replace(isAndroid ? intentUrl : schemeUrl);
+          window.setTimeout(() => window.location.replace(schemeUrl), 350);
+          window.setTimeout(() => window.location.replace(fallbackUrl), 1200);
           return true;
         }
       }
@@ -126,7 +138,7 @@ export default function Login() {
       /\/+$/,
       ""
     );
-    const loginUrl = `${appOrigin}/login?mobile_app=1&provider=google`;
+    const loginUrl = `${appOrigin}/login?mobile_app=1&provider=google&v=${Date.now()}`;
 
     if (!isNativeApp) {
       window.location.assign(loginUrl);
@@ -264,37 +276,74 @@ export default function Login() {
           auto_select: isMobileBrowserMode ? false : !loggedOutFlow,
         };
 
-        if (isMobileBrowserMode) {
-          initOptions.ux_mode = "redirect";
-          initOptions.login_uri = `${API_BASE}/api/auth/google-redirect?mobile_app=1`;
-        } else {
-          initOptions.callback = async (res) => {
-            try {
-              const r = await apiFetch("/api/auth/google", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({ credential: res.credential }),
-              });
+        const useMobileRedirectMode = isMobileBrowserMode && !isNativeApp;
 
-              const payload = await r.json().catch(() => ({}));
-              if (!r.ok) {
-                const msg =
-                  payload.error ||
-                  (await readApiError(r, t("googleLoginFailed") || "Google login failed"));
-                alert(msg);
+        if (useMobileRedirectMode) {
+          // Mobile browser (opened from APK): force redirect flow to backend endpoint.
+          // This avoids postMessage/popup limitations on some Android webviews.
+          initOptions.ux_mode = "redirect";
+          initOptions.login_uri = `${API_BASE}/api/auth/google-redirect`;
+        }
+
+        initOptions.callback = async (res) => {
+          if (useMobileRedirectMode) {
+            return;
+          }
+
+          if (isMobileBrowserMode && !isNativeApp) {
+            try {
+              const credential = String(res?.credential || "");
+              if (!credential) {
+                alert(t("googleLoginFailed") || "Google login failed");
                 return;
               }
 
-              if (await applyLoginPayload(payload)) return;
-              alert(t("errorTryAgain") || "Login session was not created. Please try again.");
+              const form = document.createElement("form");
+              form.method = "POST";
+              form.action = `${API_BASE}/api/auth/google-redirect`;
+              form.style.display = "none";
+
+              const input = document.createElement("input");
+              input.type = "hidden";
+              input.name = "credential";
+              input.value = credential;
+              form.appendChild(input);
+
+              document.body.appendChild(form);
+              form.submit();
+              return;
             } catch {
               alert(t("googleLoginFailed") || "Google login failed");
-            } finally {
               setSigningIn(false);
+              return;
             }
-          };
-        }
+          }
+
+          try {
+            const r = await apiFetch("/api/auth/google", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({ credential: res.credential }),
+            });
+
+            const payload = await r.json().catch(() => ({}));
+            if (!r.ok) {
+              const msg =
+                payload.error ||
+                (await readApiError(r, t("googleLoginFailed") || "Google login failed"));
+              alert(msg);
+              return;
+            }
+
+            if (await applyLoginPayload(payload)) return;
+            alert(t("errorTryAgain") || "Login session was not created. Please try again.");
+          } catch {
+            alert(t("googleLoginFailed") || "Google login failed");
+          } finally {
+            setSigningIn(false);
+          }
+        };
 
         window.google.accounts.id.initialize(initOptions);
 
@@ -303,6 +352,20 @@ export default function Login() {
           size: "large",
           width: 320,
         });
+
+        if (isMobileBrowserMode && mobileProvider === "google") {
+          // Give users direct Google flow when browser opens from the app.
+          window.setTimeout(() => {
+            try {
+              const clickTarget = target.querySelector('div[role="button"], button');
+              clickTarget?.dispatchEvent(
+                new MouseEvent("click", { bubbles: true, cancelable: true })
+              );
+            } catch {
+              // ignore
+            }
+          }, 200);
+        }
 
         window.setTimeout(() => {
           if (disposed) return;
@@ -342,7 +405,16 @@ export default function Login() {
       window.clearInterval(poll);
       window.clearTimeout(timeout);
     };
-  }, [API_BASE, applyLoginPayload, isMobileBrowserMode, isNativeApp, loggedOutFlow, readApiError, t]);
+  }, [
+    API_BASE,
+    applyLoginPayload,
+    isMobileBrowserMode,
+    isNativeApp,
+    loggedOutFlow,
+    mobileProvider,
+    readApiError,
+    t,
+  ]);
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">

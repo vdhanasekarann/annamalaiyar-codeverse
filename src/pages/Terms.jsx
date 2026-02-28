@@ -139,9 +139,8 @@ const TERMS_SECTIONS = [
   {
     title: "18. Contact",
     paragraphs: [
-      "Email: hello@aicodeverse.com",
-      "Phone: +91-9600887711",
-      "Company: Annamalaiyar CodeVerse",
+      "Email: codeverseteam@aicodeverse.com",
+      "Company: KANNIZCON IT ENABLING SERVICES (AI CODEVERSE)",
     ],
   },
 ];
@@ -167,6 +166,18 @@ export default function TermsPage() {
               >
                 aicodeverse.com
               </a>
+              {" , "}
+              <a
+                href="https://kannizconites.com"
+                target="_blank"
+                rel="noreferrer"
+                className="underline hover:text-white"
+              >
+                kannizconites.com
+              </a>
+            </p>
+            <p className="text-zinc-300 mt-2">
+              Company: KANNIZCON IT ENABLING SERVICES (AI CODEVERSE)
             </p>
             <p className="text-zinc-400 text-sm">Tamil Nadu, India</p>
             <p className="text-zinc-500 text-xs mt-2">Last Updated: {lastUpdated}</p>
