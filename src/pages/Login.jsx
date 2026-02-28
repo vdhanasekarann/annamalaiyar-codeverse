@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Capacitor } from "@capacitor/core";
 import { apiFetch } from "../lib/apiFetch";
+import { API_BASE } from "../config/api";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import { setAuthToken } from "../lib/authToken";
@@ -78,23 +79,7 @@ export default function Login() {
           if (deepLinkEmail) {
             params.set("email", deepLinkEmail);
           }
-          const query = params.toString();
-          const schemeUrl = `com.aicodeverse.app://auth/callback?${query}`;
-          const intentUrl = `intent://auth/callback?${query}#Intent;scheme=com.aicodeverse.app;package=com.aicodeverse.app;end`;
-          const httpsUrl = `${window.location.origin}/auth/callback?${query}`;
-
-          // Android Chrome Custom Tabs is more reliable with intent:// links.
-          const isAndroid = /android/i.test(navigator.userAgent || "");
-          window.location.replace(isAndroid ? intentUrl : schemeUrl);
-
-          // Fallbacks in case first handoff is blocked by browser policy.
-          window.setTimeout(() => {
-            window.location.replace(schemeUrl);
-          }, 350);
-
-          window.setTimeout(() => {
-            window.location.replace(httpsUrl);
-          }, 1200);
+          window.location.replace(`com.aicodeverse.app://auth/callback?${params.toString()}`);
           return true;
         }
       }
@@ -141,7 +126,7 @@ export default function Login() {
       /\/+$/,
       ""
     );
-    const loginUrl = `${appOrigin}/login?mobile_app=1`;
+    const loginUrl = `${appOrigin}/login?mobile_app=1&provider=google`;
 
     if (!isNativeApp) {
       window.location.assign(loginUrl);
@@ -274,10 +259,16 @@ export default function Login() {
           window.google.accounts.id.cancel();
         }
 
-        window.google.accounts.id.initialize({
+        const initOptions = {
           client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-          auto_select: !loggedOutFlow,
-          callback: async (res) => {
+          auto_select: isMobileBrowserMode ? false : !loggedOutFlow,
+        };
+
+        if (isMobileBrowserMode) {
+          initOptions.ux_mode = "redirect";
+          initOptions.login_uri = `${API_BASE}/api/auth/google-redirect?mobile_app=1`;
+        } else {
+          initOptions.callback = async (res) => {
             try {
               const r = await apiFetch("/api/auth/google", {
                 method: "POST",
@@ -302,8 +293,10 @@ export default function Login() {
             } finally {
               setSigningIn(false);
             }
-          },
-        });
+          };
+        }
+
+        window.google.accounts.id.initialize(initOptions);
 
         window.google.accounts.id.renderButton(target, {
           theme: "outline",
@@ -349,7 +342,7 @@ export default function Login() {
       window.clearInterval(poll);
       window.clearTimeout(timeout);
     };
-  }, [applyLoginPayload, isNativeApp, loggedOutFlow, readApiError, t]);
+  }, [API_BASE, applyLoginPayload, isMobileBrowserMode, isNativeApp, loggedOutFlow, readApiError, t]);
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">

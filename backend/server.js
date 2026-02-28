@@ -223,6 +223,7 @@ app.post(
   razorpayWebhook
 );
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 /* ---------- RAZORPAY ---------- */
 const razorpay = new Razorpay({
@@ -378,104 +379,176 @@ function getAllowedGoogleAudiences() {
   return [...set];
 }
 
+async function verifyGoogleCredential(credential) {
+  const audiences = getAllowedGoogleAudiences();
+  let ticket = null;
+  let usedAudienceFallback = false;
+
+  try {
+    const verifyOptions = { idToken: credential };
+    if (audiences.length) {
+      verifyOptions.audience = audiences;
+    }
+    ticket = await googleClient.verifyIdToken(verifyOptions);
+  } catch (primaryErr) {
+    try {
+      ticket = await googleClient.verifyIdToken({ idToken: credential });
+      usedAudienceFallback = true;
+    } catch (fallbackErr) {
+      const err = new Error("GOOGLE_VERIFY_FAILED");
+      err.meta = {
+        primary: primaryErr?.message,
+        fallback: fallbackErr?.message,
+        audiencesConfigured: audiences.length,
+      };
+      throw err;
+    }
+  }
+
+  const payload = ticket.getPayload() || {};
+  if (payload.email_verified === false) {
+    const err = new Error("GOOGLE_EMAIL_NOT_VERIFIED");
+    throw err;
+  }
+
+  const tokenAudience = String(payload.aud || "");
+  const audienceMatched = !audiences.length || audiences.includes(tokenAudience);
+  const strictAudience = String(process.env.GOOGLE_STRICT_AUDIENCE || "").toLowerCase() === "true";
+
+  if (!audienceMatched && strictAudience) {
+    const err = new Error("GOOGLE_AUDIENCE_MISMATCH");
+    err.meta = { tokenAudience, audiencesConfigured: audiences };
+    throw err;
+  }
+
+  if (!audienceMatched) {
+    console.warn("Google OAuth audience mismatch accepted:", {
+      tokenAudience,
+      audiencesConfigured: audiences,
+      usedAudienceFallback,
+    });
+  }
+
+  const email = normalizeEmail(payload.email);
+  if (!email) {
+    const err = new Error("GOOGLE_EMAIL_MISSING");
+    throw err;
+  }
+
+  return { email, payload };
+}
+
+async function issueSessionForEmail(email) {
+  await upsertUserByEmail(email);
+
+  const r = await db.query(
+    "SELECT email, role, plan, token_version FROM users WHERE email=$1",
+    [email]
+  );
+
+  if (!r.rows.length) {
+    const err = new Error("USER_NOT_FOUND");
+    throw err;
+  }
+
+  const user = r.rows[0];
+  const tokenPlan = await resolveUserPlanForToken(user.email, user.plan);
+
+  const token = buildAuthToken({
+    email: user.email,
+    role: user.role || "user",
+    plan: tokenPlan,
+    tokenVersion: Number(user.token_version ?? 0),
+  });
+
+  return {
+    token,
+    user: {
+      email: user.email,
+      role: user.role || "user",
+      plan: tokenPlan,
+    },
+  };
+}
+
 app.post("/api/auth/google", authRateLimiter, async (req, res) => {
   try {
     const { credential } = req.body;
     if (!credential) {
       return res.status(400).json({ error: "Missing credential" });
     }
+    const { email } = await verifyGoogleCredential(credential);
+    const session = await issueSessionForEmail(email);
 
-    const audiences = getAllowedGoogleAudiences();
-    let ticket = null;
-    let usedAudienceFallback = false;
-
-    try {
-      const verifyOptions = { idToken: credential };
-      if (audiences.length) {
-        verifyOptions.audience = audiences;
-      }
-      ticket = await googleClient.verifyIdToken(verifyOptions);
-    } catch (primaryErr) {
-      // Fallback: verify signature/expiry without audience pinning,
-      // then enforce audience against configured IDs if present.
-      try {
-        ticket = await googleClient.verifyIdToken({ idToken: credential });
-        usedAudienceFallback = true;
-      } catch (fallbackErr) {
-        console.error("Google OAuth verify failed:", {
-          primary: primaryErr?.message,
-          fallback: fallbackErr?.message,
-          audiencesConfigured: audiences.length,
-        });
-        return res.status(401).json({ error: "Google authentication failed" });
-      }
-    }
-
-    const payload = ticket.getPayload() || {};
-    if (payload.email_verified === false) {
-      return res.status(401).json({ error: "Google account email is not verified" });
-    }
-
-    const tokenAudience = String(payload.aud || "");
-    const audienceMatched = !audiences.length || audiences.includes(tokenAudience);
-    const strictAudience = String(process.env.GOOGLE_STRICT_AUDIENCE || "").toLowerCase() === "true";
-
-    if (!audienceMatched && strictAudience) {
-      console.error("Google OAuth audience mismatch (strict mode):", {
-        tokenAudience,
-        audiencesConfigured: audiences,
-      });
-      return res.status(401).json({ error: "Google authentication failed" });
-    }
-
-    if (!audienceMatched) {
-      console.warn("Google OAuth audience mismatch accepted:", {
-        tokenAudience,
-        audiencesConfigured: audiences,
-        usedAudienceFallback,
-      });
-    }
-
-    const email = normalizeEmail(payload.email);
-    if (!email) {
-      return res.status(400).json({ error: "Google account email not available" });
-    }
-
-    await upsertUserByEmail(email);
-
-    const r = await db.query(
-      "SELECT email, role, plan, token_version FROM users WHERE email=$1",
-      [email]
-    );
-
-    if (!r.rows.length) {
-      return res.status(404).json({ error: "User record not found" });
-    }
-
-    const user = r.rows[0];
-    const tokenPlan = await resolveUserPlanForToken(user.email, user.plan);
-
-    const token = buildAuthToken({
-      email: user.email,
-      role: user.role || "user",
-      plan: tokenPlan,
-      tokenVersion: Number(user.token_version ?? 0),
-    });
-
-    setAuthCookie(res, token);
+    setAuthCookie(res, session.token);
 
     res.json({
       ok: true,
-      token,
-      user: {
-        email: user.email,
-        role: user.role || "user",
-        plan: tokenPlan,
-      },
+      token: session.token,
+      user: session.user,
     });
   } catch (err) {
-    console.error("Google OAuth error:", err);
+    console.error("Google OAuth error:", err?.meta || err?.message || err);
+    if (err?.message === "GOOGLE_EMAIL_NOT_VERIFIED") {
+      return res.status(401).json({ error: "Google account email is not verified" });
+    }
+    if (err?.message === "GOOGLE_EMAIL_MISSING") {
+      return res.status(400).json({ error: "Google account email not available" });
+    }
+    if (err?.message === "USER_NOT_FOUND") {
+      return res.status(404).json({ error: "User record not found" });
+    }
     res.status(401).json({ error: "Google authentication failed" });
+  }
+});
+
+app.post("/api/auth/google-redirect", authRateLimiter, async (req, res) => {
+  try {
+    const credential = String(req.body?.credential || "");
+    if (!credential) {
+      return res.status(400).send("Missing credential");
+    }
+
+    const { email } = await verifyGoogleCredential(credential);
+    const session = await issueSessionForEmail(email);
+    setAuthCookie(res, session.token);
+
+    const params = new URLSearchParams({
+      token: session.token,
+      email: session.user.email,
+    });
+
+    const deepLink = `com.aicodeverse.app://auth/callback?${params.toString()}`;
+    const webFallback = `${process.env.FRONTEND_URL}/auth/callback?${params.toString()}`;
+
+    const html = `<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Returning to App...</title>
+  </head>
+  <body style="font-family: Arial, sans-serif; padding: 24px;">
+    <h2>Signing you in...</h2>
+    <p>Returning to CodeVerse app.</p>
+    <p><a href="${deepLink}">Tap here if app does not open automatically</a></p>
+    <script>
+      (function() {
+        var deepLink = ${JSON.stringify(deepLink)};
+        var webFallback = ${JSON.stringify(webFallback)};
+        window.location.replace(deepLink);
+        setTimeout(function() {
+          window.location.replace(webFallback);
+        }, 1200);
+      })();
+    </script>
+  </body>
+</html>`;
+
+    res.status(200).set("Content-Type", "text/html; charset=utf-8").send(html);
+  } catch (err) {
+    console.error("Google redirect OAuth error:", err?.meta || err?.message || err);
+    res.status(401).send("Google authentication failed");
   }
 });
 
