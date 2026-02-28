@@ -15,6 +15,7 @@ export default function Login() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { user, setUser, refreshUser } = useAuth();
+  const apiOrigin = useMemo(() => String(API_BASE || "").replace(/\/+$/, ""), []);
 
   const loggedOutFlow = useMemo(
     () => new URLSearchParams(window.location.search).get("logged_out") === "1",
@@ -282,7 +283,7 @@ export default function Login() {
           // Mobile browser (opened from APK): force redirect flow to backend endpoint.
           // This avoids postMessage/popup limitations on some Android webviews.
           initOptions.ux_mode = "redirect";
-          initOptions.login_uri = `${API_BASE}/api/auth/google-redirect`;
+          initOptions.login_uri = `${apiOrigin}/api/auth/google-redirect`;
         }
 
         initOptions.callback = async (res) => {
@@ -300,7 +301,7 @@ export default function Login() {
 
               const form = document.createElement("form");
               form.method = "POST";
-              form.action = `${API_BASE}/api/auth/google-redirect`;
+              form.action = `${apiOrigin}/api/auth/google-redirect`;
               form.style.display = "none";
 
               const input = document.createElement("input");
@@ -406,7 +407,7 @@ export default function Login() {
       window.clearTimeout(timeout);
     };
   }, [
-    API_BASE,
+    apiOrigin,
     applyLoginPayload,
     isMobileBrowserMode,
     isNativeApp,
