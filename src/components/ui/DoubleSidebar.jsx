@@ -36,7 +36,10 @@ export default function DoubleSidebar({ mobile = false, onNavigate }) {
 
   if (mobile) {
     return (
-      <aside className="h-full px-3 py-4 flex flex-col text-white">
+      <aside
+        className="h-full px-3 pt-4 flex flex-col text-white"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 72px)" }}
+      >
         <div className="mb-3 rounded-2xl border border-white/15 bg-white/5 p-3 backdrop-blur-xl">
           <div className="flex items-center gap-2">
             <img
@@ -51,7 +54,7 @@ export default function DoubleSidebar({ mobile = false, onNavigate }) {
           </div>
         </div>
 
-        <nav className="space-y-1.5 flex-1 overflow-y-auto pr-1">
+        <nav className="space-y-1.5 flex-1 overflow-y-auto pr-1 pb-2">
           {items.map((i) => (
             <Link
               key={i.path}
@@ -71,7 +74,7 @@ export default function DoubleSidebar({ mobile = false, onNavigate }) {
             </Link>
           ))}
         </nav>
-        <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 p-2 backdrop-blur-xl">
+        <div className="mt-3 mb-1 rounded-2xl border border-white/10 bg-white/5 p-2 backdrop-blur-xl">
           <SidebarProfile compact />
         </div>
       </aside>

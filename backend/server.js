@@ -225,6 +225,10 @@ app.post(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.get("/api/health", (_, res) => {
+  res.json({ ok: true, service: "codeverse-api", ts: Date.now() });
+});
+
 /* ---------- RAZORPAY ---------- */
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -502,26 +506,25 @@ app.post("/api/auth/google", authRateLimiter, async (req, res) => {
   }
 });
 
-app.post("/api/auth/google-redirect", authRateLimiter, async (req, res) => {
-  try {
-    const credential = String(req.body?.credential || "");
-    if (!credential) {
-      return res.status(400).send("Missing credential");
-    }
+function buildGoogleRedirectTargets(session) {
+  const params = new URLSearchParams({
+    token: session.token,
+    email: session.user.email,
+  });
 
-    const { email } = await verifyGoogleCredential(credential);
-    const session = await issueSessionForEmail(email);
-    setAuthCookie(res, session.token);
+  const query = params.toString();
+  const deepLink = `com.aicodeverse.app://auth/callback?${query}`;
+  const webFallback = `${process.env.FRONTEND_URL}/auth/callback?${query}`;
+  const intentLink =
+    `intent://auth/callback?${query}` +
+    `#Intent;scheme=com.aicodeverse.app;package=com.aicodeverse.app;` +
+    `S.browser_fallback_url=${encodeURIComponent(webFallback)};end`;
 
-    const params = new URLSearchParams({
-      token: session.token,
-      email: session.user.email,
-    });
+  return { deepLink, intentLink, webFallback };
+}
 
-    const deepLink = `com.aicodeverse.app://auth/callback?${params.toString()}`;
-    const webFallback = `${process.env.FRONTEND_URL}/auth/callback?${params.toString()}`;
-
-    const html = `<!doctype html>
+function renderGoogleRedirectHtml({ deepLink, intentLink, webFallback }) {
+  return `<!doctype html>
 <html>
   <head>
     <meta charset="utf-8" />
@@ -531,24 +534,90 @@ app.post("/api/auth/google-redirect", authRateLimiter, async (req, res) => {
   <body style="font-family: Arial, sans-serif; padding: 24px;">
     <h2>Signing you in...</h2>
     <p>Returning to CodeVerse app.</p>
-    <p><a href="${deepLink}">Tap here if app does not open automatically</a></p>
+    <p><a id="open-app-link" href="${deepLink}">Tap here if app does not open automatically</a></p>
     <script>
       (function() {
         var deepLink = ${JSON.stringify(deepLink)};
+        var intentLink = ${JSON.stringify(intentLink)};
         var webFallback = ${JSON.stringify(webFallback)};
-        window.location.replace(deepLink);
+        var isAndroid = /android/i.test(navigator.userAgent || "");
+        var primary = isAndroid ? intentLink : deepLink;
+        var link = document.getElementById("open-app-link");
+        if (link) link.href = primary;
+
+        // Try multiple handoff strategies; different mobile browsers handle these differently.
+        window.location.href = primary;
+        setTimeout(function() {
+          window.location.href = deepLink;
+        }, 350);
         setTimeout(function() {
           window.location.replace(webFallback);
-        }, 1200);
+        }, 1800);
       })();
     </script>
   </body>
 </html>`;
+}
 
-    res.status(200).set("Content-Type", "text/html; charset=utf-8").send(html);
+async function respondGoogleRedirect(res, credential) {
+  const { email } = await verifyGoogleCredential(credential);
+  const session = await issueSessionForEmail(email);
+  setAuthCookie(res, session.token);
+
+  const targets = buildGoogleRedirectTargets(session);
+  const html = renderGoogleRedirectHtml(targets);
+  res.status(200).set("Content-Type", "text/html; charset=utf-8").send(html);
+}
+
+app.post("/api/auth/google-redirect", authRateLimiter, async (req, res) => {
+  try {
+    const credential = String(req.body?.credential || "");
+    if (!credential) {
+      return res.status(400).send("Missing credential");
+    }
+
+    await respondGoogleRedirect(res, credential);
   } catch (err) {
     console.error("Google redirect OAuth error:", err?.meta || err?.message || err);
     res.status(401).send("Google authentication failed");
+  }
+});
+
+app.get("/api/auth/google-redirect", authRateLimiter, async (req, res) => {
+  try {
+    const credential = String(req.query?.credential || "");
+    if (credential) {
+      await respondGoogleRedirect(res, credential);
+      return;
+    }
+
+    // If browser revisits this URL without credential, reuse current auth cookie when available.
+    const existingToken = String(req.cookies?.auth || "");
+    if (existingToken) {
+      let email = "";
+      try {
+        const payload = jwt.verify(existingToken, process.env.JWT_SECRET);
+        email = normalizeEmail(payload?.email);
+      } catch {
+        // Fall through to login restart below.
+      }
+
+      if (email) {
+        const html = renderGoogleRedirectHtml(
+          buildGoogleRedirectTargets({
+            token: existingToken,
+            user: { email },
+          })
+        );
+        res.status(200).set("Content-Type", "text/html; charset=utf-8").send(html);
+        return;
+      }
+    }
+
+    res.redirect(`${process.env.FRONTEND_URL}/login?mobile_app=1&provider=google`);
+  } catch (err) {
+    console.error("Google redirect GET error:", err?.meta || err?.message || err);
+    res.redirect(`${process.env.FRONTEND_URL}/login?mobile_app=1&provider=google`);
   }
 });
 

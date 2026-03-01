@@ -147,6 +147,22 @@ export default function Login() {
     }
 
     try {
+      // Wake API before OAuth to reduce Render cold-start interruption page.
+      try {
+        const ctl = new AbortController();
+        const timer = window.setTimeout(() => ctl.abort(), 4500);
+        await fetch(`${apiOrigin}/api/health?ts=${Date.now()}`, {
+          method: "GET",
+          mode: "cors",
+          credentials: "include",
+          cache: "no-store",
+          signal: ctl.signal,
+        });
+        window.clearTimeout(timer);
+      } catch {
+        // Non-fatal warmup failure.
+      }
+
       const { Browser } = await import("@capacitor/browser");
       const finishListener = await Browser.addListener("browserFinished", async () => {
         await hydrateSessionAndRedirect();
@@ -168,7 +184,7 @@ export default function Login() {
       setSigningIn(false);
       window.location.assign(loginUrl);
     }
-  }, [hydrateSessionAndRedirect, isNativeApp]);
+  }, [apiOrigin, hydrateSessionAndRedirect, isNativeApp]);
 
   const handleMobileGoogleLogin = useCallback(async () => {
     if (signingIn) return;
