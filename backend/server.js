@@ -559,12 +559,25 @@ function renderGoogleRedirectHtml({ deepLink, intentLink, webFallback }) {
 </html>`;
 }
 
-async function respondGoogleRedirect(res, credential) {
+function isAndroidRequest(req) {
+  const ua = String(req.headers?.["user-agent"] || "");
+  return /android/i.test(ua);
+}
+
+async function respondGoogleRedirect(req, res, credential) {
   const { email } = await verifyGoogleCredential(credential);
   const session = await issueSessionForEmail(email);
   setAuthCookie(res, session.token);
 
   const targets = buildGoogleRedirectTargets(session);
+  if (isAndroidRequest(req)) {
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
+    res.set("Pragma", "no-cache");
+    res.set("Expires", "0");
+    res.redirect(302, targets.intentLink);
+    return;
+  }
+
   const html = renderGoogleRedirectHtml(targets);
   res.status(200).set("Content-Type", "text/html; charset=utf-8").send(html);
 }
@@ -576,7 +589,7 @@ app.post("/api/auth/google-redirect", authRateLimiter, async (req, res) => {
       return res.status(400).send("Missing credential");
     }
 
-    await respondGoogleRedirect(res, credential);
+    await respondGoogleRedirect(req, res, credential);
   } catch (err) {
     console.error("Google redirect OAuth error:", err?.meta || err?.message || err);
     res.status(401).send("Google authentication failed");
@@ -587,7 +600,7 @@ app.get("/api/auth/google-redirect", authRateLimiter, async (req, res) => {
   try {
     const credential = String(req.query?.credential || "");
     if (credential) {
-      await respondGoogleRedirect(res, credential);
+      await respondGoogleRedirect(req, res, credential);
       return;
     }
 
@@ -603,11 +616,17 @@ app.get("/api/auth/google-redirect", authRateLimiter, async (req, res) => {
       }
 
       if (email) {
+        const targets = buildGoogleRedirectTargets({
+          token: existingToken,
+          user: { email },
+        });
+        if (isAndroidRequest(req)) {
+          res.redirect(302, targets.intentLink);
+          return;
+        }
+
         const html = renderGoogleRedirectHtml(
-          buildGoogleRedirectTargets({
-            token: existingToken,
-            user: { email },
-          })
+          targets
         );
         res.status(200).set("Content-Type", "text/html; charset=utf-8").send(html);
         return;
