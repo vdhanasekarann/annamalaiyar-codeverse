@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Pencil, Save, Trash2, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
+const DELETE_ACCOUNT_URL = "https://app.aicodeverse.com/delete-account";
+
 function normalizeProfile(user, saved) {
   const fallbackName = user?.email ? user.email.split("@")[0] : "User";
   return {
@@ -162,9 +164,16 @@ export default function SidebarProfile({ compact = false }) {
           onClick={removeProfile}
           className="flex items-center gap-1 text-xs px-2 py-1 rounded border border-red-400/40 text-red-300"
         >
-          <Trash2 className="w-3 h-3" /> Delete
+          <Trash2 className="w-3 h-3" /> Delete Profile
         </button>
       </div>
+
+      <a
+        href={DELETE_ACCOUNT_URL}
+        className="mt-2 inline-flex items-center gap-1 text-xs px-2 py-1 rounded border border-red-500/40 text-red-200 bg-red-600/10 hover:bg-red-600/20"
+      >
+        <Trash2 className="w-3 h-3" /> Delete Account
+      </a>
     </div>
   );
 }

@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import GPTDetails from "./pages/GPTDetails";
 const ReviewsPage = React.lazy(() => import("./pages/Reviews"));
 import Terms from "./pages/Terms";
+import DeleteAccount from "./pages/DeleteAccount";
 
 const GPTsPage = React.lazy(() => import("./pages/GPTs"));
 
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/magic-login" element={<MagicLogin />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/delete-account" element={<DeleteAccount />} />
 
         {/* PROTECTED APP ROUTES */}
         <Route

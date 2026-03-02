@@ -15,10 +15,34 @@ import { ThemeProvider } from "./context/ThemeContext";
 import "./styles/motion.css";
 import { setAuthToken } from "./lib/authToken";
 
-if ("serviceWorker" in navigator && import.meta.env.PROD) {
+if ("serviceWorker" in navigator && import.meta.env.PROD && !Capacitor.isNativePlatform()) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch((err) => {
-      console.warn("Service worker registration failed:", err);
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then((registration) => {
+        registration.addEventListener("updatefound", () => {
+          const installingWorker = registration.installing;
+          if (!installingWorker) return;
+
+          installingWorker.addEventListener("statechange", () => {
+            if (
+              installingWorker.state === "installed" &&
+              navigator.serviceWorker.controller
+            ) {
+              installingWorker.postMessage({ type: "SKIP_WAITING" });
+            }
+          });
+        });
+      })
+      .catch((err) => {
+        console.warn("Service worker registration failed:", err);
+      });
+
+    let isRefreshing = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (isRefreshing) return;
+      isRefreshing = true;
+      window.location.reload();
     });
   });
 }

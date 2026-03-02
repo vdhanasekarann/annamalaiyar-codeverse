@@ -6,6 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "pwa:icons": "powershell -ExecutionPolicy Bypass -File scripts/generate-pwa-icons.ps1",
+    "release:all": "powershell -ExecutionPolicy Bypass -File scripts/build-publish-phone-test.ps1 -Provider none -PhoneTest both",
+    "release:vercel": "powershell -ExecutionPolicy Bypass -File scripts/build-publish-phone-test.ps1 -Provider vercel -PhoneTest both",
+    "release:firebase": "powershell -ExecutionPolicy Bypass -File scripts/build-publish-phone-test.ps1 -Provider firebase -PhoneTest both",
+    "test:phone:pwa": "powershell -ExecutionPolicy Bypass -File scripts/build-publish-phone-test.ps1 -Provider none -SkipBuild -SkipPublish -PhoneTest pwa",
+    "test:phone:apk": "powershell -ExecutionPolicy Bypass -File scripts/build-publish-phone-test.ps1 -Provider none -SkipBuild -SkipPublish -PhoneTest apk",
     "lint": "eslint .",
     "preview": "vite preview",
     "mobile:sync": "npx cap sync",
