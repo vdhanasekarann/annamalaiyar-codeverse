@@ -189,6 +189,28 @@ function buildAuthToken({ email, role, plan, tokenVersion }) {
 
 const csrfProtection = csrf({ cookie: true });
 
+function shouldBypassCsrfForNativeToken(req) {
+  const authHeader = String(req.headers.authorization || "");
+  const hasBearerToken = authHeader.startsWith("Bearer ");
+  const hasDeviceId = Boolean(req.headers["x-device-id"]);
+  const origin = String(req.headers.origin || "");
+  const isNativeOrigin =
+    origin === "capacitor://localhost" ||
+    origin === "ionic://localhost" ||
+    origin === "http://localhost" ||
+    origin === "https://localhost";
+
+  // Native app requests are bearer-token authenticated and are not cookie-auth CSRF vectors.
+  return hasBearerToken && hasDeviceId && (!origin || isNativeOrigin);
+}
+
+function csrfUnlessNativeToken(req, res, next) {
+  if (shouldBypassCsrfForNativeToken(req)) {
+    return next();
+  }
+  return csrfProtection(req, res, next);
+}
+
 // NOTE: make sure you don't register the razorpay webhook twice.
 // (We removed any prior shorthand registration; the explicit handler is included below.)
 
@@ -268,7 +290,7 @@ app.post("/api/account/devices/register", requireUser, async (req, res) => {
   res.json({ ok: true });
 });
 
-app.post("/api/create-order", csrfProtection, paymentRateLimiter, requireUser, async (req, res) => {
+app.post("/api/create-order", csrfUnlessNativeToken, paymentRateLimiter, requireUser, async (req, res) => {
   try {
     const { plan } = req.body || {};
     const email = req.user?.email;
@@ -956,7 +978,7 @@ app.get("/api/admin/payments", requireAdmin, async (req, res) => {
   res.json(r.rows);
 });
 
-app.post("/api/razorpay/verify", csrfProtection, paymentRateLimiter, requireUser, async (req, res) => {
+app.post("/api/razorpay/verify", csrfUnlessNativeToken, paymentRateLimiter, requireUser, async (req, res) => {
   const traceId = crypto.randomUUID();
   try {
     const { payment_id, order_id, razorpay_signature } = req.body || {};

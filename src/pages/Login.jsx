@@ -7,11 +7,18 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import { setAuthToken } from "../lib/authToken";
 
+const PLAY_REVIEW_EMAIL = "playreview@aicodeverse.com";
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [sendingMagic, setSendingMagic] = useState(false);
-  const [signingIn, setSigningIn] = useState(false);
+  const [emailSigningIn, setEmailSigningIn] = useState(false);
+  const [browserSigningIn, setBrowserSigningIn] = useState(false);
   const [googleUnavailable, setGoogleUnavailable] = useState(false);
+  const [isDesktopViewport, setIsDesktopViewport] = useState(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return false;
+    return window.matchMedia("(min-width: 768px)").matches;
+  });
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { user, setUser, refreshUser } = useAuth();
@@ -29,6 +36,9 @@ export default function Login() {
     () => new URLSearchParams(window.location.search).get("provider") || "",
     []
   );
+  const isReviewMode = useMemo(() => {
+    return new URLSearchParams(window.location.search).get("play_review") === "1";
+  }, []);
 
   const isNativeApp = useMemo(() => {
     const cap = window?.Capacitor;
@@ -39,7 +49,6 @@ export default function Login() {
       Capacitor?.isNativePlatform?.()
     );
   }, []);
-
   const hydrateSessionAndRedirect = useCallback(async () => {
     const me = await refreshUser({
       retries: 6,
@@ -166,11 +175,11 @@ export default function Login() {
       const { Browser } = await import("@capacitor/browser");
       const finishListener = await Browser.addListener("browserFinished", async () => {
         await hydrateSessionAndRedirect();
-        setSigningIn(false);
+        setBrowserSigningIn(false);
         finishListener.remove();
       });
 
-      setSigningIn(true);
+      setBrowserSigningIn(true);
       await Browser.open({
         url: loginUrl,
         presentationStyle: "popover",
@@ -178,18 +187,18 @@ export default function Login() {
 
       // Safety unlock in case callback is not fired.
       window.setTimeout(() => {
-        setSigningIn(false);
+        setBrowserSigningIn(false);
       }, 45000);
     } catch {
-      setSigningIn(false);
+      setBrowserSigningIn(false);
       window.location.assign(loginUrl);
     }
   }, [apiOrigin, hydrateSessionAndRedirect, isNativeApp]);
 
   const handleMobileGoogleLogin = useCallback(async () => {
-    if (signingIn) return;
+    if (browserSigningIn || emailSigningIn || sendingMagic) return;
     await openGoogleBrowserLogin();
-  }, [openGoogleBrowserLogin, signingIn]);
+  }, [browserSigningIn, emailSigningIn, openGoogleBrowserLogin, sendingMagic]);
 
   const sendMagicLink = async () => {
     const normalizedEmail = email.trim().toLowerCase();
@@ -228,6 +237,39 @@ export default function Login() {
     }
   };
 
+  const loginWithEmail = useCallback(
+    async (rawEmail) => {
+      const normalizedEmail = String(rawEmail || "").trim().toLowerCase();
+      if (!normalizedEmail) return;
+
+      try {
+        setEmailSigningIn(true);
+        const loginRes = await apiFetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ email: normalizedEmail }),
+        });
+
+        const payload = await loginRes.json().catch(() => ({}));
+        if (!loginRes.ok) {
+          const fallback = t("errorTryAgain") || "Unable to login";
+          const message = payload.error || (await readApiError(loginRes, fallback));
+          alert(message);
+          return;
+        }
+
+        if (await applyLoginPayload(payload, normalizedEmail)) return;
+        alert(t("errorTryAgain") || "Login session was not created. Please try again.");
+      } catch {
+        alert("Unable to reach server. Check internet/API and try again.");
+      } finally {
+        setEmailSigningIn(false);
+      }
+    },
+    [applyLoginPayload, readApiError, t]
+  );
+
   const continueWithEmail = async () => {
     const normalizedEmail = email.trim().toLowerCase();
     if (!normalizedEmail) {
@@ -236,31 +278,25 @@ export default function Login() {
       return;
     }
 
-    try {
-      setSigningIn(true);
-      const loginRes = await apiFetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email: normalizedEmail }),
-      });
-
-      const payload = await loginRes.json().catch(() => ({}));
-      if (!loginRes.ok) {
-        const fallback = t("errorTryAgain") || "Unable to login";
-        const message = payload.error || (await readApiError(loginRes, fallback));
-        alert(message);
-        return;
-      }
-
-      if (await applyLoginPayload(payload, normalizedEmail)) return;
-      alert(t("errorTryAgain") || "Login session was not created. Please try again.");
-    } catch {
-      alert("Unable to reach server. Check internet/API and try again.");
-    } finally {
-      setSigningIn(false);
-    }
+    await loginWithEmail(normalizedEmail);
   };
+
+  const continueAsPlayReviewer = async () => {
+    await loginWithEmail(PLAY_REVIEW_EMAIL);
+  };
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+
+    const mediaQuery = window.matchMedia("(min-width: 768px)");
+    const onChange = (event) => setIsDesktopViewport(event.matches);
+    setIsDesktopViewport(mediaQuery.matches);
+    mediaQuery.addEventListener("change", onChange);
+
+    return () => {
+      mediaQuery.removeEventListener("change", onChange);
+    };
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -331,12 +367,13 @@ export default function Login() {
               return;
             } catch {
               alert(t("googleLoginFailed") || "Google login failed");
-              setSigningIn(false);
+              setBrowserSigningIn(false);
               return;
             }
           }
 
           try {
+            setBrowserSigningIn(true);
             const r = await apiFetch("/api/auth/google", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -358,7 +395,7 @@ export default function Login() {
           } catch {
             alert(t("googleLoginFailed") || "Google login failed");
           } finally {
-            setSigningIn(false);
+            setBrowserSigningIn(false);
           }
         };
 
@@ -434,10 +471,19 @@ export default function Login() {
   ]);
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
-      <div className="w-full md:w-1/2 relative flex-shrink-0">
+    <div
+      className="min-h-screen flex flex-col md:flex-row"
+      style={{ minHeight: "100vh", display: "flex", flexDirection: isDesktopViewport ? "row" : "column" }}
+    >
+      <div
+        className="w-full md:w-1/2 relative flex-shrink-0"
+        style={{ width: isDesktopViewport ? "50%" : "100%", position: "relative" }}
+      >
         <div className="absolute inset-0 bg-gradient-to-br from-orange-400 via-indigo-500 to-black opacity-90" />
-        <div className="relative z-10 text-white p-8 md:p-16 flex flex-col justify-center">
+        <div
+          className="relative z-10 text-white p-8 md:p-16 flex flex-col justify-center"
+          style={{ position: "relative", zIndex: 10, color: "#fff", padding: isDesktopViewport ? "4rem" : "2rem" }}
+        >
           <h1 className="text-3xl md:text-4xl font-bold mb-3">AI CodeVerse OS</h1>
           <p className="text-base md:text-xl mb-4 leading-snug">
             Create. Build. Launch.
@@ -449,10 +495,20 @@ export default function Login() {
             <br />
             Start free. Upgrade anytime.
           </p>
-          <div className="hidden md:block">
+          <div className="hidden md:block" style={{ display: isDesktopViewport ? "block" : "none" }}>
             <button
               onClick={focusEmailInput}
               className="mt-2 inline-flex items-center px-4 py-2 rounded-lg bg-yellow-500 text-black font-semibold hover:opacity-95"
+              style={{
+                marginTop: "0.5rem",
+                display: "inline-flex",
+                alignItems: "center",
+                padding: "0.5rem 1rem",
+                borderRadius: "0.5rem",
+                backgroundColor: "#eab308",
+                color: "#111",
+                fontWeight: 600,
+              }}
             >
               Continue
             </button>
@@ -460,8 +516,18 @@ export default function Login() {
         </div>
       </div>
 
-      <div className="flex w-full md:w-1/2 items-center justify-center bg-white text-black">
-        <div className="w-full max-w-md p-10">
+      <div
+        className="flex w-full md:w-1/2 items-center justify-center bg-white text-black"
+        style={{
+          display: "flex",
+          width: isDesktopViewport ? "50%" : "100%",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#fff",
+          color: "#111",
+        }}
+      >
+        <div className="w-full max-w-md p-10" style={{ width: "100%", maxWidth: "28rem", padding: "2rem" }}>
           <h2 className="text-2xl font-semibold mb-2">{t("welcomeBack") || "Welcome Back"}</h2>
           <p className="text-sm opacity-60 mb-6">
             {t("signInContinue") || "Sign in to continue your AI journey"}
@@ -470,21 +536,42 @@ export default function Login() {
           <div
             id="googleBtn"
             className={`${isNativeApp ? "absolute -left-[9999px] top-0" : "mb-4 flex justify-center min-h-[44px]"}`}
+            style={
+              isNativeApp
+                ? { display: "none" }
+                : { marginBottom: "1rem", display: "flex", justifyContent: "center", minHeight: "44px" }
+            }
           />
 
           {isNativeApp ? (
             <button
               onClick={handleMobileGoogleLogin}
-              disabled={signingIn}
+              disabled={browserSigningIn || emailSigningIn || sendingMagic}
               className="w-full border border-zinc-300 rounded p-3 mb-4 font-semibold disabled:opacity-60"
+              style={{
+                width: "100%",
+                border: "1px solid #d4d4d8",
+                borderRadius: "0.5rem",
+                padding: "0.75rem",
+                marginBottom: "1rem",
+                fontWeight: 600,
+              }}
             >
-              {signingIn ? "Signing in..." : "Continue in Browser"}
+              {browserSigningIn ? "Signing in..." : "Continue in Browser"}
             </button>
           ) : (
             googleUnavailable && (
               <button
                 onClick={openGoogleBrowserLogin}
                 className="w-full border border-zinc-300 rounded p-3 mb-4 font-semibold"
+                style={{
+                  width: "100%",
+                  border: "1px solid #d4d4d8",
+                  borderRadius: "0.5rem",
+                  padding: "0.75rem",
+                  marginBottom: "1rem",
+                  fontWeight: 600,
+                }}
               >
                 Continue with Google
               </button>
@@ -493,11 +580,53 @@ export default function Login() {
 
           <div className="text-center text-sm opacity-50 mb-4">{t("or") || "OR"}</div>
 
+          {isReviewMode && (
+            <div
+              className="mb-4 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-3"
+              style={{
+                marginBottom: "1rem",
+                borderRadius: "0.5rem",
+                border: "1px solid #c7d2fe",
+                backgroundColor: "#eef2ff",
+                padding: "0.75rem",
+              }}
+            >
+              <p className="text-xs font-semibold text-indigo-900">Google Play Review Access</p>
+              <p className="text-xs text-indigo-800 mt-1">
+                Demo ID: {PLAY_REVIEW_EMAIL} (no password required)
+              </p>
+              <button
+                onClick={continueAsPlayReviewer}
+                disabled={emailSigningIn || browserSigningIn || sendingMagic}
+                className="mt-2 w-full rounded bg-indigo-700 text-white text-xs font-semibold py-2 disabled:opacity-60"
+                style={{
+                  marginTop: "0.5rem",
+                  width: "100%",
+                  borderRadius: "0.5rem",
+                  backgroundColor: "#4338ca",
+                  color: "#fff",
+                  fontSize: "0.75rem",
+                  fontWeight: 600,
+                  padding: "0.5rem",
+                }}
+              >
+                Continue with Demo Account
+              </button>
+            </div>
+          )}
+
           <input
             id="email-input"
             type="email"
             placeholder={t("enterYourEmail") || "Enter your email"}
             className="w-full border p-3 rounded mb-3"
+            style={{
+              width: "100%",
+              border: "1px solid #d4d4d8",
+              borderRadius: "0.5rem",
+              padding: "0.75rem",
+              marginBottom: "0.75rem",
+            }}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             onKeyDown={(e) => {
@@ -507,8 +636,17 @@ export default function Login() {
 
           <button
             onClick={sendMagicLink}
-            disabled={sendingMagic || signingIn}
+            disabled={sendingMagic || emailSigningIn || browserSigningIn}
             className="w-full bg-black text-white p-3 rounded mb-3 disabled:opacity-60"
+            style={{
+              width: "100%",
+              backgroundColor: "#111",
+              color: "#fff",
+              padding: "0.75rem",
+              borderRadius: "0.5rem",
+              marginBottom: "0.75rem",
+              border: "none",
+            }}
           >
             {sendingMagic
               ? t("sending") || "Sending..."
@@ -517,10 +655,20 @@ export default function Login() {
 
           <button
             onClick={continueWithEmail}
-            disabled={signingIn || !email.trim()}
+            disabled={sendingMagic || emailSigningIn || browserSigningIn || !email.trim()}
             className="w-full mt-2 bg-yellow-500 text-black p-3 rounded font-semibold disabled:opacity-60"
+            style={{
+              width: "100%",
+              marginTop: "0.5rem",
+              backgroundColor: "#eab308",
+              color: "#111",
+              padding: "0.75rem",
+              borderRadius: "0.5rem",
+              fontWeight: 600,
+              border: "none",
+            }}
           >
-            {signingIn ? t("sending") || "Signing in..." : t("continue") || "Continue"}
+            {emailSigningIn ? t("sending") || "Signing in..." : t("continue") || "Continue"}
           </button>
 
           <p className="text-xs opacity-50 text-center mt-6">
