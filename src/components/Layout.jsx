@@ -29,7 +29,7 @@ export default function Layout() {
   const { user } = useAuth();
   const [bg, setBg] = useState(null);
   const { collapsed, setCollapsed } = useSidebar();
-  const { headerHeight, shouldUseSafeArea } = useSafeArea();
+  const { headerHeight } = useSafeArea();
   const location = useLocation();
   const showPromptAssistant = !location.pathname.startsWith("/admin/");
 
@@ -130,7 +130,8 @@ export default function Layout() {
             {showPromptAssistant && (
               <Link
                 to="/prompt-assistant"
-                className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-xl"
+                className="fixed right-4 sm:right-6 z-50 bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-xl"
+                style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 2rem)" }}
                 aria-label="Open Prompt Assistant"
               >
                 <Bot className="w-5 h-5" />

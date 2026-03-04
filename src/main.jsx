@@ -15,6 +15,11 @@ import { ThemeProvider } from "./context/ThemeContext";
 import "./styles/motion.css";
 import { setAuthToken } from "./lib/authToken";
 
+if (Capacitor.isNativePlatform()) {
+  document.documentElement.classList.add("native-app");
+  document.body.classList.add("native-app");
+}
+
 if ("serviceWorker" in navigator && import.meta.env.PROD && !Capacitor.isNativePlatform()) {
   window.addEventListener("load", () => {
     navigator.serviceWorker

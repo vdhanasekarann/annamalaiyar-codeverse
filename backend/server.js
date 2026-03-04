@@ -214,7 +214,7 @@ function csrfUnlessNativeToken(req, res, next) {
 // NOTE: make sure you don't register the razorpay webhook twice.
 // (We removed any prior shorthand registration; the explicit handler is included below.)
 
-app.use("/api/admin", csrfProtection);
+app.use("/api/admin", csrfUnlessNativeToken);
 app.use("/api/account", (req, res, next) => {
   if (req.method === "GET") return next();
   csrfProtection(req, res, next);

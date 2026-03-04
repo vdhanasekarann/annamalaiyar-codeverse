@@ -35,6 +35,15 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
+async function readApiError(res, fallback) {
+  const data = await res.clone().json().catch(() => null);
+  if (data?.error) return data.error;
+  const rawText = await res.text().catch(() => "");
+  const text = String(rawText || "").trim();
+  if (text && text.length <= 180) return `${fallback} (${res.status}): ${text}`;
+  return `${fallback} (${res.status})`;
+}
+
 function buildMonthlyStats(paymentRows) {
   const byMonth = new Map();
 
@@ -117,6 +126,8 @@ export default function AdminRevenue() {
   const { t } = useTranslation();
   const [plans, setPlans] = useState([]);
   const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [competitors, setCompetitors] = useState([
     {
       id: 1,
@@ -130,17 +141,50 @@ export default function AdminRevenue() {
   const [nextCompetitorId, setNextCompetitorId] = useState(2);
 
   useEffect(() => {
-    Promise.all([
-      apiFetch("/api/admin/revenue", { credentials: "include" }).then((r) =>
-        r.ok ? r.json() : { plans: [] }
-      ),
-      apiFetch("/api/admin/payments", { credentials: "include" }).then((r) =>
-        r.ok ? r.json() : []
-      ),
-    ]).then(([revenue, paymentRows]) => {
-      setPlans(Array.isArray(revenue?.plans) ? revenue.plans : []);
-      setPayments(Array.isArray(paymentRows) ? paymentRows : []);
-    });
+    let active = true;
+
+    const loadData = async () => {
+      setLoading(true);
+      setLoadError("");
+
+      try {
+        const [revenueRes, paymentsRes] = await Promise.all([
+          apiFetch("/api/admin/revenue", { credentials: "include" }),
+          apiFetch("/api/admin/payments", { credentials: "include" }),
+        ]);
+
+        if (!revenueRes.ok) {
+          throw new Error(await readApiError(revenueRes, "Failed to load revenue"));
+        }
+
+        if (!paymentsRes.ok) {
+          throw new Error(await readApiError(paymentsRes, "Failed to load payments"));
+        }
+
+        const [revenue, paymentRows] = await Promise.all([
+          revenueRes.json(),
+          paymentsRes.json(),
+        ]);
+
+        if (!active) return;
+        setPlans(Array.isArray(revenue?.plans) ? revenue.plans : []);
+        setPayments(Array.isArray(paymentRows) ? paymentRows : []);
+      } catch (err) {
+        if (!active) return;
+        setPlans([]);
+        setPayments([]);
+        setLoadError(err?.message || "Unable to load admin revenue data.");
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadData();
+    return () => {
+      active = false;
+    };
   }, []);
 
   const totalRevenue = useMemo(
@@ -368,6 +412,16 @@ export default function AdminRevenue() {
   return (
     <div className="min-h-screen p-2 sm:p-4 lg:p-6 pb-24 sm:pb-8 text-white space-y-5">
       <h1 className="text-2xl sm:text-3xl font-bold">{t("adminRevenue") || "Admin Revenue"}</h1>
+      {loading && (
+        <div className="text-sm rounded-lg border border-white/15 bg-black/30 px-3 py-2">
+          Loading admin revenue...
+        </div>
+      )}
+      {loadError && (
+        <div className="text-sm rounded-lg border border-red-400/35 bg-red-950/35 text-red-100 px-3 py-2">
+          {loadError}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
         <SummaryCard label="Total Revenue" value={`Rs ${Math.round(totalRevenue)}`} sub={t("planDistribution") || "Plan Distribution"} />

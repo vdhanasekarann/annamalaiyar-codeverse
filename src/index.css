@@ -7,6 +7,8 @@
   --accent: #facc15;
   --accent-rgb: 250, 204, 21;
   --accent-color: #facc15;
+  --cv-native-checkout-top-gap: 10px;
+  --cv-native-checkout-bottom-gap: 72px;
 }
 
 :root[data-theme="gold"] {
@@ -171,4 +173,17 @@ html {
     padding-top: 44px;
     height: calc(4rem + 44px);
   }
+}
+
+.native-app .razorpay-container {
+  top: calc(env(safe-area-inset-top, 0px) + var(--cv-native-checkout-top-gap)) !important;
+  right: 0 !important;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + var(--cv-native-checkout-bottom-gap)) !important;
+  left: 0 !important;
+  height: auto !important;
+}
+
+.native-app .razorpay-container .razorpay-checkout-frame,
+.native-app iframe.razorpay-checkout-frame {
+  height: 100% !important;
 }
