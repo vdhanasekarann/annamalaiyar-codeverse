@@ -16,6 +16,7 @@ import GPTDetails from "./pages/GPTDetails";
 const ReviewsPage = React.lazy(() => import("./pages/Reviews"));
 import Terms from "./pages/Terms";
 import DeleteAccount from "./pages/DeleteAccount";
+import Orchestrator from "./pages/Orchestrator";
 
 const GPTsPage = React.lazy(() => import("./pages/GPTs"));
 
@@ -56,6 +57,7 @@ export default function App() {
             </React.Suspense>
           } />
          <Route path="/premium" element={<Premium />} />
+          <Route path="/orchestrator" element={<Orchestrator />} />
           <Route path="/terms" element={<Terms />} />
 
           <Route

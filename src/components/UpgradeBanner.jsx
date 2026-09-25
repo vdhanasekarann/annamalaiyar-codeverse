@@ -43,7 +43,7 @@ export default function UpgradeBanner({ show }) {
           <div>
             <h3 className="text-xl sm:text-2xl font-bold leading-tight">{rotatingHeadline}</h3>
             <p className="text-zinc-200 mt-2 leading-relaxed">
-              Most AI platforms charge <strong>Rs 199/month</strong> for just one GPT. CodeVerse AI OS
+              Most AI platforms charge <strong>Rs 199/month</strong> for just one GPT. CodeVerse AI
               unlocks <strong>50+ Premium GPT tools</strong> with one subscription.
             </p>
           </div>
@@ -59,7 +59,7 @@ export default function UpgradeBanner({ show }) {
           </div>
 
           <p className="text-sm text-yellow-100/90">
-            Why pay Rs 199 for one GPT elsewhere, when CodeVerse AI OS gives 50+ GPTs for the same price?
+            Why pay Rs 199 for one GPT elsewhere, when CodeVerse AI gives 50+ GPTs for the same price?
           </p>
 
           <div className="flex flex-wrap items-center gap-3">

@@ -1,11 +1,11 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { apiFetch } from "../lib/apiFetch";
-import { clearAuthToken } from "../lib/authToken";
+import { clearAuthToken, getCachedAuthUser } from "../lib/authToken";
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(getCachedAuthUser);
   const [loading, setLoading] = useState(true);
 
   const refreshUser = useCallback(
@@ -41,9 +41,9 @@ export function AuthProvider({ children }) {
 
       if (lastStatus === 401 || lastStatus === 403) {
         clearAuthToken();
+        setUser(null);
       }
 
-      setUser(null);
       return null;
     },
     []

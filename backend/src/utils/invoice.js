@@ -28,7 +28,7 @@ function renderInvoicePdf({ invoiceNo, paymentId, email, plan, amount }) {
 
     doc.pipe(stream);
 
-    doc.fontSize(20).text("ANNAMALAIYAR CODEVERSE AI OS", { align: "center" });
+    doc.fontSize(20).text("CODEVERSE AI", { align: "center" });
     doc.moveDown();
 
     doc.fontSize(12);

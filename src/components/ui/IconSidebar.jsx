@@ -36,7 +36,7 @@ export default function IconSidebar({ items = [], mobile }) {
       >
         <img
           src="/AICodeverse.png"
-          alt="CodeVerse AI OS"
+          alt="CodeVerse AI"
           className="w-9 h-9 rounded-lg object-cover"
         />
       </div>

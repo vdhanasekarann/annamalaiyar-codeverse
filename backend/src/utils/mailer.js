@@ -103,7 +103,7 @@ export async function sendInvoiceEmail(toEmail, pdfFilePath) {
   const filename = path.basename(pdfFilePath) || "invoice.pdf";
   const fileBuffer = fs.readFileSync(pdfFilePath);
   const base64Pdf = fileBuffer.toString("base64");
-  const subject = "Your Invoice - Annamalaiyar CodeVerse AI OS";
+  const subject = "Your Invoice - CodeVerse AI";
   const html = "<p>Thank you for your purchase. Your invoice is attached.</p>";
 
   const providerErrors = [];

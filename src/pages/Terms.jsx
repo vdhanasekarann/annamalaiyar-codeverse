@@ -4,7 +4,7 @@ const TERMS_SECTIONS = [
   {
     title: "1. Acceptance of Terms",
     paragraphs: [
-      "By accessing or using CodeVerse AI OS, websites, apps, GPT tools, APIs, or services (\"Services\"), you agree to be legally bound by these Terms. If you do not agree, you must not use the Services.",
+      "By accessing or using CodeVerse AI, websites, apps, GPT tools, APIs, or services (\"Services\"), you agree to be legally bound by these Terms. If you do not agree, you must not use the Services.",
     ],
   },
   {

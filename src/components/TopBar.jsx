@@ -100,13 +100,13 @@ export default function TopBar({ onOpenMobileMenu }) {
         >
           <img
             src="/AICodeverse.png"
-            alt="CodeVerse AI OS"
+            alt="CodeVerse AI"
             className="h-10 w-10 rounded-lg border border-white/15 object-cover"
             onError={(e) => {
               e.currentTarget.src = "/logo.webp";
             }}
           />
-          <span className="hidden truncate text-sm font-semibold md:block">CodeVerse AI OS</span>
+          <span className="hidden truncate text-sm font-semibold md:block">CodeVerse AI</span>
         </Link>
 
         <div className="hidden max-w-xl flex-1 md:block">

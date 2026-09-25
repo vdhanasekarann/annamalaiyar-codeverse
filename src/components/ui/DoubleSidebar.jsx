@@ -11,6 +11,7 @@ import {
   FileText,
   Gem,
   House,
+  Network,
   Users,
 } from "lucide-react";
 
@@ -23,6 +24,7 @@ export default function DoubleSidebar({ mobile = false, onNavigate }) {
   const items = [
     { path: "/dashboard", label: t("home") || "Home", icon: House },
     { path: "/gpts", label: t("gptApps") || "GPT Apps", icon: Bot },
+    { path: "/orchestrator", label: "AI Orchestrator", icon: Network },
     { path: "/terms", label: t("terms") || "Terms", icon: FileText },
     { path: "/premium", label: t("premium") || "Premium", icon: Gem },
   ];
@@ -44,12 +46,12 @@ export default function DoubleSidebar({ mobile = false, onNavigate }) {
           <div className="flex items-center gap-2">
             <img
               src="/AICodeverse.png"
-              alt="CodeVerse AI OS"
+              alt="CodeVerse AI"
               className="h-9 w-9 rounded-xl border border-white/15 object-cover"
             />
             <div>
               <p className="text-[11px] uppercase tracking-[0.14em] text-white/60">Workspace</p>
-              <p className="text-sm font-semibold leading-tight">CodeVerse AI OS</p>
+              <p className="text-sm font-semibold leading-tight">CodeVerse AI</p>
             </div>
           </div>
         </div>

@@ -26,6 +26,7 @@ import os from "os";
 import path from "path";
 import nodemailer from "nodemailer";
 import { Buffer } from "node:buffer";
+import orchestrate from "./api/orchestrate.js";
 
 async function logAudit(actor, action, target) {
   await db.query(
@@ -113,7 +114,9 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(helmet());
+app.use(helmet({
+  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+}));
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const IS_PROD = process.env.NODE_ENV === "production";
@@ -251,6 +254,8 @@ app.get("/api/health", (_, res) => {
   res.json({ ok: true, service: "codeverse-api", ts: Date.now() });
 });
 
+app.post("/api/orchestrate", requireUser, orchestrate);
+
 /* ---------- RAZORPAY ---------- */
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -315,7 +320,7 @@ app.post("/api/create-order", csrfUnlessNativeToken, paymentRateLimiter, require
       notes: {
         plan,
         email,
-        product: "Annamalaiyar CodeVerse AI OS",
+        product: "CodeVerse AI",
       },
     });
 
@@ -694,16 +699,16 @@ app.post("/api/auth/magic-link", authRateLimiter, async (req, res) => {
       const resp = await resend.emails.send({
         from: "CodeVerse <hello@aicodeverse.com>",
         to: email,
-        subject: "Your secure login link – CodeVerse AI OS",
+        subject: "Your secure login link – CodeVerse AI",
         html: `<div style="font-family:Arial;max-width:600px;margin:auto;border:1px solid #e5e7eb;border-radius:12px;padding:20px">
   <div style="text-align:center">
     <img src="https://app.aicodeverse.com/AICodeverse.png" style="width:120px;margin-bottom:20px" />
-    <h2>Secure Login – CodeVerse AI OS</h2>
+    <h2>Secure Login – CodeVerse AI</h2>
   </div>
 
   <p>Hello,</p>
 
-  <p>You requested a secure login to <b>CodeVerse AI OS</b>.</p>
+  <p>You requested a secure login to <b>CodeVerse AI</b>.</p>
 
   <div style="text-align:center;margin:25px 0">
     <a href="${link}"
@@ -719,7 +724,7 @@ app.post("/api/auth/magic-link", authRateLimiter, async (req, res) => {
   <hr />
 
   <p style="font-size:12px;opacity:0.6">
-    CodeVerse AI OS – Secure Authentication System
+    CodeVerse AI – Secure Authentication System
   </p>
 </div>`,
     });
@@ -735,7 +740,7 @@ app.post("/api/auth/magic-link", authRateLimiter, async (req, res) => {
         const info = await smtpTransporter.sendMail({
           from: process.env.FROM_EMAIL || process.env.SMTP_USER,
           to: email,
-          subject: "Your secure login link – CodeVerse AI OS",
+          subject: "Your secure login link – CodeVerse AI",
           html: `<p>Click to sign in:</p><p><a href="${link}">Secure Login</a></p><p>Expires in 15 minutes.</p>`,
         });
         console.log("SMTP fallback sent:", info);
@@ -1203,27 +1208,63 @@ app.get("/api/invoice/:id", requireUser, async (req, res) => {
   res.sendFile(pdfPath);
 });
 
+let reviewsSchemaReady = false;
+
+async function ensureReviewsSchema() {
+  if (reviewsSchemaReady) return;
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS gpt_reviews (
+      id TEXT PRIMARY KEY,
+      gpt TEXT NOT NULL,
+      email TEXT NOT NULL,
+      rating SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+      review TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+  reviewsSchemaReady = true;
+}
+
 app.post("/api/reviews", requireUser, async (req, res) => {
   const { gpt, rating, review } = req.body;
+  const numericRating = Number(rating);
 
-  await db.query(
-    `INSERT INTO gpt_reviews (id,gpt,email,rating,review)
-     VALUES ($1,$2,$3,$4,$5)`,
-    [uuid(), gpt, req.user.email, rating, review]
-  );
+  if (!gpt || !Number.isInteger(numericRating) || numericRating < 1 || numericRating > 5 || !String(review || "").trim()) {
+    return res.status(400).json({ error: "A GPT, a rating from 1 to 5, and a review are required" });
+  }
 
-  res.json({ ok: true });
+  try {
+    await ensureReviewsSchema();
+    await db.query(
+      `INSERT INTO gpt_reviews (id,gpt,email,rating,review)
+       VALUES ($1,$2,$3,$4,$5)`,
+      [uuid(), gpt, req.user.email, numericRating, String(review).trim()]
+    );
+
+    return res.json({ ok: true });
+  } catch (error) {
+    console.error("Review submission failed:", error);
+    return res.status(500).json({ error: "Unable to submit review" });
+  }
 });
 
 app.get("/api/reviews/:gpt", async (req, res) => {
-  const r = await db.query(
-    `SELECT id, rating, review, email
-     FROM gpt_reviews
-     WHERE gpt=$1`,
-    [req.params.gpt]
-  );
+  try {
+    await ensureReviewsSchema();
+    const r = await db.query(
+      `SELECT id, rating, review, email
+       FROM gpt_reviews
+       WHERE gpt=$1
+       ORDER BY created_at DESC`,
+      [req.params.gpt]
+    );
 
-  res.json(r.rows);
+    return res.json(r.rows);
+  } catch (error) {
+    console.error("Review lookup failed:", error);
+    return res.status(500).json({ error: "Unable to load reviews" });
+  }
 });
 
 app.post("/api/inbound-email", express.json(), async (req,res)=>{

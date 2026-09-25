@@ -2,7 +2,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
   appId: "com.aicodeverse.app",
-  appName: "CodeVerse AI OS",
+  appName: "CodeVerse AI",
   webDir: "dist",
   server: {
     androidScheme: "https",

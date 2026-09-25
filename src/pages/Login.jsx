@@ -338,7 +338,7 @@ export default function Login() {
           initOptions.login_uri = `${apiOrigin}/api/auth/google-redirect`;
         }
 
-        initOptions.callback = async (res) => {
+        const handleGoogleCredential = async (res) => {
           if (useMobileRedirectMode) {
             return;
           }
@@ -399,7 +399,14 @@ export default function Login() {
           }
         };
 
-        window.google.accounts.id.initialize(initOptions);
+        window.__cvGoogleCredentialHandler = handleGoogleCredential;
+        initOptions.callback = (response) =>
+          window.__cvGoogleCredentialHandler?.(response);
+
+        if (window.__cvGoogleInitializedClientId !== initOptions.client_id) {
+          window.google.accounts.id.initialize(initOptions);
+          window.__cvGoogleInitializedClientId = initOptions.client_id;
+        }
 
         window.google.accounts.id.renderButton(target, {
           theme: "outline",
@@ -484,7 +491,7 @@ export default function Login() {
           className="relative z-10 text-white p-8 md:p-16 flex flex-col justify-center"
           style={{ position: "relative", zIndex: 10, color: "#fff", padding: isDesktopViewport ? "4rem" : "2rem" }}
         >
-          <h1 className="text-3xl md:text-4xl font-bold mb-3">AI CodeVerse OS</h1>
+          <h1 className="text-3xl md:text-4xl font-bold mb-3">CodeVerse AI</h1>
           <p className="text-base md:text-xl mb-4 leading-snug">
             Create. Build. Launch.
             <br />
