@@ -1,7 +1,8 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { ArrowRight, CalendarDays, ChartColumn, Plus, ReceiptText, Trash2, Wallet } from "lucide-react";
+import { useRef, useState } from "react";
+import { ArrowUpRight, CalendarDays, Camera, ChartColumn, Plus, ReceiptText, Trash2, Wallet } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+
+const SMART_INVESTMENT_GPT_URL = "https://chatgpt.com/g/g-69540976edfc8191bbd23bace9d9dfdd-smart-investment-budget-planner-ai";
 
 const PERIODS = [
   { id: "daily", label: "Daily" },
@@ -60,6 +61,35 @@ function formatMoney(amount) {
   }).format(Number(amount) || 0);
 }
 
+function parseReceiptText(text) {
+  const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  const totalLine = [...lines].reverse().find((line) => /grand\s*total|total\s*(due|amount)?|amount\s*due|net\s*amount/i.test(line));
+  const amountTokens = totalLine?.match(/(?:₹|rs\.?|inr)?\s*([0-9][0-9,]*(?:\.[0-9]{1,2})?)/gi) || [];
+  const amountCandidates = amountTokens.map((token) => Number(token.replace(/[^0-9.]/g, ""))).filter((value) => Number.isFinite(value) && value > 0);
+  const amount = amountCandidates.length ? Math.max(...amountCandidates) : null;
+
+  let date = null;
+  const isoDate = text.match(/\b(20\d{2})[-/.](\d{1,2})[-/.](\d{1,2})\b/);
+  const localDate = text.match(/\b(\d{1,2})[-/.](\d{1,2})[-/.](20\d{2})\b/);
+  if (isoDate) {
+    date = `${isoDate[1]}-${String(isoDate[2]).padStart(2, "0")}-${String(isoDate[3]).padStart(2, "0")}`;
+  } else if (localDate) {
+    date = `${localDate[3]}-${String(localDate[2]).padStart(2, "0")}-${String(localDate[1]).padStart(2, "0")}`;
+  }
+  if (date && Number.isNaN(new Date(`${date}T12:00:00`).getTime())) date = null;
+
+  const normalizedText = text.toLowerCase();
+  const category = /uber|ola|fuel|petrol|diesel|metro|bus|parking/.test(normalizedText)
+    ? "Transport"
+    : /grocery|supermarket|restaurant|cafe|food|bakery/.test(normalizedText)
+      ? "Food"
+      : /electricity|water bill|internet|mobile bill|utility/.test(normalizedText)
+        ? "Bills"
+        : "Other";
+
+  return { amount, date, category };
+}
+
 function getChartData(period, anchorDate, expenses) {
   if (period === "daily") {
     const totals = new Map();
@@ -104,6 +134,40 @@ function ExpenseTracker({ email }) {
   const [expenseDate, setExpenseDate] = useState(today);
   const [note, setNote] = useState("");
   const [formError, setFormError] = useState("");
+  const [receiptStatus, setReceiptStatus] = useState("");
+  const [readingReceipt, setReadingReceipt] = useState(false);
+  const receiptInputRef = useRef(null);
+
+  async function readReceipt(event) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setReceiptStatus("Choose an image of the receipt.");
+      return;
+    }
+
+    setReadingReceipt(true);
+    setReceiptStatus("Reading the receipt on this device. The image is not uploaded.");
+    let worker;
+    try {
+      const { createWorker } = await import("tesseract.js");
+      worker = await createWorker("eng");
+      const result = await worker.recognize(file);
+      const parsed = parseReceiptText(result.data.text || "");
+      if (parsed.amount) setAmount(String(parsed.amount));
+      if (parsed.date) setExpenseDate(parsed.date);
+      if (parsed.category !== "Other") setCategory(parsed.category);
+      setReceiptStatus(parsed.amount
+        ? "Receipt read. Check the suggested fields, correct anything needed, then save."
+        : "Could not identify a clear total. Enter the amount manually and check any suggested date/category.");
+    } catch {
+      setReceiptStatus("Could not read this image. You can still enter the expense manually.");
+    } finally {
+      await worker?.terminate();
+      setReadingReceipt(false);
+    }
+  }
 
   function saveExpenses(nextExpenses) {
     try {
@@ -182,7 +246,7 @@ function ExpenseTracker({ email }) {
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Expense tracker</h1>
           <p className="mt-2 text-sm text-white/60">Log spending, spot patterns, and review your totals. Your entries stay on this device.</p>
         </div>
-        <Link to="/gpts?q=Smart%20Investment%20Budget" className="inline-flex items-center gap-2 text-sm font-medium text-yellow-200 hover:text-yellow-100">Smart Investment Planner <ArrowRight className="h-4 w-4" /></Link>
+        <a href={SMART_INVESTMENT_GPT_URL} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm font-medium text-yellow-200 hover:text-yellow-100">Smart Investment &amp; Budget Planner <ArrowUpRight className="h-4 w-4" /></a>
       </header>
 
       <section className="flex flex-wrap items-center justify-between gap-4">
@@ -237,7 +301,11 @@ function ExpenseTracker({ email }) {
         </div>
 
         <form onSubmit={addExpense} className="rounded-2xl border border-white/10 bg-black/20 p-4 sm:p-6">
-          <h2 className="mb-4 flex items-center gap-2 font-semibold"><Plus className="h-4 w-4 text-yellow-300" /> Add expense</h2>
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h2 className="flex items-center gap-2 font-semibold"><Plus className="h-4 w-4 text-yellow-300" /> Add expense</h2>
+            <button type="button" onClick={() => receiptInputRef.current?.click()} disabled={readingReceipt} aria-label="Scan a receipt photo" title="Scan receipt with camera or choose an image" className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/[0.04] px-3 py-2 text-xs text-white/80 transition hover:border-yellow-300/40 hover:text-yellow-100 disabled:opacity-50"><Camera className="h-4 w-4" /> {readingReceipt ? "Reading…" : "Scan receipt"}</button>
+            <input ref={receiptInputRef} type="file" accept="image/*" capture="environment" onChange={readReceipt} className="hidden" />
+          </div>
           <div className="space-y-3">
             <label className="block text-xs text-white/55">Amount (INR)
               <input type="number" min="0.01" step="0.01" inputMode="decimal" required value={amount} onChange={(event) => setAmount(event.target.value)} placeholder="0.00" className="mt-1.5 w-full rounded-lg border border-white/15 bg-[#111722] px-3 py-2.5 text-sm text-white outline-none focus:border-yellow-300/50" />
@@ -253,6 +321,7 @@ function ExpenseTracker({ email }) {
             <label className="block text-xs text-white/55">What was it for? <span className="text-white/35">(optional)</span>
               <input maxLength={100} value={note} onChange={(event) => setNote(event.target.value)} placeholder="e.g. weekly groceries" className="mt-1.5 w-full rounded-lg border border-white/15 bg-[#111722] px-3 py-2.5 text-sm text-white outline-none focus:border-yellow-300/50" />
             </label>
+            {receiptStatus && <p aria-live="polite" className="text-xs leading-5 text-yellow-100/80">{receiptStatus}</p>}
             {formError && <p role="alert" className="text-xs text-red-300">{formError}</p>}
             <button type="submit" className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-yellow-300 px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-yellow-200"><Plus className="h-4 w-4" /> Save expense</button>
           </div>
@@ -291,7 +360,7 @@ function ExpenseTracker({ email }) {
 
       <aside className="flex flex-col justify-between gap-4 border-t border-white/10 pt-5 sm:flex-row sm:items-center">
         <div><p className="text-xs font-semibold uppercase tracking-[0.15em] text-yellow-200">A useful review prompt</p><p className="mt-1 text-sm text-white/65">{topCategory ? `${topCategory.name} is your largest category in this period. Check whether the total matches your plan before changing your budget.` : "After logging a few expenses, compare your largest category with your own budget or priorities."}</p><p className="mt-1 text-xs text-white/35">For tracking and reflection only; not financial advice.</p></div>
-        <Link to="/gpts?q=Smart%20Investment%20Budget" className="inline-flex shrink-0 items-center gap-2 text-sm font-medium text-yellow-200 hover:text-yellow-100">Open related finance GPT <ArrowRight className="h-4 w-4" /></Link>
+        <a href={SMART_INVESTMENT_GPT_URL} target="_blank" rel="noreferrer" className="inline-flex shrink-0 items-center gap-2 text-sm font-medium text-yellow-200 hover:text-yellow-100">Open related finance GPT <ArrowUpRight className="h-4 w-4" /></a>
       </aside>
     </main>
   );

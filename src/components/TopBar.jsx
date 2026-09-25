@@ -133,6 +133,7 @@ export default function TopBar({ onOpenMobileMenu }) {
             onClick={() => setMobileSearchOpen(true)}
             className={`rounded-xl border border-white/20 bg-white/5 text-white transition hover:bg-white/10 md:hidden ${compactMobile ? "p-1.5" : "p-2"}`}
             aria-label="Search GPTs"
+            title="Search GPTs"
           >
             <Search className="h-5 w-5" />
           </button>
@@ -140,8 +141,8 @@ export default function TopBar({ onOpenMobileMenu }) {
           <select
             value={i18n.language}
             onChange={(e) => i18n.changeLanguage(e.target.value)}
-            className={`rounded-lg border border-white/20 bg-white/8 px-2 py-1.5 text-xs text-white outline-none transition focus:border-white/35 md:w-[132px] md:text-sm ${
-              compactMobile ? "w-[84px]" : "w-[96px]"
+            className={`rounded-lg border border-white/20 bg-white/8 px-1.5 py-1.5 text-xs text-white outline-none transition focus:border-white/35 md:w-[132px] md:px-2 md:text-sm ${
+              compactMobile ? "w-[68px]" : "w-[96px]"
             }`}
           >
             {LANGUAGE_OPTIONS.map((opt) => (
@@ -154,8 +155,8 @@ export default function TopBar({ onOpenMobileMenu }) {
           <select
             value={theme}
             onChange={(e) => setTheme(e.target.value)}
-            className={`rounded-lg border border-white/20 bg-white/8 px-2 py-1.5 text-xs text-white outline-none transition focus:border-white/35 md:w-[104px] md:text-sm ${
-              compactMobile ? "w-[70px]" : "w-[80px]"
+            className={`rounded-lg border border-white/20 bg-white/8 px-1.5 py-1.5 text-xs text-white outline-none transition focus:border-white/35 md:w-[104px] md:px-2 md:text-sm ${
+              compactMobile ? "w-[58px]" : "w-[80px]"
             }`}
           >
             <option value="gold" className="bg-zinc-900">Gold</option>
