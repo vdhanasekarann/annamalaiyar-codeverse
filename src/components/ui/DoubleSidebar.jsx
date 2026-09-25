@@ -11,7 +11,7 @@ import {
   FileText,
   Gem,
   House,
-  Network,
+  Zap,
   Users,
 } from "lucide-react";
 
@@ -24,7 +24,7 @@ export default function DoubleSidebar({ mobile = false, onNavigate }) {
   const items = [
     { path: "/dashboard", label: t("home") || "Home", icon: House },
     { path: "/gpts", label: t("gptApps") || "GPT Apps", icon: Bot },
-    { path: "/orchestrator", label: "AI Orchestrator", icon: Network },
+    { path: "/sprints", label: "Skill Sprint", icon: Zap },
     { path: "/terms", label: t("terms") || "Terms", icon: FileText },
     { path: "/premium", label: t("premium") || "Premium", icon: Gem },
   ];

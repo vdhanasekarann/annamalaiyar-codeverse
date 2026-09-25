@@ -26,7 +26,6 @@ import os from "os";
 import path from "path";
 import nodemailer from "nodemailer";
 import { Buffer } from "node:buffer";
-import orchestrate from "./api/orchestrate.js";
 
 async function logAudit(actor, action, target) {
   await db.query(
@@ -253,8 +252,6 @@ app.use(express.urlencoded({ extended: true }));
 app.get("/api/health", (_, res) => {
   res.json({ ok: true, service: "codeverse-api", ts: Date.now() });
 });
-
-app.post("/api/orchestrate", requireUser, orchestrate);
 
 /* ---------- RAZORPAY ---------- */
 const razorpay = new Razorpay({
