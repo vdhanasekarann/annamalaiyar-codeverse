@@ -42,6 +42,12 @@ function normalizeMessages(messages) {
     }));
 }
 
+function providerError(data, status, provider) {
+  const error = new Error(data.error?.message || `${provider} request failed`);
+  error.status = status;
+  return error;
+}
+
 async function callOpenAI(messages, systemPrompt) {
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -55,7 +61,7 @@ async function callOpenAI(messages, systemPrompt) {
     }),
   });
   const data = await response.json();
-  if (!response.ok) throw new Error(data.error?.message || "OpenAI request failed");
+  if (!response.ok) throw providerError(data, response.status, "OpenAI");
   return data.choices?.[0]?.message?.content || "No response was returned.";
 }
 
@@ -75,7 +81,7 @@ async function callAnthropic(messages, systemPrompt) {
     }),
   });
   const data = await response.json();
-  if (!response.ok) throw new Error(data.error?.message || "Anthropic request failed");
+  if (!response.ok) throw providerError(data, response.status, "Anthropic");
   return data.content?.map((part) => part.text || "").join("") || "No response was returned.";
 }
 
@@ -96,7 +102,7 @@ async function callGemini(messages, systemPrompt) {
     }
   );
   const data = await response.json();
-  if (!response.ok) throw new Error(data.error?.message || "Gemini request failed");
+  if (!response.ok) throw providerError(data, response.status, "Gemini");
   return data.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("") || "No response was returned.";
 }
 
@@ -122,9 +128,13 @@ export default async function orchestrate(req, res) {
       return res.json({ reply, provider, model: PROVIDER_CONFIG[provider].model, mode });
     } catch (error) {
       console.error(`AI provider ${provider} failed:`, error.message);
-      failures.push(provider);
+      failures.push({
+        provider,
+        status: Number.isInteger(error.status) ? error.status : null,
+        message: error.message,
+      });
     }
   }
 
-  return res.status(502).json({ error: "All configured AI providers failed", providers: failures });
+  return res.status(502).json({ error: "All configured AI providers failed", failures });
 }

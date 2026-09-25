@@ -44,7 +44,10 @@ export default function Orchestrator() {
       });
         const data = await response.json().catch(() => null);
         if (!response.ok) {
-          const message = data?.error || (response.status === 404
+          const providerDetails = Array.isArray(data?.failures)
+            ? data.failures.map((failure) => `${failure.provider}${failure.status ? ` (${failure.status})` : ""}: ${failure.message}`).join("; ")
+            : "";
+          const message = providerDetails || data?.error || (response.status === 404
             ? "The orchestrator route is missing from the deployed API. Deploy the backend update and try again."
             : response.status === 401 || response.status === 403
               ? "Your session is unavailable or expired. Sign in again to use the orchestrator."
