@@ -1,8 +1,10 @@
 import { useRef, useState } from "react";
-import { ArrowUpRight, CalendarDays, Camera, ChartColumn, Plus, ReceiptText, Trash2, Wallet } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ArrowRight, CalendarDays, Camera, ChartColumn, Plus, ReceiptText, Trash2, Wallet } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
-const SMART_INVESTMENT_GPT_URL = "https://chatgpt.com/g/g-69540976edfc8191bbd23bace9d9dfdd-smart-investment-budget-planner-ai";
+const SMART_INVESTMENT_GPT_TITLE = "Smart Investment & Budget Planner AI";
+const SMART_INVESTMENT_GPT_PATH = `/gpts?q=${encodeURIComponent(SMART_INVESTMENT_GPT_TITLE)}`;
 
 const PERIODS = [
   { id: "daily", label: "Daily" },
@@ -10,7 +12,7 @@ const PERIODS = [
   { id: "annual", label: "Annual" },
 ];
 
-const CATEGORIES = ["Food", "Transport", "Home", "Bills", "Health", "Shopping", "Education", "Travel", "Other"];
+const CATEGORIES = ["Food", "Transport", "Fuel", "Home", "EB / Electricity", "Bills", "EMI", "Loan repayment", "Festival savings", "Savings", "Insurance", "Health", "Shopping", "Education", "Travel", "Subscriptions", "Other"];
 const BAR_COLORS = ["#f5c451", "#58d6c2", "#7c9cff", "#f18b69", "#c392ef"];
 
 function dateValue(date) {
@@ -79,11 +81,19 @@ function parseReceiptText(text) {
   if (date && Number.isNaN(new Date(`${date}T12:00:00`).getTime())) date = null;
 
   const normalizedText = text.toLowerCase();
-  const category = /uber|ola|fuel|petrol|diesel|metro|bus|parking/.test(normalizedText)
-    ? "Transport"
+  const category = /emi|loan instal+ment|loan installment/.test(normalizedText)
+    ? "EMI"
+    : /fuel|petrol|diesel/.test(normalizedText)
+      ? "Fuel"
+      : /electricity|eb bill|tneb|bescom/.test(normalizedText)
+        ? "EB / Electricity"
+        : /festival|diwali|pongal|holiday saving/.test(normalizedText)
+          ? "Festival savings"
+          : /uber|ola|metro|bus|parking/.test(normalizedText)
+            ? "Transport"
     : /grocery|supermarket|restaurant|cafe|food|bakery/.test(normalizedText)
       ? "Food"
-      : /electricity|water bill|internet|mobile bill|utility/.test(normalizedText)
+      : /water bill|internet|mobile bill|utility/.test(normalizedText)
         ? "Bills"
         : "Other";
 
@@ -246,7 +256,7 @@ function ExpenseTracker({ email }) {
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Expense tracker</h1>
           <p className="mt-2 text-sm text-white/60">Log spending, spot patterns, and review your totals. Your entries stay on this device.</p>
         </div>
-        <a href={SMART_INVESTMENT_GPT_URL} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm font-medium text-yellow-200 hover:text-yellow-100">Smart Investment &amp; Budget Planner <ArrowUpRight className="h-4 w-4" /></a>
+        <Link to={SMART_INVESTMENT_GPT_PATH} className="inline-flex items-center gap-2 text-sm font-medium text-yellow-200 hover:text-yellow-100">Smart Investment &amp; Budget Planner AI GPT <ArrowRight className="h-4 w-4" /></Link>
       </header>
 
       <section className="flex flex-wrap items-center justify-between gap-4">
@@ -360,7 +370,7 @@ function ExpenseTracker({ email }) {
 
       <aside className="flex flex-col justify-between gap-4 border-t border-white/10 pt-5 sm:flex-row sm:items-center">
         <div><p className="text-xs font-semibold uppercase tracking-[0.15em] text-yellow-200">A useful review prompt</p><p className="mt-1 text-sm text-white/65">{topCategory ? `${topCategory.name} is your largest category in this period. Check whether the total matches your plan before changing your budget.` : "After logging a few expenses, compare your largest category with your own budget or priorities."}</p><p className="mt-1 text-xs text-white/35">For tracking and reflection only; not financial advice.</p></div>
-        <a href={SMART_INVESTMENT_GPT_URL} target="_blank" rel="noreferrer" className="inline-flex shrink-0 items-center gap-2 text-sm font-medium text-yellow-200 hover:text-yellow-100">Open related finance GPT <ArrowUpRight className="h-4 w-4" /></a>
+        <Link to={SMART_INVESTMENT_GPT_PATH} className="inline-flex shrink-0 items-center gap-2 text-sm font-medium text-yellow-200 hover:text-yellow-100">Open related finance GPT <ArrowRight className="h-4 w-4" /></Link>
       </aside>
     </main>
   );
