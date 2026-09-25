@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, BookOpen, Check, Clock3, Flame, RotateCcw, Sparkles, Target, Trophy, Zap } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { getDailySprint, SPRINT_TRACKS } from "../data/skillSprints";
+import { GPTS } from "../data/gpts";
 
 function dateKey(date) {
   const year = date.getFullYear();
@@ -60,6 +61,7 @@ function SkillSprintWorkspace({ email }) {
   const [track, setTrack] = useState("All");
   const [progress, setProgress] = useState(() => readProgress(key));
   const sprint = getDailySprint(today, track);
+  const relatedGpt = GPTS.find((gpt) => gpt.id === sprint.gptId);
   const sprintKey = `${todayKey}::${sprint.id}`;
   const checkedSteps = progress.checklists[sprintKey] || [];
   const complete = checkedSteps.length === sprint.steps.length;
@@ -198,8 +200,8 @@ function SkillSprintWorkspace({ email }) {
             </p>
             {complete ? (
               <button type="button" onClick={resetSprint} className="inline-flex items-center gap-2 text-xs text-white/55 transition hover:text-white"><RotateCcw className="h-3.5 w-3.5" /> Reset today</button>
-            ) : sprint.gptId ? (
-              <Link to={`/gpt/${sprint.gptId}`} className="inline-flex items-center gap-2 text-sm font-medium text-yellow-200 transition hover:text-yellow-100">Open a related GPT <ArrowRight className="h-4 w-4" /></Link>
+            ) : relatedGpt ? (
+              <Link to={`/gpts?q=${encodeURIComponent(relatedGpt.title)}`} className="inline-flex items-center gap-2 text-sm font-medium text-yellow-200 transition hover:text-yellow-100">Find this GPT in the catalog <ArrowRight className="h-4 w-4" /></Link>
             ) : null}
           </div>
         </div>
