@@ -17,6 +17,7 @@ const ReviewsPage = React.lazy(() => import("./pages/Reviews"));
 import Terms from "./pages/Terms";
 import DeleteAccount from "./pages/DeleteAccount";
 import SkillSprint from "./pages/SkillSprint";
+import Expenses from "./pages/Expenses";
 
 const GPTsPage = React.lazy(() => import("./pages/GPTs"));
 
@@ -58,6 +59,7 @@ export default function App() {
           } />
          <Route path="/premium" element={<Premium />} />
           <Route path="/sprints" element={<SkillSprint />} />
+          <Route path="/expenses" element={<Expenses />} />
           <Route path="/terms" element={<Terms />} />
 
           <Route

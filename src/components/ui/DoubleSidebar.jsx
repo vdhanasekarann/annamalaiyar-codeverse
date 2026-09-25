@@ -8,6 +8,7 @@ import SidebarProfile from "../SidebarProfile";
 import {
   Bot,
   ChartColumn,
+  ChartNoAxesCombined,
   FileText,
   Gem,
   House,
@@ -25,6 +26,7 @@ export default function DoubleSidebar({ mobile = false, onNavigate }) {
     { path: "/dashboard", label: t("home") || "Home", icon: House },
     { path: "/gpts", label: t("gptApps") || "GPT Apps", icon: Bot },
     { path: "/sprints", label: "Skill Sprint", icon: Zap },
+    { path: "/expenses", label: "Expenses", icon: ChartNoAxesCombined },
     { path: "/terms", label: t("terms") || "Terms", icon: FileText },
     { path: "/premium", label: t("premium") || "Premium", icon: Gem },
   ];

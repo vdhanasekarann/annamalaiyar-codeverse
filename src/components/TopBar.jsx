@@ -129,15 +129,13 @@ export default function TopBar({ onOpenMobileMenu }) {
         </div>
 
         <div className="ml-auto flex min-w-0 items-center gap-1.5">
-          {!compactMobile && (
-            <button
-              onClick={() => setMobileSearchOpen(true)}
-              className="rounded-xl border border-white/20 bg-white/5 p-2 text-white transition hover:bg-white/10 md:hidden"
-              aria-label="Search"
-            >
-              <Search className="h-5 w-5" />
-            </button>
-          )}
+          <button
+            onClick={() => setMobileSearchOpen(true)}
+            className={`rounded-xl border border-white/20 bg-white/5 text-white transition hover:bg-white/10 md:hidden ${compactMobile ? "p-1.5" : "p-2"}`}
+            aria-label="Search GPTs"
+          >
+            <Search className="h-5 w-5" />
+          </button>
 
           <select
             value={i18n.language}
