@@ -20,10 +20,11 @@ function readProgress(key) {
     const saved = JSON.parse(localStorage.getItem(key) || "{}");
     return {
       checklists: saved.checklists && typeof saved.checklists === "object" ? saved.checklists : {},
+      answers: saved.answers && typeof saved.answers === "object" ? saved.answers : {},
       completedSprints: Array.isArray(saved.completedSprints) ? saved.completedSprints : [],
     };
   } catch {
-    return { checklists: {}, completedSprints: [] };
+    return { checklists: {}, answers: {}, completedSprints: [] };
   }
 }
 
@@ -91,16 +92,33 @@ function SkillSprintWorkspace({ email }) {
       if (nextSteps.size === sprint.steps.length) completed.add(sprintKey);
       else completed.delete(sprintKey);
 
-      return { checklists, completedSprints: [...completed] };
+      return { ...current, checklists, completedSprints: [...completed] };
     });
+  }
+
+  function updateAnswer(index, value) {
+    setProgress((current) => ({
+      ...current,
+      answers: {
+        ...current.answers,
+        [sprintKey]: {
+          ...(current.answers[sprintKey] || {}),
+          [index]: value,
+        },
+      },
+    }));
   }
 
   function resetSprint() {
     setProgress((current) => {
       const checklists = { ...current.checklists };
+      const answers = { ...current.answers };
       delete checklists[sprintKey];
+      delete answers[sprintKey];
       return {
+        ...current,
         checklists,
+        answers,
         completedSprints: current.completedSprints.filter((item) => item !== sprintKey),
       };
     });
@@ -126,7 +144,7 @@ function SkillSprintWorkspace({ email }) {
             <Sparkles className="h-4 w-4" /> Daily Skill Sprint
           </p>
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Small steps. Real progress.</h1>
-          <p className="mt-2 max-w-2xl text-sm text-white/65">A short, practical activity to learn, build, create, or reset. Your progress stays on this device.</p>
+          <p className="mt-2 max-w-2xl text-sm text-white/65">A short, practical activity to learn, build, create, or reset. Your notes and progress stay on this device.</p>
         </div>
         <div className="flex items-center gap-2 text-sm text-white/70"><Clock3 className="h-4 w-4 text-yellow-300" /> About {sprint.duration} minutes</div>
       </header>
@@ -142,20 +160,34 @@ function SkillSprintWorkspace({ email }) {
           <h2 className="text-2xl font-semibold">{sprint.title}</h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-white/65">{sprint.description}</p>
 
-          <div className="mt-6 space-y-2">
+          <div className="mt-6 space-y-3">
             {sprint.steps.map((step, index) => {
               const isChecked = checkedSteps.includes(index);
               return (
-                <button
-                  key={step}
-                  type="button"
-                  aria-pressed={isChecked}
-                  onClick={() => toggleStep(index)}
-                  className={`flex min-h-14 w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition ${isChecked ? "border-emerald-300/35 bg-emerald-300/10 text-white/75" : "border-white/10 bg-white/[0.025] hover:border-white/20 hover:bg-white/[0.05]"}`}
-                >
-                  <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full border ${isChecked ? "border-emerald-300 bg-emerald-300 text-[#08120f]" : "border-white/25 text-transparent"}`}><Check className="h-4 w-4" /></span>
-                  <span className={`text-sm ${isChecked ? "line-through decoration-white/35" : ""}`}>{step}</span>
-                </button>
+                <div key={step} className={`rounded-xl border p-3 transition ${isChecked ? "border-emerald-300/35 bg-emerald-300/[0.06]" : "border-white/10 bg-white/[0.025]"}`}>
+                  <div className="flex items-start gap-3">
+                    <button
+                      type="button"
+                      aria-label={`${isChecked ? "Mark incomplete" : "Mark complete"}: ${step}`}
+                      aria-pressed={isChecked}
+                      onClick={() => toggleStep(index)}
+                      className={`mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full border transition ${isChecked ? "border-emerald-300 bg-emerald-300 text-[#08120f]" : "border-white/25 text-transparent hover:border-yellow-200"}`}
+                    >
+                      <Check className="h-4 w-4" />
+                    </button>
+                    <div className="min-w-0 flex-1">
+                      <p className={`text-sm leading-6 ${isChecked ? "text-white/70" : "text-white"}`}>{step}</p>
+                      <textarea
+                        rows={2}
+                        value={progress.answers[sprintKey]?.[index] || ""}
+                        onChange={(event) => updateAnswer(index, event.target.value)}
+                        aria-label={`Your answer for: ${step}`}
+                        placeholder="Write your response here..."
+                        className="mt-2 w-full resize-y rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-white outline-none placeholder:text-white/30 focus:border-yellow-300/50"
+                      />
+                    </div>
+                  </div>
+                </div>
               );
             })}
           </div>
